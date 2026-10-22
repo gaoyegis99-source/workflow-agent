@@ -25,8 +25,15 @@ UUID = "00000000-0000-4000-8000-000000000000"
 REQUEST_ID = re.compile(r"[0-9a-f]{32}")
 
 
-def request(origin: str, method: str, path: str, *, token: str | None = None,
-            body: object | None = None, headers: dict[str, str] | None = None):
+def request(
+    origin: str,
+    method: str,
+    path: str,
+    *,
+    token: str | None = None,
+    body: object | None = None,
+    headers: dict[str, str] | None = None,
+):
     request_headers = {"X-Request-ID": hashlib.md5((method + path).encode()).hexdigest()}
     if token:
         request_headers["Authorization"] = "Bearer " + token
@@ -135,14 +142,10 @@ def main() -> int:
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     env_file = args.env_file.resolve()
-    compose = [
-        "docker", "compose", "--env-file", str(env_file), "-f", "deploy/p8.compose.yaml"
-    ]
+    compose = ["docker", "compose", "--env-file", str(env_file), "-f", "deploy/p8.compose.yaml"]
     created = admin(compose, "principal-create", "--name", args.run_id[:200])
     principal_id = created["principal_id"]
-    issued = admin(
-        compose, "token-issue", "--principal-id", principal_id, "--ttl-seconds", "900"
-    )
+    issued = admin(compose, "token-issue", "--principal-id", principal_id, "--ttl-seconds", "900")
     token = issued["token"]
     token_id = issued["token_id"]
     results = []
@@ -233,9 +236,7 @@ def main() -> int:
 
     value.setdefault(
         "status",
-        "PASS"
-        if value["operation_count"] == 90 and value["invalid_count"] == 0
-        else "FAIL",
+        "PASS" if value["operation_count"] == 90 and value["invalid_count"] == 0 else "FAIL",
     )
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(value, ensure_ascii=False, indent=2) + "\n")

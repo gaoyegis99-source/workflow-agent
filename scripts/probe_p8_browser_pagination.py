@@ -97,9 +97,7 @@ def wait_for_upload(gateway: Gateway, project_id: str, upload_id: str) -> dict:
 def wait_for_import(gateway: Gateway, project_id: str, import_id: str) -> dict:
     deadline = time.monotonic() + 180
     while time.monotonic() < deadline:
-        value = gateway.must(
-            "GET", f"/api/v1/projects/{project_id}/knowledge/imports/{import_id}"
-        )
+        value = gateway.must("GET", f"/api/v1/projects/{project_id}/knowledge/imports/{import_id}")
         if value["status"] in {"READY", "FAILED"}:
             return value
         time.sleep(0.25)
@@ -111,16 +109,14 @@ def check_catalog(gateway: Gateway, path: str, expected: int) -> dict:
     cursor = first.get("next_cursor")
     if len(first.get("items", [])) != 100 or not cursor:
         raise RuntimeError(f"{path} did not return a 100-item first page and cursor")
-    second = gateway.must(
-        "GET", f"{path}?limit=100&after={urllib.parse.quote(cursor, safe='')}"
-    )
+    second = gateway.must("GET", f"{path}?limit=100&after={urllib.parse.quote(cursor, safe='')}")
+
     def ids(items):
         return [
-            item.get("upload_id")
-            or item.get("ref", {}).get("asset_id")
-            or item.get("document_id")
+            item.get("upload_id") or item.get("ref", {}).get("asset_id") or item.get("document_id")
             for item in items
         ]
+
     first_ids, second_ids = ids(first["items"]), ids(second["items"])
     combined = first_ids + second_ids
     if len(combined) != expected or len(set(combined)) != expected:
@@ -218,9 +214,7 @@ def main() -> int:
         stage = "wait_upload_asset_workers"
         with ThreadPoolExecutor(max_workers=12) as pool:
             uploads = list(
-                pool.map(
-                    lambda item: wait_for_upload(gateway, project_id, item), upload_ids
-                )
+                pool.map(lambda item: wait_for_upload(gateway, project_id, item), upload_ids)
             )
         if any(item["status"] != "READY" or not item.get("asset") for item in uploads):
             raise RuntimeError("At least one synthetic upload failed asset generation")
@@ -238,9 +232,7 @@ def main() -> int:
             imports.append(receipt["import_id"])
         with ThreadPoolExecutor(max_workers=12) as pool:
             documents = list(
-                pool.map(
-                    lambda item: wait_for_import(gateway, project_id, item), imports
-                )
+                pool.map(lambda item: wait_for_import(gateway, project_id, item), imports)
             )
         if any(item["status"] != "READY" or not item.get("document_id") for item in documents):
             raise RuntimeError("At least one Knowledge import failed")
@@ -317,17 +309,19 @@ def main() -> int:
             page.on("pageerror", lambda _error: page_errors.append("pageerror"))
             page.on(
                 "console",
-                lambda message: browser_console_errors.append(message.type)
-                if message.type == "error"
-                else None,
+                lambda message: (
+                    browser_console_errors.append(message.type) if message.type == "error" else None
+                ),
             )
             page.on(
                 "response",
-                lambda response: browser_api_errors.append(
-                    {"status": response.status, "path": response.url.split("?", 1)[0]}
-                )
-                if "/api/v1/" in response.url and response.status >= 400
-                else None,
+                lambda response: (
+                    browser_api_errors.append(
+                        {"status": response.status, "path": response.url.split("?", 1)[0]}
+                    )
+                    if "/api/v1/" in response.url and response.status >= 400
+                    else None
+                ),
             )
 
             def record_response(response):
@@ -388,18 +382,27 @@ def main() -> int:
                 raise RuntimeError("Browser uploaded CSV did not become a published Asset")
             result["browser_upload_flow"] = {
                 "create_status": next(
-                    (item["status"] for item in upload_responses
-                     if item["method"] == "POST" and item["path"].endswith("/uploads")),
+                    (
+                        item["status"]
+                        for item in upload_responses
+                        if item["method"] == "POST" and item["path"].endswith("/uploads")
+                    ),
                     None,
                 ),
                 "content_status": next(
-                    (item["status"] for item in upload_responses
-                     if item["method"] == "PUT" and item["path"].endswith("/content")),
+                    (
+                        item["status"]
+                        for item in upload_responses
+                        if item["method"] == "PUT" and item["path"].endswith("/content")
+                    ),
                     None,
                 ),
                 "finalize_status": next(
-                    (item["status"] for item in upload_responses
-                     if item["method"] == "POST" and item["path"].endswith("/finalize")),
+                    (
+                        item["status"]
+                        for item in upload_responses
+                        if item["method"] == "POST" and item["path"].endswith("/finalize")
+                    ),
                     None,
                 ),
                 "terminal_status": ui_upload["status"],
@@ -432,10 +435,17 @@ def main() -> int:
         admin(env_file, "token-revoke", "--token-id", token_id)
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n")
-    print(json.dumps({"status": result["status"], "project_id": result.get("project_id"),
-                      "objects_per_catalogue": result["objects_per_catalogue"],
-                      "browser_assets_pagination": result.get("browser_assets_pagination"),
-                      "output": str(args.output)}))
+    print(
+        json.dumps(
+            {
+                "status": result["status"],
+                "project_id": result.get("project_id"),
+                "objects_per_catalogue": result["objects_per_catalogue"],
+                "browser_assets_pagination": result.get("browser_assets_pagination"),
+                "output": str(args.output),
+            }
+        )
+    )
     return 0 if result["status"] == "PASS" else 1
 
 

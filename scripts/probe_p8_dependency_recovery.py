@@ -128,9 +128,11 @@ def main() -> int:
             page.on("pageerror", lambda _error: page_errors.append("pageerror"))
             page.on(
                 "response",
-                lambda response: browser_api_statuses.append(response.status)
-                if "/api/v1/" in response.url
-                else None,
+                lambda response: (
+                    browser_api_statuses.append(response.status)
+                    if "/api/v1/" in response.url
+                    else None
+                ),
             )
             page.goto(args.origin.rstrip("/") + "/")
             page.get_by_label("临时 Bearer Token").fill(token)
@@ -180,7 +182,7 @@ def main() -> int:
 
             context.set_offline(True)
             offline_result = page.evaluate(
-                "async ({project, token}) => { try { const r = await fetch(" 
+                "async ({project, token}) => { try { const r = await fetch("
                 "`/api/v1/projects/${project}/workspace-summary`, "
                 "{headers: {Authorization: `Bearer ${token}`}}); return r.status; } "
                 "catch (_) { return 'network-error'; } }",
@@ -188,7 +190,7 @@ def main() -> int:
             )
             context.set_offline(False)
             online_result = page.evaluate(
-                "async ({project, token}) => { const r = await fetch(" 
+                "async ({project, token}) => { const r = await fetch("
                 "`/api/v1/projects/${project}/workspace-summary`, "
                 "{headers: {Authorization: `Bearer ${token}`}}); return r.status; }",
                 {"project": project_id, "token": token},

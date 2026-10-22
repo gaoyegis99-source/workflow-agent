@@ -48,9 +48,7 @@ class Gateway:
             return error.code, value, error.headers
 
     def must(self, method: str, path: str, *, body=None, raw=None, key=None, statuses=(200,)):
-        status, value, headers = self.call(
-            method, path, body=body, raw=raw, key=key
-        )
+        status, value, headers = self.call(method, path, body=body, raw=raw, key=key)
         if status not in statuses:
             raise RuntimeError(f"{method} {path} returned HTTP {status}")
         return value, headers
@@ -152,9 +150,7 @@ def main() -> int:
             statuses=(201,),
         )
         upload_id = upload["upload_id"]
-        gateway.must(
-            "PUT", base + f"/uploads/{upload_id}/content", raw=content
-        )
+        gateway.must("PUT", base + f"/uploads/{upload_id}/content", raw=content)
         gateway.must(
             "POST",
             base + f"/uploads/{upload_id}/finalize",
@@ -169,9 +165,7 @@ def main() -> int:
             key=args.run_id + "-finalize",
             statuses=(202,),
         )
-        uploaded = wait_for(
-            gateway, "GET", base + f"/uploads/{upload_id}", {"READY", "FAILED"}
-        )
+        uploaded = wait_for(gateway, "GET", base + f"/uploads/{upload_id}", {"READY", "FAILED"})
         if uploaded["status"] != "READY" or not uploaded.get("asset"):
             raise RuntimeError("Synthetic CSV upload did not become an Asset")
         asset_ref = uploaded["asset"]
@@ -222,8 +216,7 @@ def main() -> int:
         catalog = json.loads((release_dir / "operator-catalog.json").read_text())
         operators = {item["operator_id"]: item for item in catalog["operators"]}
         selected = [
-            operators[name]
-            for name in ("timeseries-completeness", "statistics-linear-trend")
+            operators[name] for name in ("timeseries-completeness", "statistics-linear-trend")
         ]
         targets = [
             {

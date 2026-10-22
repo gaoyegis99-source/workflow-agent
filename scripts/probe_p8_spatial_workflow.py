@@ -193,9 +193,7 @@ def main() -> int:
                 "segments": 8,
             }
         }
-        root["steps"]["summary"]["in"]["parameters"] = {
-            "default": {"layer_id": "l0"}
-        }
+        root["steps"]["summary"]["in"]["parameters"] = {"default": {"layer_id": "l0"}}
         root["steps"]["map"]["in"]["parameters"] = {
             "default": {
                 "layer_id": "l0",
@@ -423,9 +421,7 @@ def main() -> int:
         result["release_execution_state"] = execution["state"]
         if execution["state"] != "SUCCEEDED":
             raise RuntimeError("Released spatial workflow execution did not succeed")
-        steps = gateway.must(
-            "GET", base + f"/executions/{execution_id}/steps"
-        )[0]["items"]
+        steps = gateway.must("GET", base + f"/executions/{execution_id}/steps")[0]["items"]
         if len(steps) != 3 or any(step["state"] != "SUCCEEDED" for step in steps):
             raise RuntimeError("Released workflow did not publish all three successful steps")
 
@@ -486,9 +482,11 @@ def main() -> int:
             page.on("pageerror", lambda _error: browser_errors.append("pageerror"))
             page.on(
                 "response",
-                lambda response: browser_api_errors.append(response.status)
-                if "/api/v1/" in response.url and response.status >= 400
-                else None,
+                lambda response: (
+                    browser_api_errors.append(response.status)
+                    if "/api/v1/" in response.url and response.status >= 400
+                    else None
+                ),
             )
             page.goto(args.origin.rstrip("/") + "/")
             page.get_by_label("临时 Bearer Token").fill(token)
