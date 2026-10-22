@@ -1,0 +1,17 @@
+[project]
+name = "groundwater-execution-service"
+version = "0.15.5"
+requires-python = ">=3.12,<3.13"
+dependencies = ["groundwater-platform-contracts==0.15.5", "fastapi>=0.115,<1", "uvicorn>=0.34,<1", "sqlalchemy>=2.0,<2.1", "psycopg[binary]>=3,<4", "alembic>=1.16,<2", "httpx>=0.28,<0.29", "pyarrow>=20,<26"]
+
+[project.scripts]
+execution-service = "platform_execution.api:main"
+execution-worker = "platform_execution.worker:main"
+execution-admin = "platform_execution.database:main"
+
+[build-system]
+requires = ["hatchling==1.27.0"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/platform_execution"]

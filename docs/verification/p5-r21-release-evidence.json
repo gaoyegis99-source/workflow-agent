@@ -1,0 +1,175 @@
+{
+  "phase": "P5-R2.1-real-composed-checker-reliability",
+  "version": "0.7.2",
+  "status": "PASS",
+  "finished_at": "2026-10-14T11:31:37.500142+00:00",
+  "command": "bash scripts/check_p5.sh --phase all",
+  "focused_pytest": {
+    "tests": 86,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 130.687
+  },
+  "full_regression": {
+    "tests": 653,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 2019.577
+  },
+  "response_loss_http": {
+    "tests": 1,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 7.991
+  },
+  "p1_rules": {
+    "tests": 13,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "packages": {
+    "groundwater-checker-pack": "0.7.2",
+    "groundwater-data-service": "0.7.2",
+    "groundwater-execution-service": "0.7.2",
+    "groundwater-knowledge-service": "0.7.2",
+    "groundwater-operator-pack": "0.7.2",
+    "groundwater-platform-api": "0.7.2",
+    "groundwater-platform-contracts": "0.7.2",
+    "groundwater-platform-core": "0.7.2",
+    "groundwater-platform-infrastructure": "0.7.2"
+  },
+  "release_artifacts": {
+    "groundwater_checker_pack-0.7.2-py3-none-any.whl": {
+      "bytes": 14844,
+      "sha256": "sha256:abf55ca58982dd75cc95c59276ea8625a12d788f7ce006ff3e48b4057f47c1bb"
+    },
+    "groundwater_data_service-0.7.2-py3-none-any.whl": {
+      "bytes": 27424,
+      "sha256": "sha256:b85980de26fe3300ee3b9b8b841b791f7589877330a972a984dbc5676a337bea"
+    },
+    "groundwater_execution_service-0.7.2-py3-none-any.whl": {
+      "bytes": 55523,
+      "sha256": "sha256:1e407994b28e188b95708595e185b9bcdb7e151b4fe84ffcd768e5297b6c001a"
+    },
+    "groundwater_knowledge_service-0.7.2-py3-none-any.whl": {
+      "bytes": 18525,
+      "sha256": "sha256:bf0201728edd992e598ec2675602c9d80dfb291fa907589a76e69fadcfd8efec"
+    },
+    "groundwater_operator_pack-0.7.2-py3-none-any.whl": {
+      "bytes": 13293,
+      "sha256": "sha256:e236f029c0d5bd546d843faeb892d3015c3c631b4b35c4f87cdb9316db4e9a9b"
+    },
+    "groundwater_platform_api-0.7.2-py3-none-any.whl": {
+      "bytes": 29653,
+      "sha256": "sha256:b12d3a57eec1e9fbe2b30dd92ed665cc6832f13d2e75600ff937ccb1be02623e"
+    },
+    "groundwater_platform_contracts-0.7.2-py3-none-any.whl": {
+      "bytes": 19286,
+      "sha256": "sha256:41390a3fc052db3c821c3fa758eba8f0fbed5be7f14b6658ade3848eeef25144"
+    },
+    "groundwater_platform_core-0.7.2-py3-none-any.whl": {
+      "bytes": 70186,
+      "sha256": "sha256:7b7d599568a6c28b9b757a28d77b9c09051888930c5a6ba30ca995bc7e394a14"
+    },
+    "groundwater_platform_infrastructure-0.7.2-py3-none-any.whl": {
+      "bytes": 35756,
+      "sha256": "sha256:091c70b629a87f0ac777738faf33d42ba08749b7a365ed73b38cfc93c9ff184b"
+    },
+    "groundwater_checker_pack-0.7.2.tar.gz": {
+      "bytes": 10744,
+      "sha256": "sha256:3a9e88c6131bf3c2d740ea5040fe37f427c98bd415e628a518823db023c2c0d9"
+    },
+    "groundwater_data_service-0.7.2.tar.gz": {
+      "bytes": 17304,
+      "sha256": "sha256:61c0e95e2801d12a9f5a86e0f4a1302e95577c3f855966cb8bfc9ab25f690b08"
+    },
+    "groundwater_execution_service-0.7.2.tar.gz": {
+      "bytes": 41816,
+      "sha256": "sha256:768a169a6e9c31d6bbe6f4a56204ad81e9d68a6fbff17fb40f9ebeb72b5466d8"
+    },
+    "groundwater_knowledge_service-0.7.2.tar.gz": {
+      "bytes": 12424,
+      "sha256": "sha256:67e120a5a6975420d781847bfe7574cec2195c1850fde6d5f522e4718bf814b3"
+    },
+    "groundwater_operator_pack-0.7.2.tar.gz": {
+      "bytes": 11112,
+      "sha256": "sha256:d1d3cbb45f62cd0886314587d52ea103933026ca684243b544c6f144a8b71630"
+    },
+    "groundwater_platform_api-0.7.2.tar.gz": {
+      "bytes": 22720,
+      "sha256": "sha256:773770132298eaf5caf3a345a475a90cff4a5246c1ee55929778426f6627383e"
+    },
+    "groundwater_platform_contracts-0.7.2.tar.gz": {
+      "bytes": 13484,
+      "sha256": "sha256:4db306293b5fe391d3d256567ee53a0fefb0f39d68e00d3dbcec7a66a663a50a"
+    },
+    "groundwater_platform_core-0.7.2.tar.gz": {
+      "bytes": 55269,
+      "sha256": "sha256:9b7597e4a7c5c6021b1060c410f8be41981dcd47750308c6eede3bb5acf0cf0b"
+    },
+    "groundwater_platform_infrastructure-0.7.2.tar.gz": {
+      "bytes": 24339,
+      "sha256": "sha256:83cf026c221f442d8b8c3315ba65d8000919820f17100dbb3cf69bd39d69c57d"
+    }
+  },
+  "source": {
+    "digest": "sha256:942014748ba1869663a67e9723dfd7ec65bd56dfc8a6d4e79be369f8606064c0",
+    "file_count": 253,
+    "manifest": "docs/verification/p5-r21-source-manifest.json"
+  },
+  "checker_catalog": {
+    "digest": "sha256:102ee13cb6f3a208f3bd3377e0c5eafd2ede55771ebe8405c4912a290364e947",
+    "capabilities": [
+      "platform-runtime-integrity-v1",
+      "p3-timeseries-reproduction-v1",
+      "spatial-vector-validity-v1",
+      "cartographic-product-integrity-v1",
+      "p3-descriptive-claim-support-v1"
+    ],
+    "file_sha256": "sha256:181be22235daa61425adce4e580953f4890f6a284ee2358ca3bc600f51b15eeb"
+  },
+  "checker_images": {
+    "generic": {
+      "tag": "groundwater-v7-checker:0.7.2",
+      "id": "sha256:4b0d455d42f4ba13d79ff665e220bafb6a6b095fa194def23b803a2b4e99092b",
+      "source_digest_label": "sha256:942014748ba1869663a67e9723dfd7ec65bd56dfc8a6d4e79be369f8606064c0"
+    },
+    "gdal": {
+      "tag": "groundwater-v7-gdal-checker:0.7.2",
+      "id": "sha256:9ed47bb7e7b0edbb817f675305fd136ed6483ae5c3e7e48964628b466ed413c8",
+      "source_digest_label": "sha256:942014748ba1869663a67e9723dfd7ec65bd56dfc8a6d4e79be369f8606064c0"
+    }
+  },
+  "schemas": {
+    "platform": "0010_checker_runs",
+    "data": "0004_document_assets",
+    "execution": "0006_remote_reliability",
+    "knowledge": "0002_lifecycle_outbox"
+  },
+  "python": "3.12.8",
+  "required_cases": [
+    "test_0009_to_0010_preserves_existing_task_and_is_repeatable",
+    "test_api_and_workers_restart_replay_original_acceptance_and_checker_actions",
+    "test_cancel_releases_unstarted_checker_allowance",
+    "test_decimal_reproduction_passes_and_wrong_slope_fails",
+    "test_error_retry_reuses_pass_and_runs_only_failed_capability",
+    "test_map_checker_rejects_blank_map_and_false_source",
+    "test_pause_blocks_only_the_next_checker_admission",
+    "test_real_checker_termination_retries_only_failed_run_and_unrun_downstream",
+    "test_real_platform_execution_and_two_checker_containers_complete_verified_task",
+    "test_runtime_then_reproducer_use_one_envelope_and_complete_once",
+    "test_stale_plan_cancels_queued_run_and_releases_unstarted_allowance",
+    "test_task_cancel_stops_real_checker_and_releases_unstarted_downstream",
+    "test_task_revision_makes_queued_composed_plan_stale_without_checker_execution",
+    "test_unknown_result_has_uncovered_indeterminate_without_generic_pass"
+  ],
+  "limits": [
+    "CLAIM_SUPPORT is limited to registered P3 descriptive scalar assertions.",
+    "Associational, predictive and causal claims remain INDETERMINATE.",
+    "Unknown result domains remain UNCOVERED and cannot obtain a generic PASS."
+  ]
+}

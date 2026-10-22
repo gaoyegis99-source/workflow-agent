@@ -1,0 +1,120 @@
+{
+  "schema_version": 1,
+  "decision_id": "p73-join-aggregate-reassessment-2026-10-16",
+  "baseline": {
+    "phase": "P7.2c",
+    "version": "0.12.2",
+    "release_digest": "sha256:47e57a0565f0dce9e9389d2eab54d479d1cb5dd9a58a5fb287de7375da3d1fbe"
+  },
+  "scope": "DESIGN_REASSESSMENT_ONLY",
+  "decisions": {
+    "table-aggregate@1.0.0": {
+      "result": "CONDITIONAL_GO_NEXT_PHASE",
+      "recommended_phase": "P7.3a",
+      "reason_codes": [
+        "REUSES_SINGLE_INPUT_IDENTITY",
+        "BOUNDED_SEMANTICS_AVAILABLE",
+        "INDEPENDENT_REPRODUCTION_FEASIBLE"
+      ],
+      "required_semantics": [
+        "BOUNDED_OPERATIONS",
+        "EXPLICIT_NULL_KEY_POLICY",
+        "DETERMINISTIC_GROUP_ORDER",
+        "OVERFLOW_AND_NONFINITE_REJECTION",
+        "CONSERVATIVE_UNIT_PROVENANCE"
+      ]
+    },
+    "table-join@1.0.0": {
+      "result": "DEFER_PENDING_FOUNDATION",
+      "foundation_phase": "P7.3b",
+      "pilot_phase": "P7.3c",
+      "reason_codes": [
+        "PUBLIC_CONTRACT_SINGLE_INPUT_ONLY",
+        "PLATFORM_ADMISSION_SINGLE_INPUT_ONLY",
+        "EXECUTION_STAGING_SINGLE_INPUT_ONLY",
+        "AGENT_INTENT_SINGLE_INPUT_ONLY",
+        "CHECKER_STAGING_SINGLE_INPUT_ONLY",
+        "OUTPUT_AMPLIFICATION_RISK"
+      ],
+      "pilot_restrictions": [
+        "INNER_OR_LEFT_ONLY",
+        "EXACT_KEY_TYPES",
+        "NULLS_NEVER_EQUAL",
+        "NO_MANY_TO_MANY",
+        "MANDATORY_OUTPUT_CAP",
+        "EXPLICIT_OUTPUT_PROJECTION"
+      ]
+    }
+  },
+  "implementation_evidence": [
+    {
+      "path": "packages/platform-core/src/platform_core/application/science.py",
+      "sha256": "bfb211988fc26c7e89c58e7e6de7c77624a560de32b2f61243a78945f1fe72e6",
+      "lines": "125-135",
+      "fact": "Platform requires exactly one catalog input and resolves one binding"
+    },
+    {
+      "path": "packages/contracts/src/platform_contracts/science.py",
+      "sha256": "fc26d9fd91f1629735094a14f4b6d799a3190655920526b91b45218e0fe6aa03",
+      "lines": "639-669",
+      "fact": "The public tabular request contains only one table selection"
+    },
+    {
+      "path": "packages/contracts/src/platform_contracts/control.py",
+      "sha256": "8560ecc0a45a8e8a94abce96255a0156450b329a44c44984918d13b877f46dfa",
+      "lines": "38-64",
+      "fact": "Agent operator intent freezes one table input"
+    },
+    {
+      "path": "apps/execution-service/src/platform_execution/application/runner.py",
+      "sha256": "3b511702107aa968af980cf219b588c43f2ccfc9edf1b495c30e47a55ac1ef25",
+      "lines": "478-556",
+      "fact": "TABULAR_V1 accepts the table port and stages table.parquet"
+    },
+    {
+      "path": "packages/checker-pack/src/platform_checkers/tabular.py",
+      "sha256": "28bb2553ad92ea8fcea416d63aab6aaac4b5e727b73c17664615ceec0e0c3e04",
+      "lines": "899-955",
+      "fact": "Tabular reproduction resolves one source_table and inputs.table"
+    },
+    {
+      "path": "apps/data-service/src/platform_data/domain/model.py",
+      "sha256": "533bbd332a04fadf60c98312e048ff1a39f2d4c2ea8e391c6e3d378631cb063e",
+      "lines": "6-8",
+      "fact": "A trusted table is capped at 100000 rows and 128 columns"
+    }
+  ],
+  "v6_reference_evidence": [
+    {
+      "path": "/home/mtd/liweigis/workflow/groundwater-platform_v6/packages/operator-pack/src/moperators/operators/table_join.py",
+      "sha256": "b82f0cec557985370b2bc94cac8737882134271ccb4c4b9556d64a55706b837b",
+      "reused_lessons": [
+        "CARDINALITY_ASSERTION",
+        "NULL_KEYS_DO_NOT_MATCH",
+        "PRECOUNT_OUTPUT_ROWS",
+        "STABLE_SOURCE_ORDER"
+      ],
+      "not_adopted": [
+        "MANY_TO_MANY_IN_V1",
+        "AUTOMATIC_COLLISION_PREFIXING",
+        "RULES_AS_THIRD_ASSET"
+      ]
+    },
+    {
+      "path": "/home/mtd/liweigis/workflow/groundwater-platform_v6/packages/operator-pack/src/moperators/operators/timeseries_aggregate.py",
+      "sha256": "e7997eb80971519fb998d7403240edad9dd294ce3698bb330d7dbeacbb12ca41",
+      "conclusion": "DOMAIN_TIMESERIES_OPERATOR_NOT_A_GENERIC_TABLE_AGGREGATE_CONTRACT"
+    }
+  ],
+  "external_primary_sources": [
+    "https://docs.pola.rs/api/python/stable/reference/dataframe/api/polars.DataFrame.join.html",
+    "https://pandas.pydata.org/docs/reference/api/pandas.merge.html",
+    "https://arrow.apache.org/docs/python/generated/pyarrow.Table.html",
+    "https://duckdb.org/docs/current/sql/functions/aggregates"
+  ],
+  "next_action": "DESIGN_AND_IMPLEMENT_P7_3A_TABLE_AGGREGATE_AS_AN_INDEPENDENT_ROUND",
+  "join_gate": "DO_NOT_IMPLEMENT_BEFORE_MULTI_INPUT_IDENTITY_FOUNDATION_AND_A_CONCRETE_CARDINALITY_BOUNDED_USE_CASE",
+  "database_migration_added": false,
+  "public_route_added": false,
+  "compute_operator_added": false
+}

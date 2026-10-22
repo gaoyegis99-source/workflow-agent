@@ -1,0 +1,163 @@
+{
+  "phase": "P5-R0-audit-release",
+  "version": "0.6.3",
+  "status": "PASS",
+  "finished_at": "2026-10-14T05:34:06.105211+00:00",
+  "command": "bash scripts/check_p5.sh --phase all",
+  "focused_pytest": {
+    "tests": 40,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 21.103
+  },
+  "full_regression": {
+    "tests": 607,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 1590.535
+  },
+  "response_loss_http": {
+    "tests": 1,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 7.527
+  },
+  "p1_rules": {
+    "tests": 13,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "packages": {
+    "groundwater-checker-pack": "0.6.3",
+    "groundwater-data-service": "0.6.3",
+    "groundwater-execution-service": "0.6.3",
+    "groundwater-knowledge-service": "0.6.3",
+    "groundwater-operator-pack": "0.6.3",
+    "groundwater-platform-api": "0.6.3",
+    "groundwater-platform-contracts": "0.6.3",
+    "groundwater-platform-core": "0.6.3",
+    "groundwater-platform-infrastructure": "0.6.3"
+  },
+  "release_artifacts": {
+    "groundwater_checker_pack-0.6.3-py3-none-any.whl": {
+      "bytes": 8126,
+      "sha256": "sha256:042c5608b21bf994265c664c46c7fe1b41a9b29e6abe467a02586887f2af6175"
+    },
+    "groundwater_data_service-0.6.3-py3-none-any.whl": {
+      "bytes": 27385,
+      "sha256": "sha256:876b2fab50c68cc36a915b715708670336e4bc918851e062bcc19613c6f5e343"
+    },
+    "groundwater_execution_service-0.6.3-py3-none-any.whl": {
+      "bytes": 52503,
+      "sha256": "sha256:950c487bc0e8477214a7f46bc525e6c591633ba25f01cf360d1e611b22be31f9"
+    },
+    "groundwater_knowledge_service-0.6.3-py3-none-any.whl": {
+      "bytes": 18527,
+      "sha256": "sha256:63c6d12ef5ca7102712cbceb5559c22f6af2a37cdcf543076ef0fdad022f6a05"
+    },
+    "groundwater_operator_pack-0.6.3-py3-none-any.whl": {
+      "bytes": 13293,
+      "sha256": "sha256:fb13c353464e1dd0762b84aa2b3c1cf5ae66afbeebc9b9707e280841771957f9"
+    },
+    "groundwater_platform_api-0.6.3-py3-none-any.whl": {
+      "bytes": 29585,
+      "sha256": "sha256:0cb7736596c054de2af798ffa9f5db21f4f30309e1576460d5c6336266ee469b"
+    },
+    "groundwater_platform_contracts-0.6.3-py3-none-any.whl": {
+      "bytes": 18537,
+      "sha256": "sha256:889634f4a95b607f1adadcfe305830e3cb20444f785b3ff47c09ed91f68f20a5"
+    },
+    "groundwater_platform_core-0.6.3-py3-none-any.whl": {
+      "bytes": 57853,
+      "sha256": "sha256:c313e82f644c8ee1960b83690a413f728cb9648d4ccdeffefa373e6d1dfcd84a"
+    },
+    "groundwater_platform_infrastructure-0.6.3-py3-none-any.whl": {
+      "bytes": 32622,
+      "sha256": "sha256:1f04074d8df9ddcf11ae3c8d83e03ffaa741a2ba7084280eec8b1f236b6f5e3e"
+    },
+    "groundwater_checker_pack-0.6.3.tar.gz": {
+      "bytes": 5914,
+      "sha256": "sha256:e6360a974707416466d0fcf488bfc35892888a6fc36ff72ccd3314a62dfe8b3b"
+    },
+    "groundwater_data_service-0.6.3.tar.gz": {
+      "bytes": 17272,
+      "sha256": "sha256:aa412eb8ac18fbe2eefe9e491be0fe9cf77c0df8b660566fcab126a41318be1f"
+    },
+    "groundwater_execution_service-0.6.3.tar.gz": {
+      "bytes": 39326,
+      "sha256": "sha256:c7f3056543ca326c4d98fda1b8636fad46423cab27a8aae5b3076d0c7ca638ef"
+    },
+    "groundwater_knowledge_service-0.6.3.tar.gz": {
+      "bytes": 12423,
+      "sha256": "sha256:cfdf7c073bb1f123c4dbb6ebdfeda70a044a8594ca5d1fe379d60f70596ad217"
+    },
+    "groundwater_operator_pack-0.6.3.tar.gz": {
+      "bytes": 11111,
+      "sha256": "sha256:21291f62193879e65c635c36e52e871c5ded88efcd45f2db84587d1d602c2c55"
+    },
+    "groundwater_platform_api-0.6.3.tar.gz": {
+      "bytes": 22645,
+      "sha256": "sha256:5fbdda631c3f46e8f2c3512fb9d1d0474ac3265d98fc208e04aa4b50c8464ea2"
+    },
+    "groundwater_platform_contracts-0.6.3.tar.gz": {
+      "bytes": 12813,
+      "sha256": "sha256:b5dfc1fdbbe66106ac8420737637969b9c433bcd99a529c0e3e5f429450ca1e5"
+    },
+    "groundwater_platform_core-0.6.3.tar.gz": {
+      "bytes": 44730,
+      "sha256": "sha256:5e9eef533fa12eac66da7b41f41646afb73c64c040cfd0a7b321cb04363eca01"
+    },
+    "groundwater_platform_infrastructure-0.6.3.tar.gz": {
+      "bytes": 22377,
+      "sha256": "sha256:5e7cae65be2edc2c8386a30633d26f3e70dfbf3d2276e7af71f13b15ce623ff1"
+    }
+  },
+  "source": {
+    "digest": "sha256:e7d37827bfb1ebd4e729bf187762d2fd8d987cb2967754e77d18def3368c5423",
+    "manifest": "docs/verification/p5-r0-source-manifest.json",
+    "file_count": 237
+  },
+  "checker_image": {
+    "tag": "groundwater-v7-checker:0.6.3",
+    "id": "sha256:fa0da9dd182fd52e7f5b42b11f5a7bbca963965d3a552f8f9b78e1e5d473ef9e",
+    "source_digest_label": "sha256:e7d37827bfb1ebd4e729bf187762d2fd8d987cb2967754e77d18def3368c5423",
+    "version_label": "0.6.3",
+    "verification": "PASS: fixed 0.6.3 checker container produced the deterministic open-science report (sha256:fa0da9dd182fd52e7f5b42b11f5a7bbca963965d3a552f8f9b78e1e5d473ef9e, sha256:e7d37827bfb1ebd4e729bf187762d2fd8d987cb2967754e77d18def3368c5423)"
+  },
+  "distribution": [
+    "PASS: built 9 wheels and source distributions",
+    "PASS: core wheel runs with only the Python standard library",
+    "PASS: locked runtime dependencies and wheels installed outside the repository",
+    "PASS: installed API liveness, unconfigured readiness, OpenAPI and shutdown",
+    "PASS: installed migrations, local token CLI, real task/control HTTP and worker",
+    "PASS: installed Knowledge migration, schema check, readiness and shutdown",
+    "PASS: installed Data/Execution migrations, independent workers, containers and P3 completion",
+    "PASS: installed frozen CWL, Toil nodes, atomic publication and independent check",
+    "PASS: installed GeoPackage inspection, QGIS buffer, Native summary and publication",
+    "PASS: installed trusted QGIS map, PNG delivery and atomic three-node publication",
+    "PASS: installed 0001 data upgrade, unchanged ledger, known/unknown HTTP commands"
+  ],
+  "schemas": {
+    "platform": "0008_open_acceptance",
+    "data": "0004_document_assets",
+    "execution": "0006_remote_reliability",
+    "knowledge": "0002_lifecycle_outbox"
+  },
+  "python": "3.12.8",
+  "audit_cases": [
+    "test_execution_source_from_another_task_is_rejected",
+    "test_historical_imported_event_is_consumed_before_withdrawals",
+    "test_research_change_after_check_submission_makes_coverage_stale",
+    "test_verified_delivery_cannot_turn_indeterminate_reproduction_into_pass",
+    "test_withdrawal_marks_current_validity_stale_without_rewriting_report",
+    "test_withdrawn_evidence_cannot_enter_a_new_research_revision"
+  ],
+  "limits": [
+    "No new domain checker capability was added in R0.",
+    "STALE completions still require the later dedicated revalidation phase."
+  ]
+}

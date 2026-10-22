@@ -1,0 +1,36 @@
+{
+  "name": "groundwater-capability-studio",
+  "private": true,
+  "version": "0.15.5",
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@jsonforms/core": "3.8.0",
+    "@jsonforms/react": "3.8.0",
+    "@jsonforms/vanilla-renderers": "3.8.0",
+    "@monaco-editor/react": "4.7.0",
+    "@tanstack/react-query": "5.104.3",
+    "@xyflow/react": "12.12.0",
+    "lucide-react": "1.58.0",
+    "monaco-editor": "0.54.0",
+    "monaco-yaml": "5.5.1",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "react-router-dom": "7.18.4"
+  },
+  "devDependencies": {
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "6.1.2",
+    "typescript": "7.0.2",
+    "vite": "8.3.4",
+    "vitest": "5.0.5"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}

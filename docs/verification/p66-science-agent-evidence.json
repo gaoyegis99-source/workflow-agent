@@ -1,0 +1,18 @@
+{
+  "phase": "P6.6",
+  "version": "0.8.6",
+  "platform_schema": "0017_agent_delivery_attempts",
+  "tool_catalog_digest": "sha256:5a08b79fcfa473f8d434c68e738a072704f2694749617b76814d41c27d397708",
+  "capabilities": [
+    "frozen_workflow_submission",
+    "analysis_revision",
+    "analysis_registration",
+    "proposed_claim",
+    "exact_knowledge_evidence_reads",
+    "policy_decision_reuse"
+  ],
+  "tests": {
+    "stage": "/home/mtd/liweigis/workflow/groundwater-platform_v7/.p6-runtime/verification/p66-tests.xml",
+    "http": "/home/mtd/liweigis/workflow/groundwater-platform_v7/.p6-runtime/verification/p66-api-tests.xml"
+  }
+}

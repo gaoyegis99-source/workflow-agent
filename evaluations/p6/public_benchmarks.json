@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "frozen_at": "2026-10-15",
+  "benchmarks": [
+    {
+      "benchmark_id": "BFCL",
+      "upstream": "https://github.com/ShishirPatil/gorilla",
+      "commit": "6ea57973c7a6097fd7c5915698c54c17c5b1b6c8",
+      "applicability": ["tool schema", "single call", "multiple call", "parallel call", "relevance"],
+      "status": "NOT_RUN",
+      "reason": "REAL_PROVIDER_AND_PINNED_DATASET_NOT_CONFIGURED"
+    },
+    {
+      "benchmark_id": "TAU3",
+      "upstream": "https://github.com/sierra-research/tau2-bench",
+      "commit": "5ade54e282a4555e4d6c52d6b9b861ea8872afa6",
+      "applicability": ["multi-turn", "tool interaction", "user clarification", "policy adherence"],
+      "status": "NOT_RUN",
+      "reason": "REAL_PROVIDER_AND_PINNED_DATASET_NOT_CONFIGURED",
+      "note": "The original tau-bench repository directs users to the current tau3 benchmark. Domain task success is not treated as groundwater scientific validity."
+    },
+    {
+      "benchmark_id": "SCIENCE_AGENT_BENCH_VERIFIED",
+      "upstream": "https://github.com/OSU-NLP-Group/ScienceAgentBench",
+      "commit": "c26e151ed601ba109dc4d35e057ff8e73fec469d",
+      "applicability": ["verified split tasks solvable only by registered V7 tools"],
+      "status": "NOT_RUN",
+      "reason": "VERIFIED_ARTIFACTS_NOT_CONFIGURED",
+      "excluded": ["arbitrary code generation", "unregistered package installation", "unregistered external tools"]
+    }
+  ]
+}

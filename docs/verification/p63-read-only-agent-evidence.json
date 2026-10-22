@@ -1,0 +1,174 @@
+{
+  "phase": "P6.3-context-and-read-only-agent",
+  "version": "0.8.3",
+  "status": "PASS",
+  "finished_at": "2026-10-15T02:38:51.512851+00:00",
+  "commands": [
+    "bash scripts/check_p6.sh --phase readonly",
+    "bash scripts/check_p6.sh --phase all"
+  ],
+  "p63_tests": {
+    "tests": 15,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "focused_regression": {
+    "tests": 306,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 98.245
+  },
+  "http_contract_regression": {
+    "tests": 11,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 2.135
+  },
+  "packages": {
+    "groundwater-agent-runtime": "0.8.3",
+    "groundwater-checker-pack": "0.8.3",
+    "groundwater-data-service": "0.8.3",
+    "groundwater-execution-service": "0.8.3",
+    "groundwater-knowledge-service": "0.8.3",
+    "groundwater-operator-pack": "0.8.3",
+    "groundwater-platform-api": "0.8.3",
+    "groundwater-platform-contracts": "0.8.3",
+    "groundwater-platform-core": "0.8.3",
+    "groundwater-platform-infrastructure": "0.8.3"
+  },
+  "runtime_profiles": [
+    {
+      "adapter": "PLAIN_LOOP",
+      "checkpoint_kind": "MEMORY",
+      "framework": "none",
+      "framework_version": "builtin",
+      "profile_digest": "sha256:e2dddce2b9be4c50abdd0c02dc6ba0e0ab0fa552af0a641f7802a06f7e13b1be",
+      "profile_id": "plain-loop-v1"
+    },
+    {
+      "adapter": "LANGGRAPH",
+      "checkpoint_kind": "POSTGRES",
+      "framework": "langgraph",
+      "framework_version": "1.2.15",
+      "profile_digest": "sha256:e32a5ee62b38196a37c0250cadb7a05c82b4f40b257a5a7af8d4b3c706467e2e",
+      "profile_id": "langgraph-minimal-v1"
+    }
+  ],
+  "release_artifacts": {
+    "groundwater_agent_runtime-0.8.3-py3-none-any.whl": {
+      "bytes": 22655,
+      "sha256": "sha256:f3b401d7b4ed252c185db2e7419a5072faa6c59e22b2b5c0ff772f0f68ffb1e5"
+    },
+    "groundwater_checker_pack-0.8.3-py3-none-any.whl": {
+      "bytes": 14846,
+      "sha256": "sha256:90914771a1b0649f4218b9e03b56ef9a4b602154e72891d2242abec4ac9d9dbb"
+    },
+    "groundwater_data_service-0.8.3-py3-none-any.whl": {
+      "bytes": 27427,
+      "sha256": "sha256:006f2a8b3d782eb1cfc0ce978008377cd531317dfacf76b763f854952d1fdab0"
+    },
+    "groundwater_execution_service-0.8.3-py3-none-any.whl": {
+      "bytes": 55523,
+      "sha256": "sha256:590cb96d1d3b463f50a7600493e6e426dbc96b2d77681af03c7069a334049905"
+    },
+    "groundwater_knowledge_service-0.8.3-py3-none-any.whl": {
+      "bytes": 18685,
+      "sha256": "sha256:ebbc37cdbf1ca57f11eb8c05ac6e695535fe23088a2ce9f1c9f68415be83658c"
+    },
+    "groundwater_operator_pack-0.8.3-py3-none-any.whl": {
+      "bytes": 13293,
+      "sha256": "sha256:c5c1d16325f01a00b2135156f0888159af91938e72c5e86c106dcad111fb0ec5"
+    },
+    "groundwater_platform_api-0.8.3-py3-none-any.whl": {
+      "bytes": 30321,
+      "sha256": "sha256:2a394853b5ab81c044457fdb8def71e2d19ccdd23b41bb078f19443f08cd4f1f"
+    },
+    "groundwater_platform_contracts-0.8.3-py3-none-any.whl": {
+      "bytes": 22183,
+      "sha256": "sha256:34c1417f55b436c2199442bfd60abef71d1a57dcbc60c76b07ea1f2925397cf3"
+    },
+    "groundwater_platform_core-0.8.3-py3-none-any.whl": {
+      "bytes": 95951,
+      "sha256": "sha256:731c6e45029b04061f88c884ece9281a5481afade6a9b0b9ed9f57f2e22910cf"
+    },
+    "groundwater_platform_infrastructure-0.8.3-py3-none-any.whl": {
+      "bytes": 46803,
+      "sha256": "sha256:716232a73396aa638d9f4013480665071bcb406f5ae14e87356d19d3cc69f95e"
+    },
+    "groundwater_agent_runtime-0.8.3.tar.gz": {
+      "bytes": 15298,
+      "sha256": "sha256:2ab841ba0d4bcbb91b09453640e14276a5c4f69350bcab3e867bbd79af03a9d8"
+    },
+    "groundwater_checker_pack-0.8.3.tar.gz": {
+      "bytes": 10746,
+      "sha256": "sha256:7e8a0257a95ad986b37b5cf0cd11d76385c91e64d1f999e608619fe3561e3358"
+    },
+    "groundwater_data_service-0.8.3.tar.gz": {
+      "bytes": 17306,
+      "sha256": "sha256:1ca1713eef80402db856e237e1c4d1c4e87b601d271a5e2c5eb01b885c696f5c"
+    },
+    "groundwater_execution_service-0.8.3.tar.gz": {
+      "bytes": 41819,
+      "sha256": "sha256:e9e03665df6ab04c89334720e8706334f7f3680125cde1dcdaa39591a498dc48"
+    },
+    "groundwater_knowledge_service-0.8.3.tar.gz": {
+      "bytes": 12560,
+      "sha256": "sha256:eb4160e5d8fa90a5adb4c6d6b8ca831fccd53cb15c78b58413d5d6233b697aa2"
+    },
+    "groundwater_operator_pack-0.8.3.tar.gz": {
+      "bytes": 11111,
+      "sha256": "sha256:e4ec1280bde42a5fa59f9ada4b44e5dec34e4064c2ce05f0355f2d54b14e7444"
+    },
+    "groundwater_platform_api-0.8.3.tar.gz": {
+      "bytes": 23248,
+      "sha256": "sha256:30b5852cf39f799adbfd5edbeb85ad03a0f27c871652401f0511d4f7c029a95d"
+    },
+    "groundwater_platform_contracts-0.8.3.tar.gz": {
+      "bytes": 15226,
+      "sha256": "sha256:4ba06382c22d7cd32bf4cfe7458fad362c60128e71c9304b1e35d1479f3021e4"
+    },
+    "groundwater_platform_core-0.8.3.tar.gz": {
+      "bytes": 74436,
+      "sha256": "sha256:4be3eb0f12349fafe7df85cd73f6bfd9074b893a8bc74b54dc8f24c27e581889"
+    },
+    "groundwater_platform_infrastructure-0.8.3.tar.gz": {
+      "bytes": 33104,
+      "sha256": "sha256:9f819d4708545625a1a8f1f588b82781025ef2d1767cad96d7ce2838a60b67aa"
+    }
+  },
+  "lock_digest": "sha256:705c9198d2c933d3187fcbfc358e00dbafeb0114f299dad2c58bb4017be551d1",
+  "tool_catalog_digest": "sha256:9023b51a55ee4f5c37ecd5b64919c27f3dc522c21a0872436caeae71560f4eb4",
+  "schemas": {
+    "platform": "0013_agent_read_tools",
+    "data": "0004_document_assets",
+    "execution": "0006_remote_reliability",
+    "knowledge": "0002_lifecycle_outbox",
+    "agent_checkpoint": "0001_langgraph_checkpoint"
+  },
+  "python": "3.12.8",
+  "required_cases": [
+    "test_0012_to_0013_adds_read_ledger_and_is_repeatable",
+    "test_catalog_and_context_are_deterministic_and_read_only",
+    "test_context_omits_whole_optional_objects_and_never_truncates_requirements",
+    "test_current_membership_is_rechecked_before_tool_execution",
+    "test_deployment_catalog_round_trip_and_tamper_rejection",
+    "test_exact_evidence_read_uses_stable_agent_receipt",
+    "test_mandatory_context_overflow_is_explicit",
+    "test_model_read_then_explain_loop_has_no_business_action",
+    "test_namespaced_tool_contract_and_exact_arguments",
+    "test_p63_frame_rejects_write_proposal",
+    "test_production_data_adapter_filters_list_and_enforces_exact_grant",
+    "test_production_worker_composes_frozen_context_model_and_local_read",
+    "test_read_request_is_stable_replayable_and_wakes_next_frame",
+    "test_untrusted_observation_cannot_change_policy_or_register_tool"
+  ],
+  "limits": [
+    "Only the frozen P6.3 read catalogue is enabled; no execution, research, deliverable, acceptance, grant, budget, shell, Python or arbitrary HTTP write tool can be accepted.",
+    "SearchHit remains discovery output. Only exact evidence reads create an EvidenceRef and stable read receipt.",
+    "External text, Task prose, semantic metadata and service payloads remain typed UNTRUSTED_DATA and cannot alter policy or register tools.",
+    "P6.3 can plan, explain, ask, wait and read, but cannot yet submit a scientific computation."
+  ]
+}

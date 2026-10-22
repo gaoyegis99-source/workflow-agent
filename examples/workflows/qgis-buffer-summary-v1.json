@@ -1,0 +1,113 @@
+{
+  "name": "qgis-buffer-summary-v1",
+  "entrypoint": "main",
+  "profile": "v7-cwl-p4-v1",
+  "documents": {
+    "main": {
+      "cwlVersion": "v1.2",
+      "class": "Workflow",
+      "inputs": {
+        "vector": "File",
+        "buffer_parameters": {
+          "type": "record",
+          "name": "BufferParameters",
+          "fields": [
+            {
+              "name": "distance",
+              "type": "double"
+            },
+            {
+              "name": "unit",
+              "type": "string"
+            },
+            {
+              "name": "output_crs",
+              "type": "string"
+            },
+            {
+              "name": "segments",
+              "type": "int"
+            }
+          ]
+        },
+        "summary_parameters": {
+          "type": "record",
+          "name": "SpatialSummaryParameters",
+          "fields": [
+            {
+              "name": "layer_id",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "outputs": {
+        "buffer": {
+          "type": "File",
+          "outputSource": "buffer/vector"
+        },
+        "buffer_manifest": {
+          "type": "File",
+          "outputSource": "buffer/manifest"
+        },
+        "buffer_method": {
+          "type": "File",
+          "outputSource": "buffer/method"
+        },
+        "summary": {
+          "type": "File",
+          "outputSource": "summary/summary"
+        },
+        "summary_method": {
+          "type": "File",
+          "outputSource": "summary/method"
+        }
+      },
+      "steps": {
+        "buffer": {
+          "run": "buffer_operator",
+          "in": {
+            "vector": "vector",
+            "parameters": "buffer_parameters"
+          },
+          "out": [
+            "vector",
+            "manifest",
+            "method"
+          ]
+        },
+        "summary": {
+          "run": "summary_operator",
+          "in": {
+            "vector": "buffer/vector",
+            "parameters": "summary_parameters"
+          },
+          "out": [
+            "summary",
+            "method"
+          ]
+        }
+      }
+    }
+  },
+  "implementations": {
+    "buffer_operator": {
+      "kind": "OPERATOR",
+      "operator_id": "qgis-buffer",
+      "version_id": "1.0.0",
+      "execution_binding": {
+        "kind": "LOCAL",
+        "implementation_id": "qgis-buffer-v1"
+      }
+    },
+    "summary_operator": {
+      "kind": "OPERATOR",
+      "operator_id": "spatial-vector-summary",
+      "version_id": "1.0.0",
+      "execution_binding": {
+        "kind": "LOCAL",
+        "implementation_id": "spatial-vector-summary-v1"
+      }
+    }
+  }
+}

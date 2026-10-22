@@ -1,0 +1,7 @@
+{
+  "schema_version": 1,
+  "catalog_id": "p8-embedding-v1",
+  "state": "DISABLED",
+  "reason": "External embedding endpoint has not passed the strict production gate",
+  "catalog_digest": "sha256:bca3425c39845979c437b7d237e6d573216442a56c8c634e606fe606f817e8f3"
+}

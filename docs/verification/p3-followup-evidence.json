@@ -1,0 +1,387 @@
+{
+  "phase": "P3-followup",
+  "version": "0.2.1",
+  "status": "PASS",
+  "finished_at": "2026-10-12T01:06:32.113295+00:00",
+  "command": "bash scripts/check_p3.sh",
+  "pytest": {
+    "tests": 316,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "p1_rules": {
+    "tests": 13,
+    "failures": 0
+  },
+  "pytest_by_suite": {
+    "architecture": 29,
+    "contracts": 109,
+    "integration": 11,
+    "p2": 80,
+    "p3": 87
+  },
+  "distribution": [
+    "PASS: built 8 wheels and source distributions",
+    "PASS: core wheel runs with only the Python standard library",
+    "PASS: locked runtime dependencies and wheels installed outside the repository",
+    "PASS: installed API liveness, unconfigured readiness, OpenAPI and shutdown",
+    "PASS: installed migrations, local token CLI, real task/control HTTP and worker",
+    "PASS: installed Data/Execution migrations, independent workers, containers and P3 completion",
+    "PASS: installed 0001 data upgrade, unchanged ledger, known/unknown HTTP commands"
+  ],
+  "packages": {
+    "groundwater-checker-pack": "0.2.1",
+    "groundwater-data-service": "0.2.1",
+    "groundwater-execution-service": "0.2.1",
+    "groundwater-operator-pack": "0.2.1",
+    "groundwater-platform-api": "0.2.1",
+    "groundwater-platform-contracts": "0.2.1",
+    "groundwater-platform-core": "0.2.1",
+    "groundwater-platform-infrastructure": "0.2.1"
+  },
+  "preserved_baseline": {
+    "source": "P2 0.1.1 before P3 implementation",
+    "third_party": {
+      "alembic": {
+        "version": "1.20.0",
+        "lock_sha256": "5abc68e8451aa8c88ad3a64c1fc3e3a7c5f8b41a33fd0e11533c9dbb399e7a67"
+      },
+      "annotated-doc": {
+        "version": "0.0.5",
+        "lock_sha256": "8919cfdcb71e8655ede785ab3d009c4627694a1e223e499a52e1a52b96c187af"
+      },
+      "annotated-types": {
+        "version": "0.8.0",
+        "lock_sha256": "89103d703e592aaec736b83ac9cfc65d992b4e08910a7cbc20c439ccb6033065"
+      },
+      "anyio": {
+        "version": "4.15.1",
+        "lock_sha256": "6a8db7f5481e854ed4407e671344e90408423a504138736ba3f1ae27adc42017"
+      },
+      "attrs": {
+        "version": "26.1.0",
+        "lock_sha256": "433768967f76d7f7c4fd3a6625a476f385c6ed03e0111e706418d5c020dbddfb"
+      },
+      "certifi": {
+        "version": "2026.7.22",
+        "lock_sha256": "a7a4f6e66c99d517ddfebb25537e55521ef7df05aec9194f803fddf7ad460322"
+      },
+      "click": {
+        "version": "8.5.0",
+        "lock_sha256": "753fea0d6a5f9dc47a871d35034cb99ac85bbdb17a7806d198176df9a994e5bb"
+      },
+      "colorama": {
+        "version": "0.4.6",
+        "lock_sha256": "e021d532ecc9e989f8bb5d1f12f5a15b87e84d5166110d539de72cc9bf867afc"
+      },
+      "fastapi": {
+        "version": "0.143.0",
+        "lock_sha256": "e7d4bc58a7a07ab504731b8a5863593ec759bd024a1337597adfc19390a05483"
+      },
+      "greenlet": {
+        "version": "3.5.6",
+        "lock_sha256": "734124f8a916a248c7a44b2dc64e482127b185ad4848d8f0671acc2ba39b94b5"
+      },
+      "h11": {
+        "version": "0.16.0",
+        "lock_sha256": "baf650d9d5d120b8de7cd4834aa2c9eb503e16c603dc0142de8afc8c0e721fcc"
+      },
+      "hatchling": {
+        "version": "1.27.0",
+        "lock_sha256": "9ff011eecc608b5d1f0fb2c790873cc87c7e81d65db58bbc0dd6003042b8e831"
+      },
+      "httpcore": {
+        "version": "1.0.9",
+        "lock_sha256": "98592c90f430ae3e240a9ba1c73baddd23e3b2ebe5d0e401a6a337516d2326f9"
+      },
+      "httpx": {
+        "version": "0.28.1",
+        "lock_sha256": "aed038606fc110b72f6f30c4d2a89c3f2ea50e429d4c57d35031f6ff6d02fe45"
+      },
+      "idna": {
+        "version": "3.20",
+        "lock_sha256": "f868bf92ef3e86cbfca6f23a5d24428d80ce0d3ef736ef6b52df765d9320fcc6"
+      },
+      "iniconfig": {
+        "version": "2.3.1",
+        "lock_sha256": "48bb17937758cf0b07c65a56916f622207fbf834fdcb2f77f8f78afaaa1442ce"
+      },
+      "jsonschema": {
+        "version": "4.26.0",
+        "lock_sha256": "aa2d829372278363e9c061853657704e2ee9c3017224a1fe468cf257be5b43e6"
+      },
+      "jsonschema-specifications": {
+        "version": "2025.9.1",
+        "lock_sha256": "2621b54cb2683370f8a1c72d38a228055bcc4a1d9e2c113cb66b8bbcdd55b44e"
+      },
+      "mako": {
+        "version": "1.4.3",
+        "lock_sha256": "67d9bc14e70bbc80d253da903c1e85cd342fd979e9a8a350f65f6d1f70354d9b"
+      },
+      "markupsafe": {
+        "version": "3.0.4",
+        "lock_sha256": "d9bbd79821efa4cf5fd57a12d1b4012203c3202164c0dd85df95a60c3b718068"
+      },
+      "opentelemetry-api": {
+        "version": "1.45.1",
+        "lock_sha256": "14df8ffb9308919c95c868cab20e0bb9ac56f34a01a9f712955d15ea734642f1"
+      },
+      "packaging": {
+        "version": "26.3",
+        "lock_sha256": "029d77b017ced106c1aa1d38a94480a1242346cebd3a3108dc7279d85c2959be"
+      },
+      "pathspec": {
+        "version": "1.1.1",
+        "lock_sha256": "e4e2b427d853489a52aad2eafd585caedd12e93893238a2fc06346d56068e45c"
+      },
+      "pluggy": {
+        "version": "1.6.0",
+        "lock_sha256": "90504f7563732cf098b94b355fd44a990d9949705b1493191c47b9e6e515b9bd"
+      },
+      "psycopg": {
+        "version": "3.3.6",
+        "lock_sha256": "c1f05108d2bf03930986f7c992ad1dfdc75cd02d4628bd1a09fc3dbd489feac4"
+      },
+      "psycopg-binary": {
+        "version": "3.3.6",
+        "lock_sha256": "0f602c3d788de3ee50c997d04c5636db0cefa9f26e3dac49f16e0601f83eb4c2"
+      },
+      "pydantic": {
+        "version": "2.14.0",
+        "lock_sha256": "9ff14e1da295bcc6bb406e4480bb6e8cfb7ecafb897dad0cce30847d80dc9006"
+      },
+      "pydantic-core": {
+        "version": "2.50.0",
+        "lock_sha256": "8ce09cf142732944979937e656c80f4e0df6e3b65e210e83899d2e2e623f7113"
+      },
+      "pygments": {
+        "version": "2.21.0",
+        "lock_sha256": "1ad964874393ba3c94722db8d98a05731d4cfb35e1d2c2a4b06822eed4e3a6e3"
+      },
+      "pytest": {
+        "version": "8.4.2",
+        "lock_sha256": "0d68458d332d89e2a4069e4a560212e1d80d47863930e7567e4e83d9ef6187e5"
+      },
+      "referencing": {
+        "version": "0.37.0",
+        "lock_sha256": "358f86740c115299bc56272613e6b9e998cd0faa4982df98f81c893d50a9b8e8"
+      },
+      "rpds-py": {
+        "version": "2026.9.1",
+        "lock_sha256": "b854153c752bd3c0eb2e4d97309e1c1c2a1e7fa4a79aa728d36ff19d6ef99ec5"
+      },
+      "ruff": {
+        "version": "0.17.0",
+        "lock_sha256": "6fe0bc9eb30cc462478124975b0d19bfa82480460d75092377b698adb3951672"
+      },
+      "sqlalchemy": {
+        "version": "2.0.54",
+        "lock_sha256": "d83e7ee0067d4cc4c307a992534bba861e555a33b4f208ce0fcbdece89901949"
+      },
+      "starlette": {
+        "version": "0.52.1",
+        "lock_sha256": "50d7b804afa45e112278b58866b94693f9f2745234ab56244fece2d86e50796b"
+      },
+      "trove-classifiers": {
+        "version": "2026.9.21.13",
+        "lock_sha256": "8eff709161109221b95b92b2e840925d224ce2a2c2cebbf972c90073018f4754"
+      },
+      "typing-extensions": {
+        "version": "4.16.0",
+        "lock_sha256": "e3a61fa0e3e9e756e8a2c733b345f644dc3af186a4e19e14c422009261e95b06"
+      },
+      "typing-inspection": {
+        "version": "0.4.4",
+        "lock_sha256": "3591ba274de0c00dad6f7407a23ca8853261bba4fae4540170e2fb265f7515c0"
+      },
+      "tzdata": {
+        "version": "2026.5",
+        "lock_sha256": "ff7f6bd464ec4a0768b599c18173ededc520fdf1532a91bc5771046de21a72b6"
+      },
+      "uvicorn": {
+        "version": "0.54.0",
+        "lock_sha256": "86de9cfdca0cf7367f15d9df43c6abe5688b5c7bdd8f1c89940ba7f674fdf869"
+      }
+    },
+    "migrations": {
+      "packages/platform-infrastructure/src/platform_infrastructure/migrations/schema_0001.py": "e630506523fd1c134bc96087a3afcece6285ff8b0d82b846bf7cdf1d237f1a65",
+      "packages/platform-infrastructure/src/platform_infrastructure/migrations/versions/0001_control.py": "bc1965adabf0190f3f356b0b3ee9db254f6d0d9c7544c5d3b1bf08d3e1c8aa15",
+      "packages/platform-infrastructure/src/platform_infrastructure/migrations/versions/0002_observation_snapshot.py": "c9aacb026060eef524319c0922642d4d47a0b326289b34680a5d1e54ce602db9"
+    }
+  },
+  "python": "3.12.8",
+  "schemas": {
+    "platform": "0003_p3_delivery",
+    "data": "0001_data",
+    "execution": "0001_execution"
+  },
+  "images": {
+    "operator": "sha256:5d3f61fe42cb6e30f4fdc4961ad50c3ffdb166a490fabc95473dde46b8f806ef",
+    "checker": "sha256:da290a86172db022ee7a093622b9b09c086872e10d8291b8285f96655725e766"
+  },
+  "docker": "28.1.1",
+  "browser": "Playwright 1.63.0 / Chromium 153.0.8010.12; Linux build, ubuntu22.04 override on Focal",
+  "data": "Auditable synthetic fixtures only; not real groundwater observations",
+  "heavy_p1": "Not rerun: P1 component adapters unchanged; 13 selection rules rerun",
+  "historical_evidence": [
+    "p1-evidence.json",
+    "p2-initial-evidence.json",
+    "p2-evidence.json",
+    "p3-evidence.json"
+  ],
+  "source_sha256": {
+    "apps/platform-api/pyproject.toml": "ac4ee8c961d4e6ad9dac8f9d74a2cbad3f268c5285a3bd3540dd16a2ede9c6f8",
+    "apps/execution-service/pyproject.toml": "b626653f1c19695fe033733b1e094ff7071e7e2df50b734c4c096569c2f41b8f",
+    "apps/data-service/pyproject.toml": "2610840551bd9f87dc84fc5a0e677bed8a8347feb621885fad8854c9508b0400",
+    "apps/platform-api/src/platform_api/__main__.py": "7a26f23b45171713aa8383bfb23b378358d2348acd0cb116af6b77557c676651",
+    "apps/platform-api/src/platform_api/__init__.py": "9f96f0aaab9a781485c6f790d40e0ca54932edf4f51a16cef22f9a78c64364d8",
+    "apps/platform-api/src/platform_api/app.py": "4395c7661a0261ddfadf886423a9e139db1b25944b4bd7dc0c60b438bdc619ec",
+    "apps/platform-api/src/platform_api/static/index.html": "7b632684bd44da48eefead2d834c7a3b60eb3a554ab317deecc41358bec27bec",
+    "apps/platform-api/src/platform_api/static/app.js": "efe029e2fe04ae77e2a16ab9270f84bb603812917967df7525a11a41ef5502cf",
+    "apps/platform-api/src/platform_api/static/style.css": "29ca3613d55ddf5459fcdac49be7d0953e8872ea45b348c16a37a9bb27fbf053",
+    "apps/platform-api/src/platform_api/adapters/__init__.py": "5cc9ceb6f21c0923175a3b5652163e1511ee8748ab2771cc865c06dcc230cd7a",
+    "apps/platform-api/src/platform_api/adapters/http/errors.py": "8efe12737186505fc11ac5cad6b3a026f5bbfdc0bb3f81934d3777fb6a8e5939",
+    "apps/platform-api/src/platform_api/adapters/http/__init__.py": "92dd84d8010dba8df4234b16fc6281841951de90028f58027be1edcf744c2b24",
+    "apps/platform-api/src/platform_api/adapters/http/science.py": "0c3aa62d8919b12bab8509e6f4a7c46211927070a7b27b9106f9420350181745",
+    "apps/platform-api/src/platform_api/adapters/http/health.py": "d0f3372045914bbea961d5ebf358ea00bbaf18107e3323e6ed9125348ba4522c",
+    "apps/platform-api/src/platform_api/adapters/http/control.py": "43bf944966eeaf9bc36c9a6dfa1f3a26bca7fe18e8733c16db95ef46268434a5",
+    "apps/execution-service/src/platform_execution/api.py": "b598a3881b41c91dc6261b59937807805e666aaf35e74e60fa64fb128095d091",
+    "apps/execution-service/src/platform_execution/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "apps/execution-service/src/platform_execution/worker.py": "93e22ed00fb52057ebf0fd86eeee0aea89de9454e557b1345d8c64d3e02e763e",
+    "apps/execution-service/src/platform_execution/database.py": "2875b01e4500be3bea7cbb00f6bb53812cf136a53eab642fdc04569e36104e93",
+    "apps/execution-service/src/platform_execution/migrations/env.py": "407013bdfea2da3acef7d97c50e98063ae0c91c8d13889103ed3593b15499925",
+    "apps/execution-service/src/platform_execution/migrations/schema_0001.py": "95dcd9e14816e750d64a2195fd4ad55e4d6a2dd6598007b306f20e8ada06fb4e",
+    "apps/execution-service/src/platform_execution/migrations/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "apps/execution-service/src/platform_execution/adapters/docker.py": "5f875312ea707ce8c95670dc3f0b8feb9243b0415816390e33c10602038af6eb",
+    "apps/execution-service/src/platform_execution/adapters/http.py": "6c4e589a0dfea5c30f270a013877af332ead93a2d4439bd7b70588209d55cb10",
+    "apps/execution-service/src/platform_execution/adapters/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "apps/execution-service/src/platform_execution/adapters/tables.py": "95dcd9e14816e750d64a2195fd4ad55e4d6a2dd6598007b306f20e8ada06fb4e",
+    "apps/execution-service/src/platform_execution/adapters/repository.py": "0a9e6ec7cc759f12536c7346a691ac37b4509630c52d1aafc147f5f5b347d7cd",
+    "apps/execution-service/src/platform_execution/domain/state.py": "d0b56a781433fd15ce7fffe50961982a23ac577715fa0bed97d3900a2df58bbf",
+    "apps/execution-service/src/platform_execution/domain/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "apps/execution-service/src/platform_execution/application/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "apps/execution-service/src/platform_execution/application/runner.py": "c4c89a5c30b0bcb4cd33f4bb29d298f3d5f20328ad49cce8791791c8d91e3e2c",
+    "apps/execution-service/src/platform_execution/migrations/versions/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "apps/execution-service/src/platform_execution/migrations/versions/0001_execution.py": "302793e19deb7b2015189e4f54305bfae90bdd1440b1d27977f14950442a6886",
+    "apps/data-service/src/platform_data/api.py": "e8de2a6048450fa4edcda467b8d01702fc7d0ead10684fd2d5970aff7589cb39",
+    "apps/data-service/src/platform_data/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "apps/data-service/src/platform_data/worker.py": "54d64f5ece95f34a24515246554870ffce2410362464e9cfbae56ac54cff2de5",
+    "apps/data-service/src/platform_data/database.py": "498db312b0f595a0b29eb66b7aed29b29ebff0af0659106a01b77b6c079780b6",
+    "apps/data-service/src/platform_data/migrations/env.py": "407013bdfea2da3acef7d97c50e98063ae0c91c8d13889103ed3593b15499925",
+    "apps/data-service/src/platform_data/migrations/schema_0001.py": "73ddb71f54249ebe1484e676fca11be7cbbc421ae122348d7a43a64a394f9ef3",
+    "apps/data-service/src/platform_data/migrations/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "apps/data-service/src/platform_data/adapters/blobs.py": "9dd446599963ac227ede0ac2fca2484b6bc03c8a42b4f135b5771eb327382189",
+    "apps/data-service/src/platform_data/adapters/tables_io.py": "f977202a1f8986f96f4e974aac964337771a14df601a30b335d0251574ba1963",
+    "apps/data-service/src/platform_data/adapters/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "apps/data-service/src/platform_data/adapters/tables.py": "73ddb71f54249ebe1484e676fca11be7cbbc421ae122348d7a43a64a394f9ef3",
+    "apps/data-service/src/platform_data/adapters/repository.py": "0c0605ec71dbad7250d12cbb33cd4df02af342396ef2a3c4238ceda9d5aea2d2",
+    "apps/data-service/src/platform_data/domain/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "apps/data-service/src/platform_data/domain/model.py": "533bbd332a04fadf60c98312e048ff1a39f2d4c2ea8e391c6e3d378631cb063e",
+    "apps/data-service/src/platform_data/application/publication.py": "ec11b18b0d9acccc2f70775693ff62d061386f3760b3d18eedddce5d4021d5aa",
+    "apps/data-service/src/platform_data/application/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "apps/data-service/src/platform_data/application/data.py": "d0264fb31ea2f34d5ec582745a84c01d4120c5d3a2d4350917a793a8b18669ac",
+    "apps/data-service/src/platform_data/migrations/versions/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "apps/data-service/src/platform_data/migrations/versions/0001_data.py": "17a2d75108fcb821767a6fdad277b25d44bad7c03e3c40d0d46dd838101f0c2e",
+    "packages/checker-pack/pyproject.toml": "0c638b9093edd3d483ac9159311611f18289a9967beebd4207ac91174a4e025c",
+    "packages/operator-pack/pyproject.toml": "a83d7f304a11c7c8e649f91113538e8cd509bc20729c5526ba61467a78bb4c61",
+    "packages/platform-core/pyproject.toml": "8af542d2ef5c481b1a9102acd6b69930a09b503fa6c15c2587ce7fbf364ab750",
+    "packages/platform-infrastructure/pyproject.toml": "3f2b59dc22d91687e1b20c28434cf853b9af7b5e1331412db922d4cfdf6bf281",
+    "packages/contracts/pyproject.toml": "ec67c952cb484dba036210aad9466866edfbe1f79890e75505df21f9ff60083f",
+    "packages/checker-pack/src/platform_checkers/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "packages/checker-pack/src/platform_checkers/cli.py": "a6d30038f370331a8822113eda54bf8954eca4fb0c2e5356db2c467699283291",
+    "packages/checker-pack/src/platform_checkers/reference.py": "4f8213e83cf11d94e10cfb4154a4f047e01c4f0b945a8c5fd69ed768f4324072",
+    "packages/checker-pack/src/platform_checkers/check.py": "339ca69aeb3687d50769d59d4c6d7116c4bf8edf7371d83f3795471d724dca1b",
+    "packages/operator-pack/src/platform_operators/trend.py": "62406e200121caa4298ae4b910f51f6e75792ffc9f8367b1b1af3ab184638b7a",
+    "packages/operator-pack/src/platform_operators/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "packages/operator-pack/src/platform_operators/cli.py": "de41505f389f9b0f62ff205124114ee62f156e7ff72752324984dbf406b485b6",
+    "packages/operator-pack/src/platform_operators/series.py": "08787b729036b168dc1d720c70dc19bf56d3d8e8075f61fecd8f2c18a6396969",
+    "packages/platform-core/src/platform_core/__init__.py": "a84b7f3d053eb1850f9ec116d9596e870f595249118fbbc8e1862653e7f756de",
+    "packages/platform-core/src/platform_core/domain/__init__.py": "398b04364da70d7f76adc305e8f19d61903f3af475878aa4ac05f4e438588fae",
+    "packages/platform-core/src/platform_core/domain/health.py": "1865ffc6f2d69c7aff890e81db833120f7e63783c7792c9a1e7128782bc5e94e",
+    "packages/platform-core/src/platform_core/domain/control.py": "6f1c2e7d168c814f3e1bdd2a9dedabbf439a3acbca7a9988fd92c191a6f40d8b",
+    "packages/platform-core/src/platform_core/application/errors.py": "ce15fc66d1fadc8c333ff3c5779dbf85e900bf506d0f1cabb3683081760e678a",
+    "packages/platform-core/src/platform_core/application/dispatch.py": "d289e7a5b04b2a7c0cdcba6d560decfd026124165cea33e53592c17aa5d9450a",
+    "packages/platform-core/src/platform_core/application/__init__.py": "907cc29d7bf45e714bdd7e67dd75900dbcef63c51dd6e6e034463fd6123d5169",
+    "packages/platform-core/src/platform_core/application/acceptance.py": "8890750fda8615fdf1db7584bb039724885b53bcdc9b0f690fdbb5f31a3a9087",
+    "packages/platform-core/src/platform_core/application/science.py": "a00db2df56765fb62d83187d511a4f682d7c2d5a345eb4312d990e637c114da0",
+    "packages/platform-core/src/platform_core/application/health.py": "875f1c11aa3f7352b5132e032caf2b4cb03d45ff38434472ac38c8d0987f577c",
+    "packages/platform-core/src/platform_core/application/ports.py": "1a8b122cf4c3f8c641db2cf591344053f443c237d5be066bc8f2e6e55d6dd508",
+    "packages/platform-core/src/platform_core/application/control.py": "8d2ab0b3038cf9783a8692a904731f9542e6a2be803e44eca54fbd4dd13e01ff",
+    "packages/platform-core/src/platform_core/application/catalog.py": "24211f0a371fd9d9b33cd8d2d8eaa52e18b621a3fa1c488bc68588ef33227dfa",
+    "packages/platform-infrastructure/src/platform_infrastructure/__init__.py": "66bc397eb7f69e7de97d0ec8d8c5c69cb57c8b82431be0fb480ddfb94894057d",
+    "packages/platform-infrastructure/src/platform_infrastructure/services.py": "2e070910a1034dd31f7ddfec13d92a8a9c23f2a8bf5d6959e0a85252e9151bca",
+    "packages/platform-infrastructure/src/platform_infrastructure/admin.py": "7b060b9de6fa8938ed708803ff92205e4ed8ebe2a3a39ee1dbbc49922f4cd6b2",
+    "packages/platform-infrastructure/src/platform_infrastructure/worker.py": "08f82f416d10b51a48eea631978fb309c10fc5c7e83b8502874868789ac9b729",
+    "packages/platform-infrastructure/src/platform_infrastructure/tables.py": "8aded971a4728825720863a1790c64544627bb296fef9b7f0963199996e3b7e4",
+    "packages/platform-infrastructure/src/platform_infrastructure/database.py": "14a7dfb58941e2bc773b466a59f9fbb6f6137edbfe46f67bd018762703cc6a5d",
+    "packages/platform-infrastructure/src/platform_infrastructure/repositories.py": "e57a46f61c18c306b5f8f79476ad3fdf4a7d26a29c5d2b76bc6e74cd3a538fef",
+    "packages/platform-infrastructure/src/platform_infrastructure/migrations/env.py": "e7896952424b5dad70e3efba4c60e891baf0632e5ceb273add1adca52dfa0ede",
+    "packages/platform-infrastructure/src/platform_infrastructure/migrations/schema_0001.py": "e630506523fd1c134bc96087a3afcece6285ff8b0d82b846bf7cdf1d237f1a65",
+    "packages/platform-infrastructure/src/platform_infrastructure/migrations/schema_0003.py": "8aded971a4728825720863a1790c64544627bb296fef9b7f0963199996e3b7e4",
+    "packages/platform-infrastructure/src/platform_infrastructure/migrations/versions/0003_p3_delivery.py": "fb38adb617bb662eef671b6830e011561000305b7ac9cd7601945c730294c7e4",
+    "packages/platform-infrastructure/src/platform_infrastructure/migrations/versions/0001_control.py": "bc1965adabf0190f3f356b0b3ee9db254f6d0d9c7544c5d3b1bf08d3e1c8aa15",
+    "packages/platform-infrastructure/src/platform_infrastructure/migrations/versions/0002_observation_snapshot.py": "c9aacb026060eef524319c0922642d4d47a0b326289b34680a5d1e54ce602db9",
+    "packages/contracts/src/platform_contracts/__init__.py": "a78b061e1b7ea142c6f6a22dbb92275f95dc77f660c76eb43100afd4c82b39db",
+    "packages/contracts/src/platform_contracts/science.py": "a9d40e5bd7ddc90a3afe5d289c3ecbd5d211ad89a8a60a7b327fe575a1794a8b",
+    "packages/contracts/src/platform_contracts/schema.py": "8e0aace60dcabde70db50922f21fc279a2bfc8c517c6258f6fc99906c4b82b76",
+    "packages/contracts/src/platform_contracts/v1.py": "6d334c47f7a59993f0c8a6550127cc8d1f8fed4c25c20525f9951a61c02f46e8",
+    "packages/contracts/src/platform_contracts/control.py": "f9fa9da68ff636d8e0a94f5caf281d093a902c5fde9dc3fe2873999eb5c4b0dc",
+    "packages/contracts/src/platform_contracts/service.py": "2bbd801244e6776fff1560fd59319dce4282d071a7f6e928e3e0cc3aca5f73ff",
+    "tests/integration/test_api.py": "61753dc9ea33114dc499045eb224f7130bf1a1ca8473a4d94b200b8779cbfada",
+    "tests/p3/test_browser.py": "8e17c79fea03442db7bec5016bf0447d78540d757f2dd261b10d6efcf9ccb11f",
+    "tests/p3/harness.py": "a4c829f98cb6305df0b5cfd21fadcee087f6f0ac715620f8e3f866de6278de54",
+    "tests/p3/test_upgrade_and_faults.py": "92165ad2856f72328013c32f2f64b67889c263dd5e9df3b7ef0d395943a67c2c",
+    "tests/p3/test_deployment.py": "93edcd3981f544b93eb9bcedf4dcec54cd7f9af5fd09775417d7c5600bce0ae2",
+    "tests/p3/installed_driver.py": "0eb9a85d2ab67c3abb23178051fad301965b9ae1de22328c91857bc0225ff372",
+    "tests/p3/fault_operator.py": "29b5760e30afb0cd8be2edf6fdc634b63af12d012d3093aaabe9b664d5150ca1",
+    "tests/p3/test_execution.py": "3611b32732c2ec51734f749bc4f9782a45b573a0920525f62bab50179c2be288",
+    "tests/p3/test_data.py": "d3826e6a070fe90ad808abe55a5134454ca952336947505ab9e843bb40238f6e",
+    "tests/p3/test_runner_recovery.py": "30c9f5fc7f03124cc62d970a4fd506f5e75daa40e54dde00fa81dec556cd5750",
+    "tests/p3/test_foundation.py": "3d5b7e123ed217e778b8904db23842ac4e615d2f3d06c45f81892432f7b379bd",
+    "tests/p3/fault_proxy.py": "938e45df8f07e488acf6904510c0245640564e8170b887d8cba2d4dd2ee436f9",
+    "tests/p3/test_contracts.py": "2e478c53ae606bf260384a6f72a67abcc2f326f7190dd25b70b45840a4473d46",
+    "tests/p3/test_acceptance.py": "73ae4c6b8df5eb27a676b8f9823c6efa9eccdbfa3db3d0c9b316e106d8d49a02",
+    "tests/p3/test_publication.py": "be9d411bb2a9eedbdac4e3b0b37596110c0bf90a49832d85c1c7d54b37ced04d",
+    "tests/p3/test_science.py": "47433d8044e5147504a400add5a5d0bb45658f36c1368647aef4bc4028c493df",
+    "tests/p3/conftest.py": "87568584b37a8c6259e855a103b0689fbe841df3ac9e20ae979569d138d83578",
+    "tests/p2/driver.py": "8525e44542a2580e3d328bee86880f69090fa3d363c023c06b976d267ceb8757",
+    "tests/p2/processes.py": "b131a7d122f512702173eb96af9f174b583de71c8185ebc73fa3f4dd2ea213ed",
+    "tests/p2/peer.py": "cf5e30fbe6fe8e75d7d9611b53f65807fefff01e9fac03d6d1b29546514d6e48",
+    "tests/p2/test_grants.py": "047cea04d712cb934216a3a6b25b98dc194165c6d3b5aa8084633f88d7a216ef",
+    "tests/p2/__init__.py": "3d9ec036ac511bc6e06ca4dfd4c059f63f41626e34d1b1a13d220fb6a6ba698d",
+    "tests/p2/test_recovery.py": "031591e0357c5945003f76f0c462bacac79e85c4324fce73365ebbab1a9ae9a9",
+    "tests/p2/test_upgrade.py": "9589fe6e46ee495168621191217a0886e3a1a0ea2db669ccce870381ef125d83",
+    "tests/p2/peer_client.py": "6ecf13402ec69750260c0d080ac8d02bfe9504bc529597593fac061ba621bb1d",
+    "tests/p2/test_observations.py": "795bede01df1c165770f11d167fc0a89a3259044c9d0e2c91165a7ee3e91b08a",
+    "tests/p2/test_identity.py": "fc17a39f45dae753292871192d657e0dd68c8c142b40640383cfa17bc0b2114c",
+    "tests/p2/test_http_faults.py": "2b00805cf73497d0760d0efd47b0e30890deb3b97c3f663a56b96ce3753329e4",
+    "tests/p2/drop_proxy.py": "27ab639eb489657f51f1d9f46177350d4f28c060d17715cbfd7cba07b3bfe485",
+    "tests/p2/test_controls.py": "392f45d76e8a58e6b6bf08746ce876a7f0d6f6c3344ca1dbea2c063669d857eb",
+    "tests/p2/legacy_upgrade.py": "4114b0a1eadeb3928a49aed342ab88a64584811ec85515ab145e0eb39acc7874",
+    "tests/p2/test_regressions.py": "5fd8ba13c865e7771dcc51cb3901ab863757c7790564c0e37518ce0524b96c27",
+    "tests/p2/test_actions.py": "79831ca2d134569c19641260911dda1d0bbe9eda7ce7ddfe8bd3d939ca507b93",
+    "tests/p2/conftest.py": "9edac944869763f7dfe001fc1f55f47843aaca2f1f07575b645e73bb519b5680",
+    "tests/architecture/test_boundaries.py": "e13e505bd74b53a1df4155881071cd98d821c122de47f7b0284423e00c03cb1e",
+    "tests/contracts/test_execution_identifiers.py": "5da38df384cbd6d41ef92ecde3dbead659fa6ca77564ba7834fba4d48a470c93",
+    "tests/contracts/test_contracts.py": "0000b26e7283ac5c01917459c89a83ced173638650dd578a2be2f061c61a5a1a",
+    "tests/contracts/test_control_contracts.py": "b55ef5fd0cf806386f304ab465c5fce661db5aeb81ca5d9fa184142389f7a3d0",
+    "scripts/record_p3.py": "664228073f8384b341c498bda8cd32a1d6806b7d42e2e8769e4068a8a555f6e5",
+    "scripts/build_p3_images.sh": "4c67a8373e9f96deaec476b393e8845833385ce05d307b1527077b7aa16ec81c",
+    "scripts/run_p3.sh": "f01fbb008928f841b6745ab4945310a1e02562fc678292a7196e17dc055c3e52",
+    "scripts/configure_p3.py": "1aaf0c7c1e8f2fd8d508a249786fbc1fd044b67defd360868cf5f4b5e9b93dd2",
+    "scripts/check_p2.sh": "d1c68f2319af2e9149bcb4ce36a94ba256f852c77d660a7612899c0bd34f4cb7",
+    "scripts/check_p1.sh": "dd60cb52986c1c22f74680a3aec4630aab145b0c3b5ec8f72157aed9e0a70ab7",
+    "scripts/check_p0.sh": "c045046962b1e476ef7311ad1dbcf112bbb88593840656d5e0d038c231316b41",
+    "scripts/record_p2.py": "4f1c7573e073befc4b9ca4177cdf02ebe59ca9660980d4a51cc6471981b27252",
+    "scripts/p2_environment.py": "11b5cbdf4d15747de8820903168b822c3045b6af8d51daf9bd095ba3e60ad5d0",
+    "scripts/verify_distribution.py": "4a38c75daf9c7aa02f015a4abea9d3267b61fc1d22bb4e6417621648fe51cc40",
+    "scripts/check_p3.sh": "256a2c831e0a47d7743034432c22b733b0b03fd2307cd2848ef9a59ae0af9dba",
+    "deploy/p3/operator.Dockerfile": "b8c8b4e4e014a0a6d8702b21155f3ea6fd7f92059a833a0221092b78222c2082",
+    "deploy/p3/checker.Dockerfile": "fd25c734395eccf2de9134439e48698210c6b1b09b96e46d39f94b5cac59bd7e",
+    "deploy/p3/init-db.sh": "e5a5a7ae57a470f2770881afbd25d6f66b44fcf418fdc07b4b93ae6bba441997",
+    "uv.lock": "fe5dddd2415b07d317ce916d184fde3a7c134e026318b8c9cc1909f96856b461",
+    "pyproject.toml": "b7b2d2faad4576cec444122dbfcc93af43e883e7e7a1e86a3202b14cdcc9c3d6",
+    "deploy/p3.compose.yaml": "45c23464054e8213720c73a473a1e4d2b3c7d529aed0823593be675881146a4a"
+  }
+}

@@ -1,0 +1,318 @@
+{
+  "active_workflow_recovery": {
+    "action_id": "e1b4d51a8b284346aebfbb856eac5b40",
+    "asset_count": 14,
+    "budget": {
+      "execution_count": 3,
+      "in_flight": 0,
+      "max_in_flight": 2,
+      "reserved": 0,
+      "used": 3
+    },
+    "committed_publications": 1,
+    "duplicate_invocations": 0,
+    "engine_package_digest": "sha256:7770a79b944a389d75ce052b3c61a930afab75dc946d87c6d41b140df0e4fef3",
+    "execution_id": "e89c436c265e2217a7e83504280ac3307",
+    "execution_rows": 4,
+    "jobstore_key_digest": "sha256:6065636d41b247ebfae55d74d47c30dd23c0d0b0e4dd940819ef16bfcaa8970e",
+    "parked_epoch": 1,
+    "project_id": "5ae143b44324458eb7e7c8595958c3e7",
+    "publication": "COMMITTED",
+    "publication_members": 3,
+    "publications": 1,
+    "published_output_representations": 8,
+    "resumed_epoch": 2,
+    "running_scientific_containers_after_completion": 0,
+    "settled_nodes": 3,
+    "state": "SUCCEEDED",
+    "task_id": "b1a34d1400614bb6a5942e71a3258d57",
+    "unique_actions": 4,
+    "unique_child_invocations": 3,
+    "unique_executions": 4,
+    "unique_member_assets": 3,
+    "unique_members": 3,
+    "workflow_nodes": 3
+  },
+  "old_client_compatibility": {
+    "acceptance_id": "6cacf2a3a9a4490d85c6b4a0996eb997",
+    "acceptance_status": "PASS",
+    "budget": {
+      "in_flight": 0,
+      "reserved": 0,
+      "used": 3
+    },
+    "client_version": "0.15.0",
+    "evidence_ref_digest": "sha256:ad6a2232f3fdbbb22bacc12378ddd323de2b4f92c30237b911f422237c5cba35",
+    "knowledge_availability": "WITHDRAWN",
+    "project_id": "5ae143b44324458eb7e7c8595958c3e7",
+    "spatial": {
+      "action_id": "3caa372b395a46738b61267f276b901e",
+      "execution_id": "e5dc464ab6213f9f686563bf26355f5fe",
+      "outputs": [
+        "buffer",
+        "buffer_manifest",
+        "buffer_method",
+        "map_image",
+        "map_manifest",
+        "map_method",
+        "summary",
+        "summary_method"
+      ],
+      "publication": "COMMITTED",
+      "state": "SUCCEEDED"
+    },
+    "task_id": "38765f05eded4ead9eb1a2562eb5bf68"
+  },
+  "phase": "P8.2-upgrade-rollback-compatibility",
+  "recorded_at": "2026-10-17T07:07:03+08:00",
+  "release": {
+    "application_image": "sha256:5ab06775879a89a25968b902efdda92d8c905dfa7778ade394c76f177393dbdc",
+    "checker_catalog": "sha256:65573abeeb0906e1cad9218efe9ddf4a9c7ffc2517eb054271a3383be5bc0e78",
+    "compatibility": {
+      "api_contract": "api/v1",
+      "backup_formats": [
+        1,
+        2
+      ],
+      "database_schemas": {
+        "data": "0004_document_assets",
+        "execution": "0006_remote_reliability",
+        "knowledge": "0002_lifecycle_outbox",
+        "platform": "0023_workflow_release_lifecycle"
+      },
+      "recovery_releases": {
+        "0.15.0": {
+          "catalogs": {
+            "checker_catalog": "sha256:65573abeeb0906e1cad9218efe9ddf4a9c7ffc2517eb054271a3383be5bc0e78",
+            "operator_catalog": "sha256:51a6f5a4d32deac43fed343aa679c8f8c5be2f5b1707e06b0838997b27036e50",
+            "tool_catalog": "sha256:e84e26da95838af65a766286cce9626ebe39499a9fefa870e561936639a0388e"
+          },
+          "images": {
+            "app": "sha256:41414b88c63ecfaa9530f0f8e2b26d8e0c940bf715068c07603797bfc7e9f830",
+            "checker": "sha256:141beef42300dde2d765496f5521ce411153a9f844c661b7b4a30696ae50418d",
+            "cwl": "sha256:652754092f5cf48486a9c8bb42f113d1d95d25141ef7d846be44ff8a18504a09",
+            "gdal_checker": "sha256:d519091232041aee18e5d50c5c1be334a2584d3522049d6c3c7af82bab53dd20",
+            "operator": "sha256:99dbb85cafcb711d894829fc7dd5a23f52389caf398032e2ce91b4ea118ce9ba",
+            "postgres": "sha256:3645570cccdfa447589da9f57dd740faa29b30938e861289a5574b6ca6b03826",
+            "qgis": "sha256:5a1a2c34b6f1043eb4705218db1c23be7a6537e2c474e29912d1e573103bf448",
+            "spatial_native": "sha256:0cd417177a3cc0d5e078d5a8257368a9d98186d5f7c00581d85b09f850912546",
+            "tabular": "sha256:5079ac5b9c1e811b0d31a792641fafaba023be044c21aa6311a21aa893ee8aeb"
+          },
+          "model_catalog": "sha256:12240b2fe3285363a6eff49fcbfa68c75485e053507448f43171f7afddd0136c",
+          "release_digest": "sha256:e589582e2a9e16702386736bf199bcbc6eece61829c91b8f24e9a4491b6e0f78",
+          "runtime_profile": "sha256:c422986ec33b2b5f720cc7651c9e32acb252f7377bc1bdd0e5b9ebc24dc6a1dd"
+        }
+      },
+      "upgrade_from": [
+        "0.15.0"
+      ]
+    },
+    "dependency_wheels": 64,
+    "operator_catalog": "sha256:51a6f5a4d32deac43fed343aa679c8f8c5be2f5b1707e06b0838997b27036e50",
+    "postgres_image": "sha256:3645570cccdfa447589da9f57dd740faa29b30938e861289a5574b6ca6b03826",
+    "release_digest": "sha256:360216cb3c5bab6e71d760e2445f056d17e85599aa82482427978820a07d73cb",
+    "runtime_image_source_digest": "sha256:08132f797daaeaf811076a3e9ba1b62085af4efe17c33437032c2fd119f96280",
+    "runtime_requirements": {
+      "compose": ">=2.30,<3",
+      "docker": ">=27,<30",
+      "postgresql": "17",
+      "python": ">=3.12,<3.13"
+    },
+    "schema_version": 3,
+    "source_digest": "sha256:99578cfd7dbd5a909d49a9eb53fa09b338d2a648f93c0ee1fbe87a38f3c3cd7f",
+    "source_files": 433,
+    "tool_catalog": "sha256:e84e26da95838af65a766286cce9626ebe39499a9fefa870e561936639a0388e",
+    "web_assets": 3,
+    "workspace_wheels": 11
+  },
+  "result": "PASS",
+  "rollback_evidence": [
+    {
+      "candidate_target_release_digest": "sha256:0dcc51d35ea27865201197c3ecb1c9418c2933b8538a840a2c461efdd71d3567",
+      "operation": "p82-finalrestore-upgrade-20261017a",
+      "state": "ROLLED_BACK",
+      "states": [
+        "PLANNED",
+        "BARRIER_ACTIVE",
+        "ROLLING_BACK",
+        "ROLLED_BACK"
+      ]
+    },
+    {
+      "candidate_target_release_digest": "sha256:8128ec0e3ec9649c3ae739c600cf304cede21f49d388367fccbcc0a35b93dd34",
+      "operation": "p82-finalrestore-upgrade-20261017b",
+      "state": "ROLLED_BACK",
+      "states": [
+        "PLANNED",
+        "BARRIER_ACTIVE",
+        "PARKED",
+        "BACKED_UP",
+        "ROLLING_BACK",
+        "ROLLED_BACK"
+      ]
+    },
+    {
+      "candidate_target_release_digest": "sha256:f37e603829d70830b58e4b53ffcd25bc44958f514ac9f36c3491f370b8608b4a",
+      "operation": "p82-finalrestore-upgrade-20261017c",
+      "state": "ROLLED_BACK",
+      "states": [
+        "PLANNED",
+        "BARRIER_ACTIVE",
+        "PARKED",
+        "BACKED_UP",
+        "TARGET_INSTALLED",
+        "ROLLING_BACK",
+        "ROLLED_BACK"
+      ]
+    },
+    {
+      "candidate_target_release_digest": "sha256:f37e603829d70830b58e4b53ffcd25bc44958f514ac9f36c3491f370b8608b4a",
+      "operation": "p82-finalrestore-upgrade-20261017d",
+      "state": "ROLLED_BACK",
+      "states": [
+        "PLANNED",
+        "BARRIER_ACTIVE",
+        "PARKED",
+        "BACKED_UP",
+        "TARGET_INSTALLED",
+        "TARGET_VERIFIED",
+        "ROLLING_BACK",
+        "ROLLED_BACK"
+      ]
+    }
+  ],
+  "scope": {
+    "p83_implemented": false,
+    "p84_implemented": false
+  },
+  "supporting_evidence": {
+    "api_result": "sha256:dcfd674cec139c5bec12fd85eb645cb6ac0ad3490a6b628be1ec61d8eaae31be",
+    "backup_summary": "sha256:f919cc9778fac1b5a9895c44b81815b2424ea03c7f73ac1ca69e06a7af546f0e",
+    "client_compatibility": "sha256:7199323bbd8442ae0739b59febc864c72daa1c2d3a1ec19394270970826a770f",
+    "database_result": "sha256:dda6aa425b51cbce430c402ac213cbda26559f80ca0a8bcc3bb20a51061423cc",
+    "park_summary": "sha256:6932e4306b4b119abe50df7150f9c6f59179cf5ef75a9b5c7608f96beef0fd01"
+  },
+  "tests": {
+    "authoring_backend_a1_a7": {
+      "failed": 0,
+      "passed": 117
+    },
+    "distribution": "PASS",
+    "format_managed_source_files": 531,
+    "old_client_compatibility": "PASS",
+    "p0_to_p7_compatibility": {
+      "duration_seconds": 2491.49,
+      "failed": 0,
+      "passed": 922,
+      "skipped": 0
+    },
+    "p82_and_p81": {
+      "failed": 0,
+      "passed": 19
+    },
+    "ruff": "PASS",
+    "studio_frontend": {
+      "failed": 0,
+      "passed": 7
+    }
+  },
+  "upgrade": {
+    "backup": {
+      "created_at_unix_ns": 1792191695884955581,
+      "database_count": 4,
+      "database_schemas": {
+        "data": {
+          "alembic": "0004_document_assets"
+        },
+        "execution": {
+          "alembic": "0006_remote_reliability"
+        },
+        "knowledge": {
+          "alembic": "0002_lifecycle_outbox"
+        },
+        "platform": {
+          "agent_checkpoint": "0001_langgraph_checkpoint",
+          "alembic": "0023_workflow_release_lifecycle"
+        }
+      },
+      "database_table_count": {
+        "data": 6,
+        "execution": 4,
+        "knowledge": 8,
+        "platform": 80
+      },
+      "manifest_digest": "sha256:aee71edc0b4ad9f0990479215e40541c62ee0da96c6e950392f2708ccbd06481",
+      "park": {
+        "file_sha256": "sha256:0b7dd51485f6a137695f6545b24d2f83569fec0f1a7861c77756432fca26d448",
+        "filename": "park-manifest.json",
+        "manifest_digest": "sha256:6adee94d6bfe24fd2dcbb96c40fefd3a5b1af8521490fe35622ed74eecdf9ce9"
+      },
+      "quiescence": {
+        "data": {
+          "imports": 0,
+          "publications": 0
+        },
+        "execution": {
+          "executions": 2
+        },
+        "knowledge": {
+          "imports": 0,
+          "outbox": 0
+        },
+        "platform": {
+          "active_actions": 0,
+          "agent_advancing": 0,
+          "agent_model_calls": 0,
+          "agent_tools": 0,
+          "authoring_validations": 0,
+          "outbox": 1,
+          "workflow_packages": 0,
+          "workflow_trials": 0
+        }
+      },
+      "release_digest": "sha256:e589582e2a9e16702386736bf199bcbc6eece61829c91b8f24e9a4491b6e0f78",
+      "schema_version": 2,
+      "tree_count": 4,
+      "trees": {
+        "data": {
+          "entries": null,
+          "file_count": null,
+          "total_bytes": null,
+          "tree_digest": "sha256:15a77039fcf858e67632a96df0d17abc0432c348a2ef577fcf1dd9fc94b70b61"
+        },
+        "execution": {
+          "entries": null,
+          "file_count": null,
+          "total_bytes": null,
+          "tree_digest": "sha256:8fc99dc3d23a274b9f8e83c9a2a8eeed02f3183995844eaec7c992d596c31d0d"
+        },
+        "knowledge": {
+          "entries": null,
+          "file_count": null,
+          "total_bytes": null,
+          "tree_digest": "sha256:85857315d2e91578a2bb089b96282b6ed2eabad18efe3722c152db381264ef57"
+        },
+        "spatial": {
+          "entries": null,
+          "file_count": null,
+          "total_bytes": null,
+          "tree_digest": "sha256:9e73b3b4bbdf9906b1d035587570bc270e2545c5244487699e3f6ef71236ea0f"
+        }
+      }
+    },
+    "database_schemas": {
+      "data": "0004_document_assets",
+      "execution": "0006_remote_reliability",
+      "knowledge": "0002_lifecycle_outbox",
+      "platform": "0023_workflow_release_lifecycle"
+    },
+    "deployment_id": "p82-canonical",
+    "operation_id": "69f185d0730547af8ea917ebe99b9cbe",
+    "operation_state": "COMMITTED",
+    "park_manifest_digest": "sha256:6adee94d6bfe24fd2dcbb96c40fefd3a5b1af8521490fe35622ed74eecdf9ce9",
+    "parking_generation": 1792191655624278991,
+    "source_release_digest": "sha256:e589582e2a9e16702386736bf199bcbc6eece61829c91b8f24e9a4491b6e0f78",
+    "target_release_digest": "sha256:360216cb3c5bab6e71d760e2445f056d17e85599aa82482427978820a07d73cb"
+  },
+  "version": "0.15.1"
+}

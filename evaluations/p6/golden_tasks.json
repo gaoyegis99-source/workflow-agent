@@ -1,0 +1,21 @@
+{
+  "schema_version": 2,
+  "suite_id": "p6-golden-v1",
+  "tasks": [
+    {"id":"A01","name":"explicit-plan","class":"KERNEL","nodeid":"tests/p61/test_kernel.py::test_one_frame_yields_one_plan_and_no_business_action"},
+    {"id":"A02","name":"typed-clarification","class":"KERNEL","nodeid":"tests/p61/test_kernel.py::test_question_answer_and_revision_order_are_explicit"},
+    {"id":"A03","name":"p3-autonomous-loop","class":"SCIENCE","nodeid":"tests/p64/test_agent_autonomy.py::test_deterministic_agent_runs_p3_to_completion_and_explains"},
+    {"id":"A04","name":"p3-workflow-selection","class":"WORKFLOW","nodeid":"tests/p66/test_science_tools.py::test_agent_identity_runs_frozen_workflow_through_real_toil"},
+    {"id":"A05","name":"spatial-buffer-summary-map","class":"WORKFLOW","nodeid":"tests/p66/test_science_tools.py::test_agent_identity_runs_frozen_qgis_summary_map_workflow"},
+    {"id":"A06","name":"exact-knowledge-reference","class":"KNOWLEDGE","nodeid":"tests/p63/test_knowledge_receipt.py::test_exact_evidence_read_uses_stable_agent_receipt"},
+    {"id":"A07","name":"withdrawn-evidence","class":"KNOWLEDGE","nodeid":"tests/p53/test_migrations_and_lifecycle.py::test_withdrawal_marks_current_validity_stale_without_rewriting_report"},
+    {"id":"A08","name":"groundwater-datum-conflict","class":"POLICY","nodeid":"tests/p52/test_contracts_and_policy.py::test_groundwater_policy_is_local_deterministic_and_does_not_block_unrelated_work"},
+    {"id":"A09","name":"non-comparison-not-blocked","class":"POLICY","nodeid":"tests/p52/test_contracts_and_policy.py::test_groundwater_policy_is_local_deterministic_and_does_not_block_unrelated_work"},
+    {"id":"A10","name":"exact-output-identity","class":"ACCEPTANCE","nodeid":"tests/p5r1/test_exact_candidate.py::test_direct_output_is_canonicalized_and_saved_as_exact"},
+    {"id":"A11","name":"response-loss-identity","class":"RECOVERY","nodeid":"tests/p62/test_model_gateway.py::test_response_loss_and_worker_takeover_query_original_call"},
+    {"id":"A12","name":"checkpoint-loss-recovery","class":"RECOVERY","nodeid":"tests/p65/test_wait_recovery.py::test_admin_checkpoint_rebuild_preserves_wait_state_and_rejects_active_worker"},
+    {"id":"A13","name":"cancel-convergence","class":"CONTROL","nodeid":"tests/p61/test_kernel.py::test_pause_resume_and_cancel_fence_agent_progress"},
+    {"id":"A14","name":"bounded-repair","class":"REPAIR","nodeid":"tests/p67/test_repair_policy.py::test_same_deterministic_failure_stops_after_two_attempts"},
+    {"id":"A15","name":"prompt-injection-and-scope","class":"SECURITY","nodeid":"tests/p69/test_release_eval.py::test_untrusted_instruction_cannot_change_frozen_catalog"}
+  ]
+}

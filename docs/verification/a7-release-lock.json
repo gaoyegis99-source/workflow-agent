@@ -1,0 +1,49 @@
+{
+  "checker_catalog": {
+    "digest": "sha256:65573abeeb0906e1cad9218efe9ddf4a9c7ffc2517eb054271a3383be5bc0e78",
+    "file_sha256": "sha256:851a608fca0c9c1d85e6f6ff8ed3dbf3f8792df00b1c7aac08c1b10131235610"
+  },
+  "images": {
+    "checker": "sha256:141beef42300dde2d765496f5521ce411153a9f844c661b7b4a30696ae50418d",
+    "cwl": "sha256:652754092f5cf48486a9c8bb42f113d1d95d25141ef7d846be44ff8a18504a09",
+    "gdal_checker": "sha256:d519091232041aee18e5d50c5c1be334a2584d3522049d6c3c7af82bab53dd20",
+    "operator": "sha256:99dbb85cafcb711d894829fc7dd5a23f52389caf398032e2ce91b4ea118ce9ba",
+    "qgis": "sha256:5a1a2c34b6f1043eb4705218db1c23be7a6537e2c474e29912d1e573103bf448",
+    "spatial_native": "sha256:0cd417177a3cc0d5e078d5a8257368a9d98186d5f7c00581d85b09f850912546",
+    "tabular": "sha256:5079ac5b9c1e811b0d31a792641fafaba023be044c21aa6311a21aa893ee8aeb"
+  },
+  "operator_catalog": {
+    "digest": "sha256:51a6f5a4d32deac43fed343aa679c8f8c5be2f5b1707e06b0838997b27036e50",
+    "file_sha256": "sha256:fceb9933d2ce795ec5e6a844da4cd512a2fa406f39bdbd1c9611f86c6e1ac8f0"
+  },
+  "release_digest": "sha256:45bcfd0492fec961ccee4c1803c841498b8ede7afaeb3e24e3bd5a2101f4dedb",
+  "schema_version": 2,
+  "source_tree": {
+    "digest": "sha256:621152d51ee9d01bd4ae9b4e8d9978a161c9db2829f33aa6ac36a8454fe1a321",
+    "file_count": 398
+  },
+  "tool_catalog": {
+    "catalog_id": "p7-science-tools-v2",
+    "digest": "sha256:e84e26da95838af65a766286cce9626ebe39499a9fefa870e561936639a0388e",
+    "file_sha256": "sha256:99e9865517345623855f1c063cac50c9b1abfa39c0494ebec3ec67c5ca589a49"
+  },
+  "version": "0.14.6",
+  "web_assets": {
+    "assets/index-B0fiLP7e.js": "sha256:9498bc4062987385ae07a9350b54eb543a37e10b93d69c4470c38c6c085ff8d7",
+    "assets/index-DZaIQi4u.css": "sha256:8a27c5791e0c27c90f67535535b50669a5235967aac5826f8c5e98e878319aab",
+    "index.html": "sha256:80373f313d7c27352acdb23fc22167c66d28f97f72f9d6135ab59be8f1da132c"
+  },
+  "wheels": {
+    "groundwater_agent_runtime-0.14.6-py3-none-any.whl": "sha256:282f07c82444b7d08c180d5de5290ea29248e2f2269869b1ccbaa1d33f2e8fc4",
+    "groundwater_checker_pack-0.14.6-py3-none-any.whl": "sha256:f0ec48a9ff1db4abc11653235058c2363551d69b3f61f5ba38ff5d8294995a1d",
+    "groundwater_data_service-0.14.6-py3-none-any.whl": "sha256:b8173331f7378d2f034b23a20dcab55f917bd8bfc9d1108615bf1d62f819e46f",
+    "groundwater_execution_service-0.14.6-py3-none-any.whl": "sha256:1eb3c0dfa11d11949a3338b69a206a6c1c2c62788213c3904d5680a42153c0b7",
+    "groundwater_knowledge_service-0.14.6-py3-none-any.whl": "sha256:6ed6d67bc396fe859a5bbec5b2aac8178aad0da6abb84e28b41b722e90596922",
+    "groundwater_operator_pack-0.14.6-py3-none-any.whl": "sha256:bd1168e46c5d8e98d0957c586034ce3499b7e1e0a5ebe524ddad47eee3d4f8e5",
+    "groundwater_platform_api-0.14.6-py3-none-any.whl": "sha256:fe526a252aba53a8135679ea4f210ce8b40677326fdc62fd70e9d43a6a854fef",
+    "groundwater_platform_contracts-0.14.6-py3-none-any.whl": "sha256:aefaba43d3fd443a7c1cd53eebe2f7ce948dd9ef8933dfd954c7b1b425c985e3",
+    "groundwater_platform_core-0.14.6-py3-none-any.whl": "sha256:27f9ab03288eb9e26213edc0ec87df9f37858ab18ddd8ede10282c348b165efc",
+    "groundwater_platform_infrastructure-0.14.6-py3-none-any.whl": "sha256:405d61edeb6d43e3f33548a37ada506de3d7107f575f5e05c3dc4c411808bd70",
+    "groundwater_tabular_operator_pack-0.14.6-py3-none-any.whl": "sha256:f87b14fc2540ddcd834144c6e4ccac5638ea58d2b2f33af6dd40c6e04f2c27ce"
+  }
+}

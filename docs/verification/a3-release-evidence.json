@@ -1,0 +1,131 @@
+{
+  "catalogs": {
+    "checker_digest": "sha256:65573abeeb0906e1cad9218efe9ddf4a9c7ffc2517eb054271a3383be5bc0e78",
+    "operator_digest": "sha256:51a6f5a4d32deac43fed343aa679c8f8c5be2f5b1707e06b0838997b27036e50",
+    "tool_digest": "sha256:e84e26da95838af65a766286cce9626ebe39499a9fefa870e561936639a0388e"
+  },
+  "date": "2026-10-16",
+  "known_non_blocking": [
+    "Vite reports a single JavaScript chunk of approximately 666 KiB; A3 has no frontend performance gate."
+  ],
+  "phase": "Capability Studio A3",
+  "release": {
+    "catalog_count": 3,
+    "image_count": 7,
+    "release_digest": "sha256:e68a94087bbe724be960f76438523bf69f47be9c545e3d43bf129a9c278b1c2e",
+    "release_lock": "docs/verification/a3-release-lock.json",
+    "source_file_count": 372,
+    "source_tree_digest": "sha256:a1ad777ee33a3df69a0d318cdc22e725fa16ce7e4bc1d4f03da58d96815d91b3",
+    "version": "0.14.2",
+    "web_asset_count": 3,
+    "wheel_count": 11
+  },
+  "schemas": {
+    "data": "0004_document_assets",
+    "execution": "0006_remote_reliability",
+    "knowledge": "0002_lifecycle_outbox",
+    "platform": "0021_authoring_release"
+  },
+  "scope": {
+    "excluded": [
+      "A4 registry or marketplace",
+      "A5 condition, scatter, subworkflow and source import",
+      "automatic task, grant or budget creation",
+      "scientific verification inferred from a sample verdict"
+    ],
+    "implemented": [
+      "atomic candidate and workflow package freeze",
+      "real workflow trial admission on an existing DIRECT task",
+      "server-owned immutable trial case and verdict",
+      "retryable dependency uncertainty with lease and generation fencing",
+      "immutable SemVer workflow release with exact trial evidence",
+      "Studio candidate, trial, release, refresh and copy-as-draft panels",
+      "real browser Filter-Aggregate-Profile and Buffer-Summary-StaticMap flows",
+      "exact deliverable and independent checker after the table trial"
+    ]
+  },
+  "status": "PASS",
+  "tests": {
+    "authoring_a3": {
+      "command": "uv run --locked pytest -q tests/authoring/a3",
+      "failed": 0,
+      "passed": 17,
+      "skipped": 0
+    },
+    "authoring_gate": {
+      "build": "PASS",
+      "command": "bash scripts/check_authoring.sh --phase workflow-release",
+      "failed": 0,
+      "format": "PASS",
+      "frontend_test_files": 2,
+      "frontend_tests": 4,
+      "passed": 52,
+      "ruff": "PASS",
+      "seconds": 136.73,
+      "skipped": 0,
+      "typecheck": "PASS"
+    },
+    "catalog_gate": {
+      "command": "bash scripts/check_p7.sh --phase catalog",
+      "failed": 0,
+      "p1_rules_passed": 13,
+      "pytest_passed": 24
+    },
+    "compatibility": {
+      "closure": [
+        "Updated the exact OpenAPI route set for six A3 endpoints.",
+        "The P4 browser timing failure passed targeted 2/2 verification and the final full run."
+      ],
+      "command": "bash scripts/check_p7.sh --phase compatibility",
+      "final": {
+        "failed": 0,
+        "passed": 919,
+        "seconds": 2363.83,
+        "skipped": 0
+      },
+      "first_run": {
+        "failed": 2,
+        "passed": 917,
+        "seconds": 2432.19,
+        "skipped": 0
+      }
+    },
+    "distribution": {
+      "checks": [
+        "11 wheels and source distributions built",
+        "core standard-library-only boundary",
+        "locked install outside repository",
+        "installed API, OpenAPI, migrations, CLI and authoring worker",
+        "installed P3 real container completion",
+        "installed P4 frozen CWL and Toil workflow",
+        "installed GeoPackage, QGIS buffer and Native summary",
+        "installed QGIS PNG and atomic three-node publication",
+        "installed legacy data upgrade and command recovery"
+      ],
+      "command": "uv run --locked python scripts/verify_distribution.py",
+      "status": "PASS"
+    },
+    "real_browser_flows": {
+      "cartography": {
+        "published_asset_count": 3,
+        "trial_release": "PASS",
+        "workflow": "Buffer -> Summary / StaticMap"
+      },
+      "table": {
+        "acceptance": "PASS",
+        "budget": {
+          "in_flight": 0,
+          "reserved": 0,
+          "used": 5
+        },
+        "independent_checkers": [
+          "platform-runtime-integrity-v1",
+          "tabular-profile-reproduction-v1"
+        ],
+        "task_lifecycle": "COMPLETED",
+        "trial_release": "PASS",
+        "workflow": "Filter -> Aggregate -> Profile"
+      }
+    }
+  }
+}

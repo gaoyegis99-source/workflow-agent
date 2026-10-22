@@ -1,0 +1,19 @@
+[project]
+name = "groundwater-data-service"
+version = "0.15.5"
+requires-python = ">=3.12,<3.13"
+dependencies = ["groundwater-platform-contracts==0.15.5", "fastapi>=0.115,<1", "uvicorn>=0.34,<1", "sqlalchemy>=2.0,<2.1", "psycopg[binary]>=3,<4", "alembic>=1.16,<2", "pyarrow>=20,<26"]
+
+[project.scripts]
+data-service = "platform_data.api:main"
+data-worker = "platform_data.worker:main"
+data-spatial-worker = "platform_data.spatial_worker:main"
+data-document-worker = "platform_data.document_worker:main"
+data-admin = "platform_data.database:main"
+
+[build-system]
+requires = ["hatchling==1.27.0"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/platform_data"]

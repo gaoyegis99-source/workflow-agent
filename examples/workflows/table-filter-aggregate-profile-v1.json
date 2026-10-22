@@ -1,0 +1,127 @@
+{
+  "name": "table-filter-aggregate-profile-v1",
+  "entrypoint": "main",
+  "profile": "v7-cwl-p4-v1",
+  "documents": {
+    "main": {
+      "cwlVersion": "v1.2",
+      "class": "Workflow",
+      "inputs": {
+        "table": "File",
+        "filter_parameters": {
+          "type": "record",
+          "name": "TableFilterParameters",
+          "fields": [{
+            "name": "predicate",
+            "type": {
+              "type": "record",
+              "name": "TableFilterPredicate",
+              "fields": [
+                {"name": "semantics", "type": "string"},
+                {"name": "root_id", "type": "string"},
+                {
+                  "name": "nodes",
+                  "type": {
+                    "type": "array",
+                    "items": {
+                      "type": "record",
+                      "name": "TableFilterNode",
+                      "fields": [
+                        {"name": "node_id", "type": "string"},
+                        {"name": "kind", "type": "string"},
+                        {"name": "field_id", "type": ["null", "string"]},
+                        {"name": "operator", "type": ["null", "string"]},
+                        {"name": "value_type", "type": ["null", "string"]},
+                        {"name": "value", "type": ["null", "string"]},
+                        {"name": "values", "type": ["null", {"type": "array", "items": "string"}]},
+                        {"name": "arguments", "type": {"type": "array", "items": "string"}}
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          }]
+        },
+        "aggregate_parameters": {
+          "type": "record",
+          "name": "TableAggregateParameters",
+          "fields": [
+            {"name": "semantics", "type": "string"},
+            {"name": "group_by", "type": {"type": "array", "items": "string"}},
+            {"name": "null_key_policy", "type": "string"},
+            {
+              "name": "measures",
+              "type": {
+                "type": "array",
+                "items": {
+                  "type": "record",
+                  "name": "TableAggregateMeasure",
+                  "fields": [
+                    {"name": "measure_id", "type": "string"},
+                    {"name": "operation", "type": "string"},
+                    {"name": "field_id", "type": ["null", "string"]},
+                    {"name": "display_name", "type": ["null", "string"]}
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "profile_parameters": {
+          "type": "record",
+          "name": "TableProfileParameters",
+          "fields": [{"name": "fields", "type": {"type": "array", "items": "string"}}]
+        }
+      },
+      "outputs": {
+        "filter_report": {"type": "File", "outputSource": "filter/report"},
+        "filter_table": {"type": "File", "outputSource": "filter/table"},
+        "filter_method": {"type": "File", "outputSource": "filter/method"},
+        "aggregate_report": {"type": "File", "outputSource": "aggregate/report"},
+        "aggregate_table": {"type": "File", "outputSource": "aggregate/table"},
+        "aggregate_method": {"type": "File", "outputSource": "aggregate/method"},
+        "profile_report": {"type": "File", "outputSource": "profile/report"},
+        "profile_table": {"type": "File", "outputSource": "profile/table"},
+        "profile_method": {"type": "File", "outputSource": "profile/method"}
+      },
+      "steps": {
+        "filter": {
+          "run": "filter_operator",
+          "in": {"table": "table", "parameters": "filter_parameters"},
+          "out": ["report", "table", "method"]
+        },
+        "aggregate": {
+          "run": "aggregate_operator",
+          "in": {"table": "filter/table", "parameters": "aggregate_parameters"},
+          "out": ["report", "table", "method"]
+        },
+        "profile": {
+          "run": "profile_operator",
+          "in": {"table": "aggregate/table", "parameters": "profile_parameters"},
+          "out": ["report", "table", "method"]
+        }
+      }
+    }
+  },
+  "implementations": {
+    "filter_operator": {
+      "kind": "OPERATOR",
+      "operator_id": "table-filter",
+      "version_id": "1.0.0",
+      "execution_binding": {"kind": "LOCAL", "implementation_id": "table-filter-native-v1"}
+    },
+    "aggregate_operator": {
+      "kind": "OPERATOR",
+      "operator_id": "table-aggregate",
+      "version_id": "1.0.0",
+      "execution_binding": {"kind": "LOCAL", "implementation_id": "table-aggregate-native-v1"}
+    },
+    "profile_operator": {
+      "kind": "OPERATOR",
+      "operator_id": "table-profile",
+      "version_id": "1.0.0",
+      "execution_binding": {"kind": "LOCAL", "implementation_id": "table-profile-native-v1"}
+    }
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "phase": "P6.8",
+  "version": "0.8.8",
+  "platform_schema": "0017_agent_delivery_attempts",
+  "ui": [
+    "agent_status",
+    "typed_questions",
+    "decision_and_repair_timeline",
+    "model_usage",
+    "resumable_sse_cursor"
+  ],
+  "operations": [
+    "list-waiting",
+    "list-blocked",
+    "reconcile",
+    "export"
+  ],
+  "forbidden_operations": [
+    "force-pass",
+    "write-result",
+    "direct-database-update"
+  ],
+  "tests": {
+    "stage": "/home/mtd/liweigis/workflow/groundwater-platform_v7/.p6-runtime/verification/p68-tests.xml",
+    "http": "/home/mtd/liweigis/workflow/groundwater-platform_v7/.p6-runtime/verification/p68-api-tests.xml"
+  }
+}

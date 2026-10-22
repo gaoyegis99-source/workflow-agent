@@ -1,0 +1,30 @@
+[project]
+name = "groundwater-agent-runtime"
+version = "0.15.5"
+description = "Replaceable agent runtime adapters for Groundwater Platform V7"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "groundwater-platform-contracts==0.15.5",
+    "groundwater-platform-core==0.15.5",
+    "groundwater-platform-infrastructure==0.15.5",
+    "langgraph==1.2.15",
+    "langgraph-checkpoint-postgres==3.2.0",
+    "opentelemetry-sdk>=1.38,<2",
+    "opentelemetry-exporter-otlp-proto-http>=1.38,<2",
+]
+
+[project.scripts]
+platform-authoring-worker = "platform_agent_runtime.authoring_worker:main"
+agent-runtime-probe = "platform_agent_runtime.cli:main"
+agent-checkpoint-admin = "platform_agent_runtime.checkpoint_admin:main"
+agent-tool-catalog = "platform_agent_runtime.tool_catalog_cli:main"
+agent-worker = "platform_agent_runtime.worker:main"
+agent-admin = "platform_agent_runtime.admin:main"
+agent-ledger-backup = "platform_agent_runtime.backup:main"
+
+[build-system]
+requires = ["hatchling==1.27.0"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/platform_agent_runtime"]

@@ -1,0 +1,316 @@
+{
+  "name": "table-project-filter-cast-profile-v1",
+  "entrypoint": "main",
+  "profile": "v7-cwl-p4-v1",
+  "documents": {
+    "main": {
+      "cwlVersion": "v1.2",
+      "class": "Workflow",
+      "inputs": {
+        "table": "File",
+        "project_parameters": {
+          "type": "record",
+          "name": "TableProjectParameters",
+          "fields": [
+            {
+              "name": "fields",
+              "type": {
+                "type": "array",
+                "items": {
+                  "type": "record",
+                  "name": "TableProjectField",
+                  "fields": [
+                    {
+                      "name": "source_field_id",
+                      "type": "string"
+                    },
+                    {
+                      "name": "display_name",
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "filter_parameters": {
+          "type": "record",
+          "name": "TableFilterParameters",
+          "fields": [
+            {
+              "name": "predicate",
+              "type": {
+                "type": "record",
+                "name": "TableFilterPredicate",
+                "fields": [
+                  {
+                    "name": "semantics",
+                    "type": "string"
+                  },
+                  {
+                    "name": "root_id",
+                    "type": "string"
+                  },
+                  {
+                    "name": "nodes",
+                    "type": {
+                      "type": "array",
+                      "items": {
+                        "type": "record",
+                        "name": "TableFilterNode",
+                        "fields": [
+                          {
+                            "name": "node_id",
+                            "type": "string"
+                          },
+                          {
+                            "name": "kind",
+                            "type": "string"
+                          },
+                          {
+                            "name": "field_id",
+                            "type": [
+                              "null",
+                              "string"
+                            ]
+                          },
+                          {
+                            "name": "operator",
+                            "type": [
+                              "null",
+                              "string"
+                            ]
+                          },
+                          {
+                            "name": "value_type",
+                            "type": [
+                              "null",
+                              "string"
+                            ]
+                          },
+                          {
+                            "name": "value",
+                            "type": [
+                              "null",
+                              "string"
+                            ]
+                          },
+                          {
+                            "name": "values",
+                            "type": [
+                              "null",
+                              {
+                                "type": "array",
+                                "items": "string"
+                              }
+                            ]
+                          },
+                          {
+                            "name": "arguments",
+                            "type": {
+                              "type": "array",
+                              "items": "string"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "profile_parameters": {
+          "type": "record",
+          "name": "TableProfileParameters",
+          "fields": [
+            {
+              "name": "fields",
+              "type": {
+                "type": "array",
+                "items": "string"
+              }
+            }
+          ]
+        },
+        "cast_parameters": {
+          "type": "record",
+          "name": "TableCastParameters",
+          "fields": [
+            {
+              "name": "semantics",
+              "type": "string"
+            },
+            {
+              "name": "casts",
+              "type": {
+                "type": "array",
+                "items": {
+                  "type": "record",
+                  "name": "TableCastField",
+                  "fields": [
+                    {
+                      "name": "field_id",
+                      "type": "string"
+                    },
+                    {
+                      "name": "target_type",
+                      "type": "string"
+                    },
+                    {
+                      "name": "on_error",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      "outputs": {
+        "project_report": {
+          "type": "File",
+          "outputSource": "project/report"
+        },
+        "project_table": {
+          "type": "File",
+          "outputSource": "project/table"
+        },
+        "project_method": {
+          "type": "File",
+          "outputSource": "project/method"
+        },
+        "filter_report": {
+          "type": "File",
+          "outputSource": "filter/report"
+        },
+        "filter_table": {
+          "type": "File",
+          "outputSource": "filter/table"
+        },
+        "filter_method": {
+          "type": "File",
+          "outputSource": "filter/method"
+        },
+        "cast_report": {
+          "type": "File",
+          "outputSource": "cast/report"
+        },
+        "cast_table": {
+          "type": "File",
+          "outputSource": "cast/table"
+        },
+        "cast_method": {
+          "type": "File",
+          "outputSource": "cast/method"
+        },
+        "profile_report": {
+          "type": "File",
+          "outputSource": "profile/report"
+        },
+        "profile_table": {
+          "type": "File",
+          "outputSource": "profile/table"
+        },
+        "profile_method": {
+          "type": "File",
+          "outputSource": "profile/method"
+        }
+      },
+      "steps": {
+        "project": {
+          "run": "project_operator",
+          "in": {
+            "table": "table",
+            "parameters": "project_parameters"
+          },
+          "out": [
+            "report",
+            "table",
+            "method"
+          ]
+        },
+        "filter": {
+          "run": "filter_operator",
+          "in": {
+            "table": "project/table",
+            "parameters": "filter_parameters"
+          },
+          "out": [
+            "report",
+            "table",
+            "method"
+          ]
+        },
+        "profile": {
+          "run": "profile_operator",
+          "in": {
+            "table": "cast/table",
+            "parameters": "profile_parameters"
+          },
+          "out": [
+            "report",
+            "table",
+            "method"
+          ]
+        },
+        "cast": {
+          "run": "cast_operator",
+          "in": {
+            "table": "filter/table",
+            "parameters": "cast_parameters"
+          },
+          "out": [
+            "report",
+            "table",
+            "method"
+          ]
+        }
+      }
+    }
+  },
+  "implementations": {
+    "project_operator": {
+      "kind": "OPERATOR",
+      "operator_id": "table-project",
+      "version_id": "1.0.0",
+      "execution_binding": {
+        "kind": "LOCAL",
+        "implementation_id": "table-project-native-v1"
+      }
+    },
+    "filter_operator": {
+      "kind": "OPERATOR",
+      "operator_id": "table-filter",
+      "version_id": "1.0.0",
+      "execution_binding": {
+        "kind": "LOCAL",
+        "implementation_id": "table-filter-native-v1"
+      }
+    },
+    "profile_operator": {
+      "kind": "OPERATOR",
+      "operator_id": "table-profile",
+      "version_id": "1.0.0",
+      "execution_binding": {
+        "kind": "LOCAL",
+        "implementation_id": "table-profile-native-v1"
+      }
+    },
+    "cast_operator": {
+      "kind": "OPERATOR",
+      "operator_id": "table-cast",
+      "version_id": "1.0.0",
+      "execution_binding": {
+        "kind": "LOCAL",
+        "implementation_id": "table-cast-native-v1"
+      }
+    }
+  }
+}

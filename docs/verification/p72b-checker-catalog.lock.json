@@ -1,0 +1,256 @@
+{
+  "schema_version": 1,
+  "images": {
+    "CHECKER": "sha256:eea130833fde35b6f9ac4d960a6726af6a990167f3df2d42f2bcb7bb798a157c",
+    "GDAL_CHECKER": "sha256:bc2924e9fe19994520a63372e1d2958cd504a25def65050c5d8e42f3c3a9f788"
+  },
+  "catalog": {
+    "schema_version": 1,
+    "capabilities": [
+      {
+        "capability_id": "platform-runtime-integrity-v1",
+        "version": "1.0.0",
+        "implementation_id": "platform-runtime-integrity-v1",
+        "image_role": "CHECKER",
+        "check_types": [
+          "RUNTIME_INTEGRITY",
+          "METHOD_PRECONDITION"
+        ],
+        "matches": {
+          "result_kinds": [
+            "*"
+          ]
+        },
+        "image_digest": "sha256:eea130833fde35b6f9ac4d960a6726af6a990167f3df2d42f2bcb7bb798a157c",
+        "input_contract_digest": "sha256:6a28ebba9b6272e48126f73eb12e18421e5f8d93b5f4585738a089ef625be996",
+        "output_contract_digest": "sha256:b6337b1661f8b81b1cabcf9ff2e45d91762d89bc3bc15ca1553321d714af612e",
+        "absolute_tolerance": 1e-10,
+        "relative_tolerance": 1e-08,
+        "capability_digest": "sha256:7160613ce9b4101335d358db993ed24de6d6fb2e181705d595ed58bad0971c49"
+      },
+      {
+        "capability_id": "p3-timeseries-reproduction-v1",
+        "version": "1.0.0",
+        "implementation_id": "p3-timeseries-reproduction-v1",
+        "image_role": "CHECKER",
+        "check_types": [
+          "DATA_VALIDITY",
+          "RESULT_REPRODUCTION"
+        ],
+        "matches": {
+          "result_kinds": [
+            "OPERATOR_RESULT"
+          ],
+          "operators": [
+            "timeseries-completeness@1.0.0",
+            "statistics-linear-trend@1.0.0"
+          ],
+          "schemas": [
+            "p3-result-v1"
+          ]
+        },
+        "image_digest": "sha256:eea130833fde35b6f9ac4d960a6726af6a990167f3df2d42f2bcb7bb798a157c",
+        "input_contract_digest": "sha256:5f347f989af5094e0a285d73be68d6e808b10c64e665148dce5adb30ae33545f",
+        "output_contract_digest": "sha256:9f63b3023863fe88c8aa8370b69d1a4bc5625d798bc6ec06c772598173b5e14d",
+        "absolute_tolerance": 1e-10,
+        "relative_tolerance": 1e-08,
+        "capability_digest": "sha256:01e875e500d6639707472135089c3318fc098bbcdff1d9ecb96e6e37afead665"
+      },
+      {
+        "capability_id": "spatial-vector-validity-v1",
+        "version": "1.0.0",
+        "implementation_id": "spatial-vector-validity-v1",
+        "image_role": "GDAL_CHECKER",
+        "check_types": [
+          "DATA_VALIDITY"
+        ],
+        "matches": {
+          "result_kinds": [
+            "SPATIAL_VECTOR"
+          ],
+          "schemas": [
+            "spatial-vector-v1"
+          ]
+        },
+        "image_digest": "sha256:bc2924e9fe19994520a63372e1d2958cd504a25def65050c5d8e42f3c3a9f788",
+        "input_contract_digest": "sha256:aa7e0ef325404d6c020f28fd4816a98f1bd28dc8b74eb250dc5c78a767423dbe",
+        "output_contract_digest": "sha256:9b1ec87863a0058362a581c5d96c12d37c2018de6f6ebec28d49b3dba899765a",
+        "absolute_tolerance": 1e-10,
+        "relative_tolerance": 1e-08,
+        "capability_digest": "sha256:757a7390bb8cb202b10ba250cb6386a201126e626d4ebe8442557e260fd4c61c"
+      },
+      {
+        "capability_id": "cartographic-product-integrity-v1",
+        "version": "1.0.0",
+        "implementation_id": "cartographic-product-integrity-v1",
+        "image_role": "CHECKER",
+        "check_types": [
+          "DATA_VALIDITY",
+          "RESULT_REPRODUCTION"
+        ],
+        "matches": {
+          "result_kinds": [
+            "CARTOGRAPHIC_PRODUCT"
+          ],
+          "schemas": [
+            "cartographic-png-v1"
+          ]
+        },
+        "image_digest": "sha256:eea130833fde35b6f9ac4d960a6726af6a990167f3df2d42f2bcb7bb798a157c",
+        "input_contract_digest": "sha256:b12929375734c2f390101311896d48c50be729be19e1628bdf594825a2c6edd6",
+        "output_contract_digest": "sha256:cf7eac332b63b5c28e54618c3e437943973bf5939d0ece319e94c0a6664d658f",
+        "absolute_tolerance": 1e-10,
+        "relative_tolerance": 1e-08,
+        "capability_digest": "sha256:22317b8171d6b8a743b5d1ff834c271bdd9dd7665128d3bdfa0ec0c8be7ac53b"
+      },
+      {
+        "capability_id": "p3-descriptive-claim-support-v1",
+        "version": "1.0.0",
+        "implementation_id": "p3-descriptive-claim-support-v1",
+        "image_role": "CHECKER",
+        "check_types": [
+          "CLAIM_SUPPORT"
+        ],
+        "matches": {
+          "result_kinds": [
+            "OPERATOR_RESULT"
+          ],
+          "operators": [
+            "timeseries-completeness@1.0.0",
+            "statistics-linear-trend@1.0.0"
+          ],
+          "schemas": [
+            "p3-result-v1"
+          ]
+        },
+        "image_digest": "sha256:eea130833fde35b6f9ac4d960a6726af6a990167f3df2d42f2bcb7bb798a157c",
+        "input_contract_digest": "sha256:53cd4a43281478a743336d5a8d4b5bce196a3fd2c97a501cb65fa1a4a975862b",
+        "output_contract_digest": "sha256:bf790cdcc1b1dbb90d2f919eaff485c2b62a484b8e08c9b22a6d0de76c760f30",
+        "absolute_tolerance": 1e-10,
+        "relative_tolerance": 1e-08,
+        "capability_digest": "sha256:64bb495189898247aced663d2cdd58bd15469b1fe4b5da17addbd455a3b3b7ea"
+      },
+      {
+        "capability_id": "tabular-profile-reproduction-v1",
+        "version": "1.0.0",
+        "implementation_id": "tabular-profile-reproduction-v1",
+        "image_role": "CHECKER",
+        "check_types": [
+          "DATA_VALIDITY",
+          "RESULT_REPRODUCTION"
+        ],
+        "matches": {
+          "result_kinds": [
+            "OPERATOR_RESULT"
+          ],
+          "operators": [
+            "table-profile@1.0.0"
+          ],
+          "schemas": [
+            "table-profile-report-v1"
+          ],
+          "output_ports": [
+            "report"
+          ]
+        },
+        "image_digest": "sha256:eea130833fde35b6f9ac4d960a6726af6a990167f3df2d42f2bcb7bb798a157c",
+        "input_contract_digest": "sha256:5e1ad089ccf04d23116510a583d633dcf77ebb019babb0ae3cd725fad5f97ca3",
+        "output_contract_digest": "sha256:fd03887d67884c128f23b587674cc2c095afd9641134e0cfc575afe2f12e366f",
+        "absolute_tolerance": 1e-10,
+        "relative_tolerance": 1e-08,
+        "capability_digest": "sha256:e9787e4a82c3bb2a3dce918bdc9b5c2834a507dfd22c8a591b7408f04b5b0ceb"
+      },
+      {
+        "capability_id": "tabular-validation-reproduction-v1",
+        "version": "1.0.0",
+        "implementation_id": "tabular-validation-reproduction-v1",
+        "image_role": "CHECKER",
+        "check_types": [
+          "DATA_VALIDITY",
+          "RESULT_REPRODUCTION"
+        ],
+        "matches": {
+          "result_kinds": [
+            "OPERATOR_RESULT"
+          ],
+          "operators": [
+            "table-validate@1.0.0"
+          ],
+          "schemas": [
+            "table-validation-report-v1"
+          ],
+          "output_ports": [
+            "report"
+          ]
+        },
+        "image_digest": "sha256:eea130833fde35b6f9ac4d960a6726af6a990167f3df2d42f2bcb7bb798a157c",
+        "input_contract_digest": "sha256:6536e9de440d7f9ead4d6e687ba63bdb385229c8b26bc492f50e80f712b32bfe",
+        "output_contract_digest": "sha256:4c8302f900d6b3ebc783e11ee325d42ecdc24b7bcabf966a4d6a5e405b5ec3dc",
+        "absolute_tolerance": 1e-10,
+        "relative_tolerance": 1e-08,
+        "capability_digest": "sha256:0446d76334dc1bfe72220bf739b83b9aaf58019dfbf441c3880bc48b5ee48cc8"
+      },
+      {
+        "capability_id": "tabular-project-reproduction-v1",
+        "version": "1.0.0",
+        "implementation_id": "tabular-project-reproduction-v1",
+        "image_role": "CHECKER",
+        "check_types": [
+          "DATA_VALIDITY",
+          "RESULT_REPRODUCTION"
+        ],
+        "matches": {
+          "result_kinds": [
+            "OPERATOR_RESULT"
+          ],
+          "operators": [
+            "table-project@1.0.0"
+          ],
+          "schemas": [
+            "table-project-report-v1"
+          ],
+          "output_ports": [
+            "report"
+          ]
+        },
+        "image_digest": "sha256:eea130833fde35b6f9ac4d960a6726af6a990167f3df2d42f2bcb7bb798a157c",
+        "input_contract_digest": "sha256:1cc665e72f5177a8570a7c5ba564d30adf8905ee2f4c8e8759bdf6b597b5ff5e",
+        "output_contract_digest": "sha256:931f07db36f19e00ce45be3c01c26e02597ca82409ef18f7c09ddd2d9cccda17",
+        "absolute_tolerance": 1e-10,
+        "relative_tolerance": 1e-08,
+        "capability_digest": "sha256:9c8d09f70687d18498f26fb0735a5c3f5e7a5c2d0f28403432b5340bf326f406"
+      },
+      {
+        "capability_id": "tabular-filter-reproduction-v1",
+        "version": "1.0.0",
+        "implementation_id": "tabular-filter-reproduction-v1",
+        "image_role": "CHECKER",
+        "check_types": [
+          "DATA_VALIDITY",
+          "RESULT_REPRODUCTION"
+        ],
+        "matches": {
+          "result_kinds": [
+            "OPERATOR_RESULT"
+          ],
+          "operators": [
+            "table-filter@1.0.0"
+          ],
+          "schemas": [
+            "table-filter-report-v1"
+          ],
+          "output_ports": [
+            "report"
+          ]
+        },
+        "image_digest": "sha256:eea130833fde35b6f9ac4d960a6726af6a990167f3df2d42f2bcb7bb798a157c",
+        "input_contract_digest": "sha256:45fed1d60ccc34faa9fe031ff56f781d8c193ed0075f6e7046663d709d888195",
+        "output_contract_digest": "sha256:5823018ba685572d2ccbecb060b2cd34d4e0994b75692fefb42e39877faea81d",
+        "absolute_tolerance": 1e-10,
+        "relative_tolerance": 1e-08,
+        "capability_digest": "sha256:b4d95dd070cd62267f6417a5c2dd4d43157d1ace2b04f9b8228a659d80afadfe"
+      }
+    ],
+    "catalog_digest": "sha256:cc8362f7465712c9c8a42357679a3a7a9093f21f452bf775e04ee9346c03daa0"
+  }
+}

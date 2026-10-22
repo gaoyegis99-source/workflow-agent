@@ -1,0 +1,86 @@
+{
+  "task": {
+    "contract": "TaskRef",
+    "value": {"task_id": "task-example", "spec_revision": 3}
+  },
+  "asset": {
+    "contract": "AssetRef",
+    "value": {
+      "project_id": "project-example",
+      "asset_id": "observations",
+      "version_id": "asset-version-1",
+      "version_manifest_digest": "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+    }
+  },
+  "local_operator": {
+    "contract": "ComputationTarget",
+    "value": {
+      "kind": "OPERATOR",
+      "operator_id": "linear-trend",
+      "version_id": "1.0.0",
+      "execution_binding": {"kind": "LOCAL", "implementation_id": "native-trend-1"}
+    }
+  },
+  "remote_operator": {
+    "contract": "ComputationTarget",
+    "value": {
+      "kind": "OPERATOR",
+      "operator_id": "linear-trend",
+      "version_id": "1.0.0",
+      "execution_binding": {
+        "kind": "REMOTE",
+        "service_binding_id": "binding-1",
+        "binding_revision": 2
+      }
+    }
+  },
+  "workflow": {
+    "contract": "ComputationTarget",
+    "value": {
+      "kind": "WORKFLOW",
+      "package_ref": {
+        "package_id": "groundwater-workflow",
+        "version_id": "package-v1",
+        "manifest_digest": "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+      }
+    }
+  },
+  "code_package": {
+    "contract": "ComputationTarget",
+    "value": {
+      "kind": "CODE_PACKAGE",
+      "package_ref": {
+        "package_id": "code-example",
+        "version_id": "package-v1",
+        "manifest_digest": "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+      }
+    }
+  },
+  "recorded_command": {
+    "contract": "CommandReceipt",
+    "value": {
+      "command_id": "command-example",
+      "status": "RECORDED",
+      "action_id": "action-example",
+      "task_ref": {"task_id": "task-example", "spec_revision": 3},
+      "result": null,
+      "status_url": "/api/v1/projects/project-example/commands/command-example",
+      "request_id": "request-example"
+    }
+  },
+  "error": {
+    "contract": "ErrorEnvelope",
+    "value": {
+      "code": "REVISION_CONFLICT",
+      "message": "Task requirements changed",
+      "request_id": "request-example",
+      "retry_mode": "AFTER_STATE_CHANGE",
+      "locations": [{"path": ["task_ref", "spec_revision"]}],
+      "related_refs": [{"task_id": "task-example", "spec_revision": 4}]
+    }
+  },
+  "health": {
+    "contract": "HealthResponse",
+    "value": {"status": "ok", "service": "platform-api", "phase": "P0", "contract_version": "1"}
+  }
+}

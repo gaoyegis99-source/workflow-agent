@@ -1,0 +1,149 @@
+{
+  "phase": "P5-R1-exact-output-identity",
+  "version": "0.7.0",
+  "status": "PASS",
+  "finished_at": "2026-10-14T08:13:32.205314+00:00",
+  "command": "bash scripts/check_p5.sh --phase all",
+  "focused_pytest": {
+    "tests": 65,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 24.913
+  },
+  "full_regression": {
+    "tests": 632,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 2153.121
+  },
+  "response_loss_http": {
+    "tests": 1,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 8.236
+  },
+  "p1_rules": {
+    "tests": 13,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "packages": {
+    "groundwater-checker-pack": "0.7.0",
+    "groundwater-data-service": "0.7.0",
+    "groundwater-execution-service": "0.7.0",
+    "groundwater-knowledge-service": "0.7.0",
+    "groundwater-operator-pack": "0.7.0",
+    "groundwater-platform-api": "0.7.0",
+    "groundwater-platform-contracts": "0.7.0",
+    "groundwater-platform-core": "0.7.0",
+    "groundwater-platform-infrastructure": "0.7.0"
+  },
+  "release_artifacts": {
+    "groundwater_checker_pack-0.7.0-py3-none-any.whl": {
+      "bytes": 8166,
+      "sha256": "sha256:3a1a792cb81c131b6fadc592108c5f75f460f41787aeda1eb2651e60d5d2cced"
+    },
+    "groundwater_data_service-0.7.0-py3-none-any.whl": {
+      "bytes": 27426,
+      "sha256": "sha256:a92ba9040f0d9024cef44770a7dc6af3240588b115ee314baae92e1ce60f2c18"
+    },
+    "groundwater_execution_service-0.7.0-py3-none-any.whl": {
+      "bytes": 52778,
+      "sha256": "sha256:4b49f82a4208e43b3b7267cdd7e10c6941a6076441a00065f1b2a07e7cede9b3"
+    },
+    "groundwater_knowledge_service-0.7.0-py3-none-any.whl": {
+      "bytes": 18527,
+      "sha256": "sha256:cab8ae401eccfe824a00e44d4ad8d700f191887bbdb4bec6b954e30309169359"
+    },
+    "groundwater_operator_pack-0.7.0-py3-none-any.whl": {
+      "bytes": 13293,
+      "sha256": "sha256:7fa1f783658d6e86ad79d915660a0815a41d49b0e03748c9d30887e8f9b0e647"
+    },
+    "groundwater_platform_api-0.7.0-py3-none-any.whl": {
+      "bytes": 29585,
+      "sha256": "sha256:f6d1bc862e1f12b9a98645a1f576040f55bc37000d1c48111fe50b26e2630d23"
+    },
+    "groundwater_platform_contracts-0.7.0-py3-none-any.whl": {
+      "bytes": 19081,
+      "sha256": "sha256:50e470aabfc4de8b0bb60a629b9df77a248e05a800c46ef849ae68caa5f40fc1"
+    },
+    "groundwater_platform_core-0.7.0-py3-none-any.whl": {
+      "bytes": 61359,
+      "sha256": "sha256:e6316d4cce3ee47b4f2567b51b16a95fb2238d2f3314d30981daf193cccd1c17"
+    },
+    "groundwater_platform_infrastructure-0.7.0-py3-none-any.whl": {
+      "bytes": 33396,
+      "sha256": "sha256:d5db582e0ee5a7c634fc3b1132d837e9ade336f0671b087df8d31b83f6029735"
+    },
+    "groundwater_checker_pack-0.7.0.tar.gz": {
+      "bytes": 5953,
+      "sha256": "sha256:10bf688ee0c3aadf95749d850c5f3ddfea14e0f0c092d863dac1a79b6b14f057"
+    },
+    "groundwater_data_service-0.7.0.tar.gz": {
+      "bytes": 17304,
+      "sha256": "sha256:e6cf1ece5e0d7e1ee74b1b3fcb424b93925bb2f0428e74bb8053942d68646b27"
+    },
+    "groundwater_execution_service-0.7.0.tar.gz": {
+      "bytes": 39612,
+      "sha256": "sha256:28391a16499b1920dbda612bada6da004c79a12b9a142a9cac8f3cf0e8f92aea"
+    },
+    "groundwater_knowledge_service-0.7.0.tar.gz": {
+      "bytes": 12422,
+      "sha256": "sha256:baa0e0db463de27b1d1da721a73339a3527a888bb54b2e89f5ba5d1b1aa57fdb"
+    },
+    "groundwater_operator_pack-0.7.0.tar.gz": {
+      "bytes": 11111,
+      "sha256": "sha256:9f621b6d3800b9d0397fa7940ce3d0540c9d47f58208fbf3c92ed1f13361ac4f"
+    },
+    "groundwater_platform_api-0.7.0.tar.gz": {
+      "bytes": 22649,
+      "sha256": "sha256:9f20e42ef159c6c1d7e0ca966237d919f0029082b0d4102f642739ddf69df736"
+    },
+    "groundwater_platform_contracts-0.7.0.tar.gz": {
+      "bytes": 13273,
+      "sha256": "sha256:7d17651b8b82f58ef26296c18e790ef3cef42e5e9cdcb94b86d7cbe9d5b91905"
+    },
+    "groundwater_platform_core-0.7.0.tar.gz": {
+      "bytes": 47817,
+      "sha256": "sha256:5a3863139ad0db43b2b2361c23c086dfccbbaaaebee01cfcbddb3b84150699b7"
+    },
+    "groundwater_platform_infrastructure-0.7.0.tar.gz": {
+      "bytes": 22614,
+      "sha256": "sha256:fcb3d5c1f494916dbec5952fd7e26650e18edc53a02df98853233f5946ed576e"
+    }
+  },
+  "source": {
+    "digest": "sha256:70aa95e5af31aa6ee246e856de7a2ae1e493e4a62f455c945ef4758df70a40bb",
+    "file_count": 240,
+    "manifest": "docs/verification/p5-r1-source-manifest.json"
+  },
+  "checker_image": {
+    "tag": "groundwater-v7-checker:0.7.0",
+    "id": "sha256:f83efb7d271cba802c486023795b1cf541b8533186bc4c72b70161384c3758e6",
+    "source_digest_label": "sha256:70aa95e5af31aa6ee246e856de7a2ae1e493e4a62f455c945ef4758df70a40bb"
+  },
+  "schemas": {
+    "platform": "0009_output_identity",
+    "data": "0004_document_assets",
+    "execution": "0006_remote_reliability",
+    "knowledge": "0002_lifecycle_outbox"
+  },
+  "python": "3.12.8",
+  "identity_cases": [
+    "test_0008_upgrade_marks_existing_deliverables_legacy_and_is_repeatable",
+    "test_direct_output_is_canonicalized_and_saved_as_exact",
+    "test_new_verified_task_rejects_legacy_output_identity",
+    "test_schema_v2_freezes_role_binding_and_explicit_registration",
+    "test_verified_plan_rejects_missing_or_wrong_explicit_registration[None]",
+    "test_verified_plan_rejects_missing_or_wrong_explicit_registration[wrong-registration]",
+    "test_workflow_output_preserves_call_and_scatter_identity"
+  ],
+  "limits": [
+    "P5-R2 checker capability composition is not implemented in this release.",
+    "Legacy VERIFIED task specifications remain readable but cannot start new acceptance."
+  ]
+}

@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://groundwater-v7.local/schemas/operator-catalog-v1.json",
+  "title": "Groundwater V7 Operator Catalog",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "operators", "catalog_digest"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "catalog_digest": {"$ref": "#/$defs/digest"},
+    "operators": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/operator"}
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "implementation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "implementation_id", "binding_kind", "runtime", "implementation_digest",
+        "image_digest", "protocol", "resource_profile"
+      ],
+      "properties": {
+        "implementation_id": {"$ref": "#/$defs/identifier"},
+        "binding_kind": {"const": "LOCAL"},
+        "runtime": {"enum": ["NATIVE", "QGIS"]},
+        "implementation_digest": {"$ref": "#/$defs/digest"},
+        "image_digest": {"$ref": "#/$defs/digest"},
+        "protocol": {
+          "enum": ["P3_TABLE", "SPATIAL_VECTOR", "SPATIAL_SUMMARY", "CARTOGRAPHIC_PNG", "TABULAR_V1"]
+        },
+        "resource_profile": {
+          "enum": ["native-small-v1", "spatial-native-v1", "qgis-medium-v1", "table-small-v1"]
+        }
+      }
+    },
+    "operator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "operator_id", "version_id", "operator_digest", "ownership", "trust_level",
+        "lifecycle", "inputs", "parameters", "outputs", "effects", "supports_workflow",
+        "implementations", "legacy"
+      ],
+      "properties": {
+        "operator_id": {"$ref": "#/$defs/identifier"},
+        "version_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$"},
+        "operator_digest": {"$ref": "#/$defs/digest"},
+        "ownership": {"enum": ["PLATFORM", "CURATED_PACKAGE", "DOMAIN_PACKAGE"]},
+        "trust_level": {"enum": ["BUILTIN", "VERIFIED"]},
+        "lifecycle": {"enum": ["ACTIVE", "DISABLED", "REVOKED"]},
+        "inputs": {"type": "object", "minProperties": 1},
+        "parameters": {"type": "object"},
+        "outputs": {"type": "object", "minProperties": 1},
+        "effects": {
+          "const": ["CONSUMES_EXECUTION_BUDGET", "CREATES_ASSETS"]
+        },
+        "supports_workflow": {"type": "boolean"},
+        "implementations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/implementation"}
+        },
+        "legacy": {"type": ["object", "null"]}
+      }
+    }
+  }
+}

@@ -1,0 +1,71 @@
+{
+  "name": "table-project-profile-v1",
+  "entrypoint": "main",
+  "profile": "v7-cwl-p4-v1",
+  "documents": {
+    "main": {
+      "cwlVersion": "v1.2",
+      "class": "Workflow",
+      "inputs": {
+        "table": "File",
+        "project_parameters": {
+          "type": "record",
+          "name": "TableProjectParameters",
+          "fields": [{
+            "name": "fields",
+            "type": {
+              "type": "array",
+              "items": {
+                "type": "record",
+                "name": "TableProjectField",
+                "fields": [
+                  {"name": "source_field_id", "type": "string"},
+                  {"name": "display_name", "type": ["null", "string"]}
+                ]
+              }
+            }
+          }]
+        },
+        "profile_parameters": {
+          "type": "record",
+          "name": "TableProfileParameters",
+          "fields": [{"name": "fields", "type": {"type": "array", "items": "string"}}]
+        }
+      },
+      "outputs": {
+        "project_report": {"type": "File", "outputSource": "project/report"},
+        "project_table": {"type": "File", "outputSource": "project/table"},
+        "project_method": {"type": "File", "outputSource": "project/method"},
+        "profile_report": {"type": "File", "outputSource": "profile/report"},
+        "profile_table": {"type": "File", "outputSource": "profile/table"},
+        "profile_method": {"type": "File", "outputSource": "profile/method"}
+      },
+      "steps": {
+        "project": {
+          "run": "project_operator",
+          "in": {"table": "table", "parameters": "project_parameters"},
+          "out": ["report", "table", "method"]
+        },
+        "profile": {
+          "run": "profile_operator",
+          "in": {"table": "project/table", "parameters": "profile_parameters"},
+          "out": ["report", "table", "method"]
+        }
+      }
+    }
+  },
+  "implementations": {
+    "project_operator": {
+      "kind": "OPERATOR",
+      "operator_id": "table-project",
+      "version_id": "1.0.0",
+      "execution_binding": {"kind": "LOCAL", "implementation_id": "table-project-native-v1"}
+    },
+    "profile_operator": {
+      "kind": "OPERATOR",
+      "operator_id": "table-profile",
+      "version_id": "1.0.0",
+      "execution_binding": {"kind": "LOCAL", "implementation_id": "table-profile-native-v1"}
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "phase": "P6.5",
+  "version": "0.8.5",
+  "platform_schema": "0015_agent_wakeup_recovery",
+  "capabilities": [
+    "persistent_wait_dependencies",
+    "source_event_watermarks",
+    "lost_event_reconciliation",
+    "runtime_epoch_recovery_evidence",
+    "intermediate_state_model_suppression"
+  ],
+  "tests": {
+    "stage": "/home/mtd/liweigis/workflow/groundwater-platform_v7/.p6-runtime/verification/p65-tests.xml",
+    "http": "/home/mtd/liweigis/workflow/groundwater-platform_v7/.p6-runtime/verification/p65-api-tests.xml"
+  },
+  "excluded": [
+    "P4 performance matrices",
+    "P6.6 scientific planning"
+  ]
+}

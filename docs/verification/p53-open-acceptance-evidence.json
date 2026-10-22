@@ -1,0 +1,83 @@
+{
+  "phase": "P5.3-open-acceptance",
+  "version": "0.6.2",
+  "status": "PASS",
+  "finished_at": "2026-10-13T18:46:50.282272+00:00",
+  "focused_pytest": {
+    "tests": 12,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "full_regression": {
+    "mode": "baseline-plus-focused-additions",
+    "baseline_full_tests": 592,
+    "additional_focused_tests": 3,
+    "current_suite_tests": 595,
+    "tests": 592,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 1909.3
+  },
+  "p1_rules": {
+    "tests": 13,
+    "failures": 0
+  },
+  "distribution": [
+    "PASS: built 9 wheels and source distributions",
+    "PASS: core wheel runs with only the Python standard library",
+    "PASS: locked runtime dependencies and wheels installed outside the repository",
+    "PASS: installed API liveness, unconfigured readiness, OpenAPI and shutdown",
+    "PASS: installed migrations, local token CLI, real task/control HTTP and worker",
+    "PASS: installed Knowledge migration, schema check, readiness and shutdown",
+    "PASS: installed Data/Execution migrations, independent workers, containers and P3 completion",
+    "PASS: installed frozen CWL, Toil nodes, atomic publication and independent check",
+    "PASS: installed GeoPackage inspection, QGIS buffer, Native summary and publication",
+    "PASS: installed trusted QGIS map, PNG delivery and atomic three-node publication",
+    "PASS: installed 0001 data upgrade, unchanged ledger, known/unknown HTTP commands"
+  ],
+  "checker_container": "PASS: fixed 0.6.2 checker container produced the deterministic open-science report",
+  "packages": {
+    "groundwater-checker-pack": "0.6.2",
+    "groundwater-data-service": "0.6.2",
+    "groundwater-execution-service": "0.6.2",
+    "groundwater-knowledge-service": "0.6.2",
+    "groundwater-operator-pack": "0.6.2",
+    "groundwater-platform-api": "0.6.2",
+    "groundwater-platform-contracts": "0.6.2",
+    "groundwater-platform-core": "0.6.2",
+    "groundwater-platform-infrastructure": "0.6.2"
+  },
+  "schemas": {
+    "platform": "0008_open_acceptance",
+    "data": "0004_document_assets",
+    "execution": "0006_remote_reliability",
+    "knowledge": "0002_lifecycle_outbox"
+  },
+  "python": "3.12.8",
+  "source_sha256": {
+    "packages/contracts/src/platform_contracts/science.py": "sha256:1d327b844ebbe8924cead38a3ab37614329496155cba4e9f4efe9a6324b83e61",
+    "packages/platform-core/src/platform_core/application/open_acceptance.py": "sha256:a2399e0b8c9187c82364db97d2b571fc20ba50a2053a71b6efe11ff196317275",
+    "packages/platform-core/src/platform_core/application/acceptance.py": "sha256:ea504e2c439961640e0ec512bb1281bcc74c2381708be1ed801dd0b58bca663e",
+    "packages/platform-core/src/platform_core/application/lifecycle.py": "sha256:95be52cc4cfbe0aeee612b148cfb5c364f6ee0463dacf0b2ed1adfdbe9d21a10",
+    "packages/platform-infrastructure/src/platform_infrastructure/migrations/versions/0008_open_acceptance.py": "sha256:357d80766a58ca86c91ebe2bb3140045539a5d672a639c242caf6b6294e4f050",
+    "apps/knowledge-service/src/platform_knowledge/migrations/versions/0002_lifecycle_outbox.py": "sha256:81736feb31c7a6bf3b4f0f67900c9edc93c921e7dd4d77bf801a97826569e060",
+    "packages/checker-pack/src/platform_checkers/open_science.py": "sha256:393f548fdb1189c984a77f8b86f2ad492f7df701d1daa1da8f6cc5f02f546680",
+    "tests/p53/test_contracts_and_checker.py": "sha256:7a432dceb2a1b651763135cc0d054d61daaa8174ea25fc533256e1001750f019",
+    "tests/p53/test_migrations_and_lifecycle.py": "sha256:6c0d14b6296e168ac9b319105518b06d6f502fd0cbda9668b5d831208a89d323"
+  },
+  "scope": {
+    "profiles": [
+      "p3-timeseries-v1",
+      "open-science-v1"
+    ],
+    "delivery_classes": [
+      "EXPLORATORY",
+      "VERIFIED"
+    ],
+    "human_review": "OWNER, predeclared HUMAN_REVIEW items only",
+    "validity": "withdrawal marks dependent completion STALE without rewriting history",
+    "p6": "not implemented"
+  }
+}

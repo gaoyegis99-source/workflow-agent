@@ -1,0 +1,54 @@
+[project]
+name = "groundwater-platform-v7"
+version = "0.15.5"
+description = "V7 P8.2 unified enterprise workspace and recoverable release engineering"
+requires-python = ">=3.12,<3.13"
+dependencies = ["groundwater-platform-api==0.15.5", "groundwater-data-service==0.15.5", "groundwater-execution-service==0.15.5", "groundwater-knowledge-service==0.15.5", "groundwater-agent-runtime==0.15.5", "groundwater-operator-pack==0.15.5", "groundwater-checker-pack==0.15.5", "groundwater-tabular-operator-pack==0.15.5"]
+
+[dependency-groups]
+dev = [
+    "pytest>=8,<9",
+    "httpx>=0.28,<0.29",
+    "jsonschema>=4.23,<5",
+    "ruff>=0.12,<1",
+    "hatchling==1.27.0",
+    "playwright>=1.50,<2",
+    "httpx2>=2.13.1",
+]
+
+[tool.uv]
+package = false
+required-version = ">=0.8.14"
+
+[tool.uv.workspace]
+members = ["apps/platform-api", "apps/agent-worker", "packages/platform-core", "packages/contracts", "packages/platform-infrastructure", "apps/data-service", "apps/execution-service", "apps/knowledge-service", "packages/operator-pack", "packages/checker-pack", "packages/tabular-operator-pack"]
+
+[tool.uv.sources]
+groundwater-platform-api = { workspace = true }
+groundwater-platform-core = { workspace = true }
+groundwater-platform-contracts = { workspace = true }
+groundwater-platform-infrastructure = { workspace = true }
+
+groundwater-data-service = { workspace = true }
+groundwater-execution-service = { workspace = true }
+groundwater-knowledge-service = { workspace = true }
+groundwater-operator-pack = { workspace = true }
+groundwater-checker-pack = { workspace = true }
+groundwater-agent-runtime = { workspace = true }
+groundwater-tabular-operator-pack = { workspace = true }
+
+[[tool.uv.index]]
+name = "pypi"
+url = "https://pypi.org/simple"
+default = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --import-mode=importlib"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]

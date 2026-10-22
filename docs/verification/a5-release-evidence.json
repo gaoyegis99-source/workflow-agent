@@ -1,0 +1,103 @@
+{
+  "schema_version": 1,
+  "phase": "Capability Studio A5",
+  "version": "0.14.4",
+  "platform_schema": "0022_operator_proposals",
+  "database_migrations": false,
+  "operator_count_before": 11,
+  "operator_count_after": 11,
+  "public_routes_added": [
+    "POST /api/v1/projects/{project_id}/authoring/imports"
+  ],
+  "supported_authoring": {
+    "package_local_subworkflows": true,
+    "boolean_input_conditions": true,
+    "scatter_methods": [
+      "dotproduct",
+      "flat_crossproduct",
+      "nested_crossproduct"
+    ],
+    "safe_json_yaml_import": true,
+    "lossless_source_canvas_roundtrip": true,
+    "trial_coverage_facts": true,
+    "arbitrary_expressions": false,
+    "external_imports": false,
+    "user_commands_or_images": false
+  },
+  "tests": {
+    "a5_targeted_collected": 29,
+    "a5_and_api_targeted": {
+      "passed": 40,
+      "failed": 0,
+      "skipped": 0
+    },
+    "authoring_python": {
+      "passed": 98,
+      "failed": 0,
+      "skipped": 0,
+      "seconds": 152.73
+    },
+    "studio": {
+      "test_files": 2,
+      "passed": 6,
+      "failed": 0
+    },
+    "p7_catalog": {
+      "passed": 24,
+      "failed": 0,
+      "skipped": 0
+    },
+    "p1_rules": {
+      "passed": 13,
+      "failed": 0
+    },
+    "architecture_after_fix": {
+      "passed": 33,
+      "failed": 0,
+      "skipped": 0
+    },
+    "compatibility": {
+      "passed": 919,
+      "failed": 0,
+      "skipped": 0,
+      "seconds": 2346.50
+    },
+    "distribution": {
+      "passed": true,
+      "wheel_count": 11,
+      "sdist_count": 11,
+      "postgresql": true,
+      "http": true,
+      "docker": true,
+      "toil": true,
+      "qgis": true
+    },
+    "ruff_check": "PASS",
+    "ruff_format_files": 680
+  },
+  "release": {
+    "lock_schema": 2,
+    "release_digest": "sha256:97b3446d5e8faeb457710b42349e9ad03971c081cee9092cc9af0afe3e722c4a",
+    "source_digest": "sha256:9fa01a8eb59b9560c6dee2bb24462c890c660aa60c519298a3eb3e04934d2602",
+    "source_file_count": 391,
+    "wheel_count": 11,
+    "catalog_count": 3,
+    "image_count": 7,
+    "web_asset_count": 3,
+    "operator_catalog_digest": "sha256:51a6f5a4d32deac43fed343aa679c8f8c5be2f5b1707e06b0838997b27036e50",
+    "checker_catalog_digest": "sha256:65573abeeb0906e1cad9218efe9ddf4a9c7ffc2517eb054271a3383be5bc0e78",
+    "tool_catalog_digest": "sha256:e84e26da95838af65a766286cce9626ebe39499a9fefa870e561936639a0388e"
+  },
+  "security_invariants": {
+    "import_executes_source": false,
+    "import_fetches_external_content": false,
+    "duplicate_yaml_or_json_keys_allowed": false,
+    "yaml_aliases_or_custom_tags_allowed": false,
+    "client_can_submit_command_or_image": false,
+    "client_can_write_trial_verdict": false,
+    "all_skipped_trial_can_alone_support_release": false,
+    "sample_pass_implies_scientific_verification": false,
+    "trial_bypasses_task_grant_or_budget": false
+  },
+  "result": "PASS"
+}

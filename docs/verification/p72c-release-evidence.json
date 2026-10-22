@@ -1,0 +1,158 @@
+{
+  "schema_version": 1,
+  "phase": "P7.2c",
+  "version": "0.12.2",
+  "status": "PASSED",
+  "release_digest": "sha256:47e57a0565f0dce9e9389d2eab54d479d1cb5dd9a58a5fb287de7375da3d1fbe",
+  "source_tree": {
+    "digest": "sha256:3762cc5254b1f1d9a2ed54fe587a1b33c4338d1aadabca96bbeb98af5c9425ce",
+    "file_count": 323
+  },
+  "image_source": {
+    "digest": "sha256:51b84f9753d7b3d81f933e25ca36a3f70cd9256cde57b0197e0796503e9e6712",
+    "file_count": 360
+  },
+  "catalogs": {
+    "operator": "sha256:395364eeb8a6b8ff42f066d1ed893efc16ac9b468821bd175721db588f8b106a",
+    "operator_count": 10,
+    "checker": "sha256:3b16a17a0b4910e311b8b3fb4ee9c31b6b3d1ccfc12ff55a48df50224eced1e9",
+    "checker_count": 10,
+    "tool": "sha256:e84e26da95838af65a766286cce9626ebe39499a9fefa870e561936639a0388e",
+    "tool_catalog_id": "p7-science-tools-v2"
+  },
+  "operator": {
+    "operator_id": "table-cast",
+    "version": "1.0.0",
+    "operator_digest": "sha256:dd3807f231052eab608fdfd53a1b458a2f16e2b03ec536dcaf56a78f223b9548",
+    "ownership": "CURATED_PACKAGE",
+    "trust_level": "VERIFIED",
+    "implementation_id": "table-cast-native-v1",
+    "implementation_digest": "sha256:f17e31242051235e1150561445415f95ef266e4d434c70f30f3e68ffce67f1a2",
+    "image_digest": "sha256:8db365dde7f1ec49010e2024e8036aef9ce7e084aeb30f1cdc2a4e9be4032ebc",
+    "semantics": "strict-scalar-cast-v1",
+    "max_casts": 128,
+    "source_types": [
+      "string",
+      "int64",
+      "double",
+      "bool"
+    ],
+    "target_types": [
+      "string",
+      "int64",
+      "double",
+      "bool"
+    ],
+    "failure_policies": [
+      "ERROR",
+      "SET_NULL"
+    ]
+  },
+  "capability": {
+    "capability_id": "tabular-cast-reproduction-v1",
+    "version": "1.0.0",
+    "capability_digest": "sha256:54de61a21a3618daca295090e5d7b10486601b73729ac97c618c98287b8cae84",
+    "image_digest": "sha256:3ca32b1a747f7e68aa3a8ff13b528b496ebc6191a7ddbde53379408ffb3fb24f",
+    "check_types": [
+      "DATA_VALIDITY",
+      "RESULT_REPRODUCTION"
+    ],
+    "matches": {
+      "result_kinds": [
+        "OPERATOR_RESULT"
+      ],
+      "operators": [
+        "table-cast@1.0.0"
+      ],
+      "schemas": [
+        "table-cast-report-v1"
+      ],
+      "output_ports": [
+        "report"
+      ]
+    }
+  },
+  "images": {
+    "checker": "sha256:3ca32b1a747f7e68aa3a8ff13b528b496ebc6191a7ddbde53379408ffb3fb24f",
+    "cwl": "sha256:652754092f5cf48486a9c8bb42f113d1d95d25141ef7d846be44ff8a18504a09",
+    "gdal_checker": "sha256:b65075fc59fd2ddc8aa38111a6b62929f4c7ce9bdbd118d33489a7436cad3da8",
+    "operator": "sha256:8b2e83e44b6673ab21ec8f912e373db74204cea853e8b712195d7f8979f42ed1",
+    "qgis": "sha256:5a1a2c34b6f1043eb4705218db1c23be7a6537e2c474e29912d1e573103bf448",
+    "spatial_native": "sha256:0cd417177a3cc0d5e078d5a8257368a9d98186d5f7c00581d85b09f850912546",
+    "tabular": "sha256:8db365dde7f1ec49010e2024e8036aef9ce7e084aeb30f1cdc2a4e9be4032ebc"
+  },
+  "tests": {
+    "p72c_official": {
+      "passed": 13,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 68.8
+    },
+    "p7_combined": {
+      "passed": 106,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 341.01
+    },
+    "compatibility_final": {
+      "passed": 902,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 2335.39
+    },
+    "architecture_and_cast": {
+      "passed": 43,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 1.43
+    },
+    "p7_catalog": {
+      "passed": 24,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 1.19
+    },
+    "p1_rules": {
+      "passed": 13,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.016
+    },
+    "ruff": "PASS",
+    "format": "PASS",
+    "non_overlapping_minimum": 915,
+    "overlap_note": "P7.2c, combined P7, architecture and catalog pytest results overlap the final compatibility suite and are not summed."
+  },
+  "distribution": {
+    "wheel_count": 11,
+    "exact_wheel_set": "PASS",
+    "outside_repository_install": "PASS",
+    "core_standard_library_only": "PASS",
+    "migrations_and_http": "PASS",
+    "p3_container_completion": "PASS",
+    "toil_atomic_workflow": "PASS",
+    "qgis_native_spatial": "PASS",
+    "trusted_cartography": "PASS"
+  },
+  "schemas": {
+    "platform": "0018_agent_acceptance_identity",
+    "data": "0004_document_assets",
+    "execution": "0006_remote_reliability",
+    "knowledge": "0002_lifecycle_outbox",
+    "migration_added": false
+  },
+  "scope": {
+    "new_compute_operators": 1,
+    "new_checker_capabilities": 1,
+    "new_public_routes": 0,
+    "new_page_features": 0,
+    "claim_support_added": false,
+    "join_or_aggregate_added": false
+  }
+}

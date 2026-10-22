@@ -1,0 +1,76 @@
+{
+  "phase": "P4.3.2-mixed-local-remote-workflow",
+  "version": "0.5.2",
+  "recorded_at": "2026-10-13T11:13:22.502391+00:00",
+  "result": "PASS",
+  "scope": {
+    "workflow": "local qgis-buffer -> remote spatial-vector-summary -> atomic publication",
+    "remote_host": "192.168.167.89:19080",
+    "transport": "HTTPS with pinned CA and file credential",
+    "remote_operator": "spatial-vector-summary@1.0.0"
+  },
+  "tests": {
+    "cross_host_mixed_and_binding": {
+      "passed": 9,
+      "failed": 0,
+      "skipped": 0,
+      "seconds": 35.81
+    },
+    "cross_host_direct_compatibility": {
+      "passed": 12,
+      "failed": 0,
+      "skipped": 0,
+      "seconds": 12.6
+    },
+    "complete_regression": {
+      "passed": 541,
+      "failed": 0,
+      "skipped": 0,
+      "seconds": 1091.19
+    },
+    "p1_rules": {
+      "passed": 13,
+      "failed": 0,
+      "skipped": 0
+    },
+    "distribution": {
+      "wheels_and_sdists": 8,
+      "result": "PASS"
+    }
+  },
+  "images": {
+    "remote_native": "sha256:822586faa89d3a3799f2b93ac3d3c4cdeb47482717637bd8d04cfbaa5fb72e1f",
+    "local_native": "sha256:822586faa89d3a3799f2b93ac3d3c4cdeb47482717637bd8d04cfbaa5fb72e1f",
+    "qgis": "sha256:6c6b70288fb3c07de4d9d1af0cfe0963a1d178ab150234bf8cf9659d8b27111f",
+    "cwl": "sha256:652754092f5cf48486a9c8bb42f113d1d95d25141ef7d846be44ff8a18504a09"
+  },
+  "schemas": {
+    "platform": "0006_service_binding_scope",
+    "data": "0003_spatial_import_runtime",
+    "execution": "0006_remote_reliability"
+  },
+  "packages": {
+    "groundwater-data-service": "0.5.2",
+    "groundwater-execution-service": "0.5.2",
+    "groundwater-platform-api": "0.5.2",
+    "groundwater-checker-pack": "0.5.2",
+    "groundwater-platform-contracts": "0.5.2",
+    "groundwater-operator-pack": "0.5.2",
+    "groundwater-platform-core": "0.5.2",
+    "groundwater-platform-infrastructure": "0.5.2"
+  },
+  "invariants": {
+    "remote_binding_frozen_by_call_path": true,
+    "permit_rechecks_binding": true,
+    "node_and_remote_ledger_atomic": true,
+    "derived_input_digest_verified": true,
+    "node_action_stable": true,
+    "atomic_group_publication": true,
+    "internal_binding_hidden": true,
+    "remote_active_containers_after_acceptance": 0
+  },
+  "commands": [
+    "bash scripts/check_p432.sh --profile standard",
+    "bash scripts/check_p4.sh --phase cartography"
+  ]
+}

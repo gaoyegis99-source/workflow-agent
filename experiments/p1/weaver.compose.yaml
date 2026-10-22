@@ -1,0 +1,58 @@
+# Experiment-only services. No published database port or reused production volume.
+services:
+  outputs:
+    image: python@sha256:2199a62885a12290dc9c5be3ca0681d367576ab7bf037da120e564723292a2f0
+    labels: {v7.phase: P1}
+    command: [python, -m, http.server, "8000", --directory, /files]
+    user: "65534:65534"
+    read_only: true
+    mem_limit: 128m
+    cpus: 0.5
+    ports: ["127.0.0.1::8000"]
+    volumes:
+      - "${V7_P1_ROOT}/.p1-runtime/weaver/outputs:/files/wpsoutputs:ro"
+    networks:
+      probe:
+        aliases: [outputs.p1.test]
+  mongodb:
+    image: mongo@sha256:c630c59342c1493d50345136df2af14a76b9e827dd5316bfabee07a0880a5f3a
+    labels: {v7.phase: P1}
+    mem_limit: 512m
+    cpus: 1
+    volumes: [db:/data/db]
+    networks: [probe]
+  manager:
+    image: pavics/weaver@sha256:ff7b845c04dfeeeaad7e9d501074f8b18ae45b2b57c0a63ebeab313cdc290f88
+    labels: {v7.phase: P1}
+    command: [pserve, "${V7_P1_ROOT}/.p1-runtime/weaver/weaver.ini"]
+    mem_limit: 768m
+    cpus: 1
+    ports: ["127.0.0.1::4001"]
+    volumes:
+      - "${V7_P1_ROOT}/experiments/p1:${V7_P1_ROOT}/experiments/p1:ro"
+      - "${V7_P1_ROOT}/.p1-runtime/weaver:${V7_P1_ROOT}/.p1-runtime/weaver"
+      - "${V7_P1_ROOT}/.p1-runtime/weaver/outputs:/v7-p1-outputs"
+    networks:
+      probe:
+        aliases: [weaver.p1.test]
+    depends_on: [mongodb]
+  worker:
+    image: pavics/weaver@sha256:ff7b845c04dfeeeaad7e9d501074f8b18ae45b2b57c0a63ebeab313cdc290f88
+    labels: {v7.phase: P1}
+    command: [celery, -A, pyramid_celery.celery_app, worker, -E, --concurrency=4, --ini, "${V7_P1_ROOT}/.p1-runtime/weaver/weaver.ini"]
+    mem_limit: 1g
+    cpus: 2
+    environment:
+      TMPDIR: "${V7_P1_ROOT}/.p1-runtime/weaver/tmp"
+    volumes:
+      - "${V7_P1_ROOT}/experiments/p1:${V7_P1_ROOT}/experiments/p1:ro"
+      - "${V7_P1_ROOT}/.p1-runtime/weaver:${V7_P1_ROOT}/.p1-runtime/weaver"
+      - "${V7_P1_ROOT}/.p1-runtime/weaver/outputs:/v7-p1-outputs"
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /usr/bin/docker:/usr/local/bin/docker:ro
+    networks: [probe]
+    depends_on: [mongodb]
+volumes:
+  db:
+networks:
+  probe: {}

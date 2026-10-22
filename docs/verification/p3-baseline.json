@@ -1,0 +1,170 @@
+{
+  "source": "P2 0.1.1 before P3 implementation",
+  "third_party": {
+    "alembic": {
+      "version": "1.20.0",
+      "lock_sha256": "5abc68e8451aa8c88ad3a64c1fc3e3a7c5f8b41a33fd0e11533c9dbb399e7a67"
+    },
+    "annotated-doc": {
+      "version": "0.0.5",
+      "lock_sha256": "8919cfdcb71e8655ede785ab3d009c4627694a1e223e499a52e1a52b96c187af"
+    },
+    "annotated-types": {
+      "version": "0.8.0",
+      "lock_sha256": "89103d703e592aaec736b83ac9cfc65d992b4e08910a7cbc20c439ccb6033065"
+    },
+    "anyio": {
+      "version": "4.15.1",
+      "lock_sha256": "6a8db7f5481e854ed4407e671344e90408423a504138736ba3f1ae27adc42017"
+    },
+    "attrs": {
+      "version": "26.1.0",
+      "lock_sha256": "433768967f76d7f7c4fd3a6625a476f385c6ed03e0111e706418d5c020dbddfb"
+    },
+    "certifi": {
+      "version": "2026.7.22",
+      "lock_sha256": "a7a4f6e66c99d517ddfebb25537e55521ef7df05aec9194f803fddf7ad460322"
+    },
+    "click": {
+      "version": "8.5.0",
+      "lock_sha256": "753fea0d6a5f9dc47a871d35034cb99ac85bbdb17a7806d198176df9a994e5bb"
+    },
+    "colorama": {
+      "version": "0.4.6",
+      "lock_sha256": "e021d532ecc9e989f8bb5d1f12f5a15b87e84d5166110d539de72cc9bf867afc"
+    },
+    "fastapi": {
+      "version": "0.143.0",
+      "lock_sha256": "e7d4bc58a7a07ab504731b8a5863593ec759bd024a1337597adfc19390a05483"
+    },
+    "greenlet": {
+      "version": "3.5.6",
+      "lock_sha256": "734124f8a916a248c7a44b2dc64e482127b185ad4848d8f0671acc2ba39b94b5"
+    },
+    "h11": {
+      "version": "0.16.0",
+      "lock_sha256": "baf650d9d5d120b8de7cd4834aa2c9eb503e16c603dc0142de8afc8c0e721fcc"
+    },
+    "hatchling": {
+      "version": "1.27.0",
+      "lock_sha256": "9ff011eecc608b5d1f0fb2c790873cc87c7e81d65db58bbc0dd6003042b8e831"
+    },
+    "httpcore": {
+      "version": "1.0.9",
+      "lock_sha256": "98592c90f430ae3e240a9ba1c73baddd23e3b2ebe5d0e401a6a337516d2326f9"
+    },
+    "httpx": {
+      "version": "0.28.1",
+      "lock_sha256": "aed038606fc110b72f6f30c4d2a89c3f2ea50e429d4c57d35031f6ff6d02fe45"
+    },
+    "idna": {
+      "version": "3.20",
+      "lock_sha256": "f868bf92ef3e86cbfca6f23a5d24428d80ce0d3ef736ef6b52df765d9320fcc6"
+    },
+    "iniconfig": {
+      "version": "2.3.1",
+      "lock_sha256": "48bb17937758cf0b07c65a56916f622207fbf834fdcb2f77f8f78afaaa1442ce"
+    },
+    "jsonschema": {
+      "version": "4.26.0",
+      "lock_sha256": "aa2d829372278363e9c061853657704e2ee9c3017224a1fe468cf257be5b43e6"
+    },
+    "jsonschema-specifications": {
+      "version": "2025.9.1",
+      "lock_sha256": "2621b54cb2683370f8a1c72d38a228055bcc4a1d9e2c113cb66b8bbcdd55b44e"
+    },
+    "mako": {
+      "version": "1.4.3",
+      "lock_sha256": "67d9bc14e70bbc80d253da903c1e85cd342fd979e9a8a350f65f6d1f70354d9b"
+    },
+    "markupsafe": {
+      "version": "3.0.4",
+      "lock_sha256": "d9bbd79821efa4cf5fd57a12d1b4012203c3202164c0dd85df95a60c3b718068"
+    },
+    "opentelemetry-api": {
+      "version": "1.45.1",
+      "lock_sha256": "14df8ffb9308919c95c868cab20e0bb9ac56f34a01a9f712955d15ea734642f1"
+    },
+    "packaging": {
+      "version": "26.3",
+      "lock_sha256": "029d77b017ced106c1aa1d38a94480a1242346cebd3a3108dc7279d85c2959be"
+    },
+    "pathspec": {
+      "version": "1.1.1",
+      "lock_sha256": "e4e2b427d853489a52aad2eafd585caedd12e93893238a2fc06346d56068e45c"
+    },
+    "pluggy": {
+      "version": "1.6.0",
+      "lock_sha256": "90504f7563732cf098b94b355fd44a990d9949705b1493191c47b9e6e515b9bd"
+    },
+    "psycopg": {
+      "version": "3.3.6",
+      "lock_sha256": "c1f05108d2bf03930986f7c992ad1dfdc75cd02d4628bd1a09fc3dbd489feac4"
+    },
+    "psycopg-binary": {
+      "version": "3.3.6",
+      "lock_sha256": "0f602c3d788de3ee50c997d04c5636db0cefa9f26e3dac49f16e0601f83eb4c2"
+    },
+    "pydantic": {
+      "version": "2.14.0",
+      "lock_sha256": "9ff14e1da295bcc6bb406e4480bb6e8cfb7ecafb897dad0cce30847d80dc9006"
+    },
+    "pydantic-core": {
+      "version": "2.50.0",
+      "lock_sha256": "8ce09cf142732944979937e656c80f4e0df6e3b65e210e83899d2e2e623f7113"
+    },
+    "pygments": {
+      "version": "2.21.0",
+      "lock_sha256": "1ad964874393ba3c94722db8d98a05731d4cfb35e1d2c2a4b06822eed4e3a6e3"
+    },
+    "pytest": {
+      "version": "8.4.2",
+      "lock_sha256": "0d68458d332d89e2a4069e4a560212e1d80d47863930e7567e4e83d9ef6187e5"
+    },
+    "referencing": {
+      "version": "0.37.0",
+      "lock_sha256": "358f86740c115299bc56272613e6b9e998cd0faa4982df98f81c893d50a9b8e8"
+    },
+    "rpds-py": {
+      "version": "2026.9.1",
+      "lock_sha256": "b854153c752bd3c0eb2e4d97309e1c1c2a1e7fa4a79aa728d36ff19d6ef99ec5"
+    },
+    "ruff": {
+      "version": "0.17.0",
+      "lock_sha256": "6fe0bc9eb30cc462478124975b0d19bfa82480460d75092377b698adb3951672"
+    },
+    "sqlalchemy": {
+      "version": "2.0.54",
+      "lock_sha256": "d83e7ee0067d4cc4c307a992534bba861e555a33b4f208ce0fcbdece89901949"
+    },
+    "starlette": {
+      "version": "0.52.1",
+      "lock_sha256": "50d7b804afa45e112278b58866b94693f9f2745234ab56244fece2d86e50796b"
+    },
+    "trove-classifiers": {
+      "version": "2026.9.21.13",
+      "lock_sha256": "8eff709161109221b95b92b2e840925d224ce2a2c2cebbf972c90073018f4754"
+    },
+    "typing-extensions": {
+      "version": "4.16.0",
+      "lock_sha256": "e3a61fa0e3e9e756e8a2c733b345f644dc3af186a4e19e14c422009261e95b06"
+    },
+    "typing-inspection": {
+      "version": "0.4.4",
+      "lock_sha256": "3591ba274de0c00dad6f7407a23ca8853261bba4fae4540170e2fb265f7515c0"
+    },
+    "tzdata": {
+      "version": "2026.5",
+      "lock_sha256": "ff7f6bd464ec4a0768b599c18173ededc520fdf1532a91bc5771046de21a72b6"
+    },
+    "uvicorn": {
+      "version": "0.54.0",
+      "lock_sha256": "86de9cfdca0cf7367f15d9df43c6abe5688b5c7bdd8f1c89940ba7f674fdf869"
+    }
+  },
+  "migrations": {
+    "packages/platform-infrastructure/src/platform_infrastructure/migrations/schema_0001.py": "e630506523fd1c134bc96087a3afcece6285ff8b0d82b846bf7cdf1d237f1a65",
+    "packages/platform-infrastructure/src/platform_infrastructure/migrations/versions/0001_control.py": "bc1965adabf0190f3f356b0b3ee9db254f6d0d9c7544c5d3b1bf08d3e1c8aa15",
+    "packages/platform-infrastructure/src/platform_infrastructure/migrations/versions/0002_observation_snapshot.py": "c9aacb026060eef524319c0922642d4d47a0b326289b34680a5d1e54ce602db9"
+  }
+}

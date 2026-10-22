@@ -1,0 +1,22 @@
+{
+  "phase": "P4.3.1",
+  "version": "0.5.0",
+  "date": "2026-10-13",
+  "schemas": {"platform": "0005_service_bindings", "data": "0003_spatial_import_runtime", "execution": "0005_remote_calls"},
+  "remote_host": {"address": "192.168.167.89", "kernel": "Linux 5.15.0-117-generic", "docker_server": "28.1.1", "transport": "real HTTP over LAN"},
+  "remote_peer_image": "sha256:8b8d6a964ff500ba2429bbf187d3fb7face297607c7e31bdb0448c9b6a2574d3",
+  "checks": {
+    "p43_direct": {"passed": 197, "failed": 0, "skipped": 0},
+    "fresh_remote_volume_e2e": {"passed": 1, "failed": 0, "skipped": 0},
+    "p1_rules": {"passed": 13, "failed": 0},
+    "distribution_install": "passed",
+    "credential_source_scan": {"leak_files": 0}
+  },
+  "remote_runtime": {
+    "container_status": "running",
+    "restart_policy": "unless-stopped",
+    "persistent_volume": "groundwater-v7-remote-state-050"
+  },
+  "full_non_performance_probe": {"passed_before_stop": 333, "failure_fixed": "OpenAPI expected route set", "note": "stopped at 56 percent because existing real Toil/QGIS suite exceeded ten minutes; covered by targeted compatibility selection"},
+  "limitations": ["direct remote operator only", "no mixed local/remote workflow", "single remote peer, no cross-host HA", "no performance claim"]
+}

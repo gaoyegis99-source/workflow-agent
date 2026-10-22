@@ -1,0 +1,129 @@
+{
+  "schema_version": 1,
+  "phase": "P7.2a",
+  "version": "0.12.0",
+  "status": "PASSED",
+  "release_digest": "sha256:8cc00e70e67848d2f207192c26d89a2f958c10fdfc840fcce5efb6b8789a89c9",
+  "source_tree": {
+    "digest": "sha256:d2f773cb01ca387186a53d6d5b3c46ee3a1dfc0b0d999c26cda725cfc860efe2",
+    "file_count": 315
+  },
+  "image_source": {
+    "digest": "sha256:3dda0de99cafbd82aca95805f3adfb956ddcfb60d223b5c8be982121711973d2",
+    "file_count": 350
+  },
+  "catalogs": {
+    "operator": "sha256:1d4997dc9a1d953aacb67937ac7ca63d186bb6ac8bf5886491a969c4b0f3a763",
+    "checker": "sha256:440ed98c511284f69d83ac831bbd1d6551f3f552e21db261ea63fc0494d27df0",
+    "tool": "sha256:e84e26da95838af65a766286cce9626ebe39499a9fefa870e561936639a0388e",
+    "tool_catalog_id": "p7-science-tools-v2"
+  },
+  "operator": {
+    "operator_id": "table-project",
+    "version": "1.0.0",
+    "operator_digest": "sha256:e2e2d3b7640e30696985e6d638bd1b5e113297568c58c7f7824b445691177057",
+    "ownership": "CURATED_PACKAGE",
+    "trust_level": "VERIFIED",
+    "implementation_id": "table-project-native-v1",
+    "implementation_digest": "sha256:d57cf510cdd56eba1793f053fac2c8886c495dfb4f48aa1e5a5e48aa206f4891",
+    "image_digest": "sha256:ecca5b826aece9dc800ef4698f37ce102c55cd4d3a9930d87daaf6c5fbd87c1a"
+  },
+  "capability": {
+    "capability_id": "tabular-project-reproduction-v1",
+    "version": "1.0.0",
+    "capability_digest": "sha256:240ed6cdff58d600164537c6fd407cdd9a16a117b5752dbb821d57f3381bdd06",
+    "image_digest": "sha256:a877fa963c4217aa6b28223ce1bc08b829f9f5abfb733fb6965dfc3bf0d3b7d0",
+    "check_types": [
+      "DATA_VALIDITY",
+      "RESULT_REPRODUCTION"
+    ],
+    "matches": {
+      "result_kinds": ["OPERATOR_RESULT"],
+      "operators": ["table-project@1.0.0"],
+      "schemas": ["table-project-report-v1"],
+      "output_ports": ["report"]
+    }
+  },
+  "images": {
+    "operator": "sha256:16321e51506f230603bd25d88508e165ddb0cae995062c41432875eed7852780",
+    "checker": "sha256:a877fa963c4217aa6b28223ce1bc08b829f9f5abfb733fb6965dfc3bf0d3b7d0",
+    "gdal_checker": "sha256:b75ef5ce4bfc81acf4435f7b5b925c38e3d677d963d412750bf590f23308ce7a",
+    "tabular": "sha256:ecca5b826aece9dc800ef4698f37ce102c55cd4d3a9930d87daaf6c5fbd87c1a",
+    "cwl": "sha256:652754092f5cf48486a9c8bb42f113d1d95d25141ef7d846be44ff8a18504a09",
+    "qgis": "sha256:5a1a2c34b6f1043eb4705218db1c23be7a6537e2c474e29912d1e573103bf448",
+    "spatial_native": "sha256:0cd417177a3cc0d5e078d5a8257368a9d98186d5f7c00581d85b09f850912546"
+  },
+  "tests": {
+    "p72a_official": {
+      "passed": 11,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 52.55
+    },
+    "tabular_combined": {
+      "passed": 54,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 243.67
+    },
+    "compatibility_initial": {
+      "passed": 873,
+      "failed": 1,
+      "failure": "obsolete fixed checker capability count",
+      "seconds": 2312.0
+    },
+    "compatibility_final": {
+      "passed": 874,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 2264.31
+    },
+    "p7_catalog": {
+      "passed": 24,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 1.26
+    },
+    "p1_rules": {
+      "passed": 13,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 1.149
+    },
+    "ruff": "PASS",
+    "format": "PASS",
+    "non_overlapping_minimum": 887,
+    "overlap_note": "P7.2a, combined tabular and P7 catalog pytest results overlap the final compatibility suite and are not summed."
+  },
+  "distribution": {
+    "wheel_count": 11,
+    "exact_wheel_set": "PASS",
+    "outside_repository_install": "PASS",
+    "core_standard_library_only": "PASS",
+    "migrations_and_http": "PASS",
+    "p3_container_completion": "PASS",
+    "toil_atomic_workflow": "PASS",
+    "qgis_native_spatial": "PASS",
+    "trusted_cartography": "PASS"
+  },
+  "schemas": {
+    "platform": "0018_agent_acceptance_identity",
+    "data": "0004_document_assets",
+    "execution": "0006_remote_reliability",
+    "knowledge": "0002_lifecycle_outbox",
+    "migration_added": false
+  },
+  "scope": {
+    "new_compute_operators": 1,
+    "new_checker_capabilities": 1,
+    "new_public_routes": 0,
+    "new_page_features": 0,
+    "claim_support_added": false,
+    "filter_or_cast_added": false
+  }
+}

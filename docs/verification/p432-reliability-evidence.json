@@ -1,0 +1,83 @@
+{
+  "phase": "P4.3.2-reliability-hardening",
+  "version": "0.5.3",
+  "recorded_at": "2026-10-13T21:23:00+08:00",
+  "result": "PASS",
+  "tests": {
+    "cross_host_standard": {
+      "passed": 25,
+      "failed": 0,
+      "skipped": 0,
+      "seconds": 465.55,
+      "remote": "192.168.167.89:19080"
+    },
+    "direct_remote_compatibility": {
+      "passed": 210,
+      "failed": 0,
+      "seconds": 111.8
+    },
+    "complete_regression": {
+      "passed": 564,
+      "failed": 0,
+      "skipped": 0,
+      "seconds": 1521.12
+    },
+    "p1_rules": {
+      "passed": 13,
+      "failed": 0
+    },
+    "rebuilt_spatial_images": {
+      "passed": 6,
+      "failed": 0,
+      "seconds": 198.67
+    },
+    "rebuilt_spatial_image_browsers": {
+      "passed": 2,
+      "failed": 0,
+      "seconds": 84.51
+    },
+    "distribution": {
+      "wheels_and_sdists": 8,
+      "result": "PASS"
+    }
+  },
+  "images": {
+    "qgis": "sha256:533f6e7b2560674fd4738756636929b83732807d7b013938ad915d35ff21e534",
+    "native": "sha256:7a92c031ce4a8960b171860b759029a9e081751c1af64b64e1003999277095c0",
+    "remote_native": "sha256:7a92c031ce4a8960b171860b759029a9e081751c1af64b64e1003999277095c0",
+    "cwl": "sha256:652754092f5cf48486a9c8bb42f113d1d95d25141ef7d846be44ff8a18504a09"
+  },
+  "schemas": {
+    "platform": "0006_service_binding_scope",
+    "data": "0003_spatial_import_runtime",
+    "execution": "0006_remote_reliability"
+  },
+  "packages": {
+    "groundwater-data-service": "0.5.3",
+    "groundwater-execution-service": "0.5.3",
+    "groundwater-platform-api": "0.5.3",
+    "groundwater-checker-pack": "0.5.3",
+    "groundwater-platform-contracts": "0.5.3",
+    "groundwater-operator-pack": "0.5.3",
+    "groundwater-platform-core": "0.5.3",
+    "groundwater-platform-infrastructure": "0.5.3"
+  },
+  "invariants": {
+    "remote_outputs_promoted_only_after_complete_verification": true,
+    "workflow_group_visibility_is_atomic": true,
+    "node_and_remote_ledger_are_transactional": true,
+    "binding_is_checked_before_upload_and_submit": true,
+    "accepted_remote_call_keeps_frozen_revision": true,
+    "plain_404_preserves_identity_and_accounting": true,
+    "cancel_commit_race_has_one_fact": true,
+    "combined_restart_reuses_action_execution_container_and_jobstore": true,
+    "duplicate_compute_budget_and_publication": 0,
+    "remote_active_actions_after_acceptance": 0,
+    "remote_active_test_containers_after_acceptance": 0
+  },
+  "commands": [
+    "bash scripts/check_p432_reliability.sh --profile standard",
+    "bash scripts/check_p43.sh --phase direct",
+    "bash scripts/check_p4.sh --phase workflows"
+  ]
+}

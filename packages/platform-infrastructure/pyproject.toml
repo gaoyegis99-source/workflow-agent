@@ -1,0 +1,26 @@
+[project]
+name = "groundwater-platform-infrastructure"
+version = "0.15.5"
+description = "PostgreSQL, authentication and worker adapters for V7"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "groundwater-platform-contracts==0.15.5",
+    "groundwater-platform-core==0.15.5",
+    "sqlalchemy>=2.0,<2.1",
+    "psycopg[binary]>=3,<4",
+    "alembic>=1.16,<2",
+    "httpx>=0.28,<0.29",
+]
+
+[project.scripts]
+platform-admin = "platform_infrastructure.admin:main"
+platform-worker = "platform_infrastructure.worker:main"
+platform-cold-backup = "platform_infrastructure.cold_backup:main"
+platform-release-upgrade = "platform_infrastructure.upgrade:main"
+
+[build-system]
+requires = ["hatchling==1.27.0"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/platform_infrastructure"]

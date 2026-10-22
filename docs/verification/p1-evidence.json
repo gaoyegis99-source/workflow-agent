@@ -1,0 +1,271 @@
+{
+  "phase": "P1",
+  "status": "PASS",
+  "selected_engine": "Toil",
+  "reason": "Selected by the explicit P1 gates; production integration remains out of scope",
+  "started_at": "2026-10-12T01:00:11+08:00",
+  "finished_at": "2026-10-12T01:02:20+08:00",
+  "platform": "Linux-5.15.0-139-generic-x86_64-with-glibc2.31",
+  "python": "3.12.8",
+  "docker": "28.1.1 / 28.1.1",
+  "sources_sha256": {
+    "experiments/p1/fixtures/nested.cwl": "06c8bd3c590aceb7c0fff7cc16e864f2756f9973457629e0197e59883686833e",
+    "experiments/p1/fixtures/probe.py": "6bbb1abd022c81c0a12233cbc08b1988c81f285ddcd1378d4656a34185b49636",
+    "experiments/p1/fixtures/scatter.cwl": "bde1e002b2c3035ad3ea8c44600724fee054b2ef23ec0e8bd6c6eadd41af73da",
+    "experiments/p1/fixtures/tool.cwl": "4323abe8f03d4af3ab0787c92535b7bdc01d2f79ecfc980b85484a90f9676082",
+    "experiments/p1/gate.py": "3585686f5ed095fd178b441b239a277c70adc19f0c7f466bf758b630ca45e762",
+    "experiments/p1/isolation_probe.py": "69da1c2851b37d41a6e4457507d54d17538d227a3598e97291257a9861db061c",
+    "experiments/p1/pins.json": "86a69cf5a4ff70c42a00918e8dd7fbf1f86268be825dbf56ce18111e9f653641",
+    "experiments/p1/run.py": "dc0d8da52abd883ebf0e68e9d2fc2c684f366d7425715d5eaa3ab5bc442d02ec",
+    "experiments/p1/test_probes.py": "552d0783aedae07da3492a10b082f9f4ddbf46a598177895039585d09c5a812c",
+    "experiments/p1/toil/pyproject.toml": "5f5662eaa33befefd24c7c2401c43914937eeedba235965a4b5603a92e116006",
+    "experiments/p1/toil/uv.lock": "a92d213a3f29c666ead12aa1b96ee31f40a4eb35a7872442498baf8471efa8a1",
+    "experiments/p1/toil_probe.py": "d20fc9e271bc6d12417e18ac48bd64515e00aa2077845526a6a9aad5745b022b",
+    "experiments/p1/weaver-sources.yaml": "78dba2997104011160df564209e12bcf0aa953bdaae6acaca383a260f3073714",
+    "experiments/p1/weaver.compose.yaml": "bacffeeac483540e5cc64000b75d244b1caeeb5f841d92fa01ee5b1668946c05",
+    "experiments/p1/weaver.ini": "d1a98ff81b6ea7772dd6222245b701caab5e887e043cbfaeb6a5783a05a744bb",
+    "experiments/p1/weaver_probe.py": "3100ee5d8c01ff2fcf7e4f46ac9b91e6145b151bf2d8207ca105cf9c7d974bda",
+    "scripts/check_p1.sh": "dd60cb52986c1c22f74680a3aec4630aab145b0c3b5ec8f72157aed9e0a70ab7",
+    "uv.lock": "5619d57bac295f778200da9c7a3874899149667bf0f4fcbcade411a99eea3a0d"
+  },
+  "reports": {
+    "Toil": {
+      "candidate": "Toil",
+      "version": "9.5.0",
+      "status": "PASS",
+      "checks": [
+        {
+          "check": "submit_query_relocate_duplicate_scatter",
+          "status": "PASS",
+          "handle": {
+            "state": "RUNNING",
+            "attempt": 1,
+            "engine": {
+              "pid": 1069526,
+              "start_ticks": "665027497",
+              "boot_id": "26532028-f800-4d2d-b393-121d5c63bc29"
+            },
+            "job_store": "/home/mtd/liweigis/workflow/groundwater-platform_v7/.p1-runtime/verification-78b6f204a320/toil/identity/job-store"
+          },
+          "records": [
+            {
+              "run_id": "p1-identity",
+              "step_path": "outer/scatter",
+              "scatter_index": 0,
+              "invocation_id": "p1-identity/outer/scatter/0",
+              "value": 7,
+              "result": 14
+            },
+            {
+              "run_id": "p1-identity",
+              "step_path": "outer/scatter",
+              "scatter_index": 1,
+              "invocation_id": "p1-identity/outer/scatter/1",
+              "value": 7,
+              "result": 14
+            }
+          ],
+          "engine_jobs": [
+            {
+              "job_store_id": "kind-CWLJob/instance-iw94rel2",
+              "name": "v7_outer.1.v7_outer_scatter",
+              "exit_code": 0,
+              "annotations": {},
+              "toil_batch_id": 2,
+              "external_batch_id": "1070193",
+              "batch_system": "SingleMachineBatchSystem"
+            },
+            {
+              "job_store_id": "kind-CWLJob/instance-9emar180",
+              "name": "v7_outer.0.v7_outer_scatter",
+              "exit_code": 0,
+              "annotations": {},
+              "toil_batch_id": 3,
+              "external_batch_id": "1070222",
+              "batch_system": "SingleMachineBatchSystem"
+            }
+          ],
+          "step_map": {
+            "v7_outer_scatter": "outer/scatter"
+          }
+        },
+        {
+          "check": "failed_attempt_restart_same_jobstore",
+          "status": "PASS",
+          "before": [
+            {
+              "job_store_id": "kind-CWLJob/instance-vgekwmus",
+              "name": "v7_outer.0.v7_outer_scatter",
+              "exit_code": 1,
+              "annotations": {},
+              "toil_batch_id": 2,
+              "external_batch_id": "1072215",
+              "batch_system": "SingleMachineBatchSystem"
+            }
+          ],
+          "after": [
+            {
+              "job_store_id": "kind-CWLJob/instance-vgekwmus",
+              "name": "v7_outer.0.v7_outer_scatter",
+              "exit_code": 0,
+              "annotations": {},
+              "toil_batch_id": 1,
+              "external_batch_id": "1074092",
+              "batch_system": "SingleMachineBatchSystem"
+            }
+          ],
+          "attempts": [
+            1,
+            2
+          ]
+        },
+        {
+          "check": "cancel_live_worker_and_repeat",
+          "status": "PASS",
+          "child_count": 3,
+          "children_stopped": true
+        }
+      ],
+      "returncode": 0,
+      "log": ".p1-runtime/verification-78b6f204a320/Toil.log"
+    },
+    "Weaver": {
+      "candidate": "Weaver",
+      "version": "6.16.0",
+      "image": "pavics/weaver@sha256:ff7b845c04dfeeeaad7e9d501074f8b18ae45b2b57c0a63ebeab313cdc290f88",
+      "status": "FAIL",
+      "checks": [
+        {
+          "check": "submit_query_output",
+          "status": "PASS",
+          "evidence": {
+            "job_id": "8df8295f-563a-4851-b196-2e62170a2c88",
+            "records": [
+              {
+                "run_id": "weaver-p1",
+                "step_path": "outer/scatter",
+                "scatter_index": 0,
+                "invocation_id": "weaver-p1/outer/scatter/0",
+                "value": 7,
+                "result": 14
+              }
+            ]
+          }
+        },
+        {
+          "check": "nested_duplicate_scatter_identity",
+          "status": "PASS",
+          "evidence": {
+            "job_id": "dab9b002-24f7-4877-914a-7d1466d5847d",
+            "records": [
+              {
+                "run_id": "weaver-p1",
+                "step_path": "outer/scatter",
+                "scatter_index": 0,
+                "invocation_id": "weaver-p1/outer/scatter/0",
+                "value": 7,
+                "result": 14
+              },
+              {
+                "run_id": "weaver-p1",
+                "step_path": "outer/scatter",
+                "scatter_index": 1,
+                "invocation_id": "weaver-p1/outer/scatter/1",
+                "value": 7,
+                "result": 14
+              }
+            ],
+            "child_ids": [
+              "2bf04b67-c65c-4d5a-baf8-3f36fad63bc6",
+              "c119798a-f5da-43c3-9aee-ad409c27ed34"
+            ],
+            "definitions": [
+              {
+                "job_id": "2bf04b67-c65c-4d5a-baf8-3f36fad63bc6",
+                "inputs": {
+                  "delay": 0,
+                  "fail_once": "none",
+                  "ordinal": 1,
+                  "run_id": "weaver-p1",
+                  "started_file": "none",
+                  "step_path": "outer/scatter",
+                  "value": 7
+                }
+              },
+              {
+                "job_id": "c119798a-f5da-43c3-9aee-ad409c27ed34",
+                "inputs": {
+                  "delay": 0,
+                  "fail_once": "none",
+                  "ordinal": 0,
+                  "run_id": "weaver-p1",
+                  "started_file": "none",
+                  "step_path": "outer/scatter",
+                  "value": 7
+                }
+              }
+            ]
+          }
+        },
+        {
+          "check": "api_restart_relocates_job",
+          "status": "PASS",
+          "evidence": {
+            "job_id": "f86595c7-8f2f-42c0-adb1-cdf8c0f0f055",
+            "status_after_restart": "successful"
+          }
+        },
+        {
+          "check": "cancel_stops_actual_tool",
+          "status": "FAIL",
+          "error": "Dismissed job 3a937277-4b5d-4738-8ca4-b3078d237357 still has running tool containers after 15s: ['4d67ec9b985e']"
+        }
+      ],
+      "docker_cli_sha256": "afa884fe4ff068a7ebe8339dd577c00150d2606cdb1bf57989d672bd86cc475f",
+      "returncode": 1,
+      "log": ".p1-runtime/verification-78b6f204a320/Weaver.log"
+    },
+    "gVisor": {
+      "runtime": "gVisor",
+      "version": "release-20261005.0",
+      "status": "PASS",
+      "deployment": "dedicated Docker wrapper; SYS_ADMIN/SYS_PTRACE; no daemon changes",
+      "checks": [
+        {
+          "check": "guest_files_network_and_tmp_quota",
+          "status": "PASS",
+          "stdout": "FILE_NETWORK_DISK_PASS\n",
+          "stderr": "/bin/sh: can't create /input.txt: Read-only file system\n/bin/sh: can't create /escape: Permission denied\ndd: error writing '/tmp/excess': No space left on device\n16+0 records in\n15+0 records out\n16773120 bytes (16.0MB) copied, 0.015267 seconds, 1.0GB/s\n"
+        },
+        {
+          "check": "guest_cancel_and_container_relocate",
+          "status": "PASS",
+          "container_id": "b01623b17e70b102d8580f9fe4251f4a6e7ee117bb4b5b0fc8deb5af4302ff08",
+          "state": {
+            "Status": "exited",
+            "Running": false,
+            "Paused": false,
+            "Restarting": false,
+            "OOMKilled": false,
+            "Dead": false,
+            "Pid": 0,
+            "ExitCode": 137,
+            "Error": "",
+            "StartedAt": "2026-10-11T17:02:19.742006532Z",
+            "FinishedAt": "2026-10-11T17:02:20.061636995Z"
+          },
+          "stdout": "READY\n",
+          "stderr": ""
+        }
+      ],
+      "rootless_host": {
+        "status": "FAIL",
+        "returncode": 128,
+        "stderr": "running container: creating container: cannot create gofer process: gofer: fork/exec /proc/self/exe: operation not permitted\n"
+      },
+      "returncode": 0,
+      "log": ".p1-runtime/verification-78b6f204a320/gVisor.log"
+    }
+  },
+  "run_directory": ".p1-runtime/verification-78b6f204a320"
+}

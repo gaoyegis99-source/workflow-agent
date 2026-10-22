@@ -1,0 +1,63 @@
+{
+  "name": "completeness-profile-v1",
+  "entrypoint": "main",
+  "profile": "v7-cwl-p4-v1",
+  "documents": {
+    "main": {
+      "cwlVersion": "v1.2",
+      "class": "Workflow",
+      "inputs": {
+        "observations": "File",
+        "analysis_parameters": {
+          "type": "record",
+          "name": "AnalysisParameters",
+          "fields": [
+            {"name": "groups", "type": {"type": "array", "items": "string"}},
+            {"name": "start", "type": "string"},
+            {"name": "end", "type": "string"},
+            {"name": "frequency", "type": "string"},
+            {"name": "min_samples", "type": "int"}
+          ]
+        },
+        "profile_parameters": {
+          "type": "record",
+          "name": "TableProfileParameters",
+          "fields": [{"name": "fields", "type": {"type": "array", "items": "string"}}]
+        }
+      },
+      "outputs": {
+        "completeness_result": {"type": "File", "outputSource": "completeness/result"},
+        "completeness_table": {"type": "File", "outputSource": "completeness/table"},
+        "profile_report": {"type": "File", "outputSource": "profile/report"},
+        "profile_table": {"type": "File", "outputSource": "profile/table"},
+        "profile_method": {"type": "File", "outputSource": "profile/method"}
+      },
+      "steps": {
+        "completeness": {
+          "run": "completeness_operator",
+          "in": {"observations": "observations", "parameters": "analysis_parameters"},
+          "out": ["result", "table", "method"]
+        },
+        "profile": {
+          "run": "profile_operator",
+          "in": {"table": "completeness/table", "parameters": "profile_parameters"},
+          "out": ["report", "table", "method"]
+        }
+      }
+    }
+  },
+  "implementations": {
+    "completeness_operator": {
+      "kind": "OPERATOR",
+      "operator_id": "timeseries-completeness",
+      "version_id": "1.0.0",
+      "execution_binding": {"kind": "LOCAL", "implementation_id": "p3-completeness-v1"}
+    },
+    "profile_operator": {
+      "kind": "OPERATOR",
+      "operator_id": "table-profile",
+      "version_id": "1.0.0",
+      "execution_binding": {"kind": "LOCAL", "implementation_id": "table-profile-native-v1"}
+    }
+  }
+}

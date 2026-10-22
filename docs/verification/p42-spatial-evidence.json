@@ -1,0 +1,148 @@
+{
+  "phase": "P4.2.1-spatial",
+  "version": "0.4.0",
+  "status": "PASS",
+  "finished_at": "2026-10-13T01:35:09.159282+00:00",
+  "command": "bash scripts/check_p4.sh --phase spatial",
+  "pytest": {
+    "tests": 494,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "pytest_by_suite": {
+    "architecture": 32,
+    "contracts": 109,
+    "integration": 11,
+    "p2": 80,
+    "p3": 87,
+    "p4": 131,
+    "p42": 27,
+    "performance": 17
+  },
+  "p1_rules": {
+    "tests": 13,
+    "failures": 0
+  },
+  "distribution": [
+    "PASS: built 8 wheels and source distributions",
+    "PASS: core wheel runs with only the Python standard library",
+    "PASS: locked runtime dependencies and wheels installed outside the repository",
+    "PASS: installed API liveness, unconfigured readiness, OpenAPI and shutdown",
+    "PASS: installed migrations, local token CLI, real task/control HTTP and worker",
+    "PASS: installed Data/Execution migrations, independent workers, containers and P3 completion",
+    "PASS: installed frozen CWL, Toil nodes, atomic publication and independent check",
+    "PASS: installed GeoPackage inspection, QGIS buffer, Native summary and publication",
+    "PASS: installed 0001 data upgrade, unchanged ledger, known/unknown HTTP commands"
+  ],
+  "packages": {
+    "groundwater-checker-pack": "0.4.0",
+    "groundwater-data-service": "0.4.0",
+    "groundwater-execution-service": "0.4.0",
+    "groundwater-operator-pack": "0.4.0",
+    "groundwater-platform-api": "0.4.0",
+    "groundwater-platform-contracts": "0.4.0",
+    "groundwater-platform-core": "0.4.0",
+    "groundwater-platform-infrastructure": "0.4.0"
+  },
+  "schemas": {
+    "platform": "0004_workflows",
+    "data": "0003_spatial_import_runtime",
+    "execution": "0004_execution_work_class"
+  },
+  "images": {
+    "images": {
+      "qgis": "sha256:9341a6b4b0c6e6724cf18128c45ba1e199e27e0f78cdede1241ba6b0d4273ca5",
+      "native": "sha256:0323c7d393438f3c08d18ff4031e0f7f57a6b17fd53ff8f797724f99678df15e"
+    },
+    "versions": [
+      "3.44.15-Solothurn",
+      "GDAL 3.8.4, released 2024/02/08",
+      "9.4.0-1build2"
+    ]
+  },
+  "python": "3.12.8",
+  "docker": "28.1.1",
+  "fixtures": {
+    "ambiguous-layers.gpkg": {
+      "digest": "sha256:3fb7d1729246d02db516a13854cc4ed3e34d68dc4ab7eeec4deb734afe7fdda6",
+      "size": 118784
+    },
+    "corrupt.gpkg": {
+      "digest": "sha256:1bc33c78ce3c5256a28e1db2d31ba5e233dff9c9cffdeea9b31289df9e7e4a3d",
+      "size": 32
+    },
+    "corrupt.tif": {
+      "digest": "sha256:e0f52dcb5ff0c5d05f42b7176b80fd9b010b2b641c5b9aa96dd2927ca5d2b2c9",
+      "size": 17
+    },
+    "empty-geometry.gpkg": {
+      "digest": "sha256:5e647f972713ee26aa6c3f5acee3292136f3c34a9326fa31f7b0381a526fb42d",
+      "size": 98304
+    },
+    "empty.gpkg": {
+      "digest": "sha256:b165275a80120296eacb2bd62780379a6e6931b9cafd42881601bf1c782ba8e5",
+      "size": 98304
+    },
+    "invalid-geometry.gpkg": {
+      "digest": "sha256:a30f2f403667d87383c8070e50f7c97faaa50af5df3d303642b7d48d6170a982",
+      "size": 98304
+    },
+    "missing-crs.gpkg": {
+      "digest": "sha256:d43c9cf27e3276f410035ca170390ba36ea1ddabaa2c66bd91d09c73f3ba7a54",
+      "size": 98304
+    },
+    "missing-crs.tif": {
+      "digest": "sha256:438c8055efdcc4c26bf01da617dfb0ac6a3fdb438e12324a12bcb5b19b261fc6",
+      "size": 267
+    },
+    "multi-band-nodata.tif": {
+      "digest": "sha256:eddcedf751517279bea3999e5e704f22ce4914a7f3a619a94646a8d7bec2b10f",
+      "size": 432
+    },
+    "multi-layer.gpkg": {
+      "digest": "sha256:059b23e5e5647b76715223130d399ce71fa7be42d2d10b9561723613ff648cae",
+      "size": 118784
+    },
+    "points-feet.gpkg": {
+      "digest": "sha256:ef6ec63b60146686b75c34b3387c8f8961778bc1963f3cae6fa18327e005840a",
+      "size": 98304
+    },
+    "points-utm.gpkg": {
+      "digest": "sha256:6c7f66c15a86acd79ecd8d63c24f7cb9494977e1bd84472d327bdaf89f443790",
+      "size": 98304
+    },
+    "points-wgs84.gpkg": {
+      "digest": "sha256:b61095b5e4a910a16eebd299ae85817f982ec6523fedf635d61faf9f340c37bb",
+      "size": 98304
+    },
+    "single-band.tif": {
+      "digest": "sha256:3ec7e99e933f5e384bd276875af3f43c69279a780eda7b6cc5531e08efe20f11",
+      "size": 385
+    }
+  },
+  "source_sha256": {
+    "packages/contracts/src/platform_contracts/science.py": "52cda767a9f318941ec3ecde759f107a5318e0251590a0ec0529d32a2866a22c",
+    "packages/operator-pack/src/platform_operators/spatial.py": "20966db4458568b69f8984a56f00beb64fc55de7a15b1c588244c1dbc12fcf1c",
+    "apps/data-service/src/platform_data/spatial_worker.py": "6fc187f229d545ca67fc259991f710ec9d635fa59e0c109d7eb6f37ddfac4c63",
+    "apps/data-service/src/platform_data/migrations/versions/0003_spatial_import_runtime.py": "4e8f4258f134e21b905058a0de78b5069f0eb192413d5cb58c5028ffc550e73d",
+    "apps/execution-service/src/platform_execution/application/runner.py": "583d4ecfaee43e95e05c87bab0a701a18c7f86638f7b109fd22d23bcaa5f5623",
+    "apps/execution-service/src/platform_execution/application/workflow_runner.py": "0446ead2d3d916cca389be827d3f7c1a2f172d2e02cf08fa53e5bd57a70b3c5b",
+    "examples/workflows/qgis-buffer-summary-v1.json": "d66c13d40e867e63e5491bc2f9c576960098590e06ac2a1e08a9a686cb4e2ac8",
+    "deploy/p42/qgis.Dockerfile": "267654a72ee0f7d414ffa9ad38e00709e5f0f9a835b6a9ab1e4bd8448cff14e5",
+    "deploy/p42/native.Dockerfile": "62b1746a6a52fcb51e2009cea32a5c6056700c54bdeff28b5835524f176a3895",
+    "scripts/check_p42.sh": "69f7d2af2aa0d352d72b7bbcb000397f299a622c68fa6c4fe6e7e1156998cad4",
+    "tests/p42/test_migration.py": "66725c98ef767cd5c51d3fae30c07fcd44d927be84d7fcda1e323ce842d06f7b"
+  },
+  "scope": {
+    "vector_import": "GeoPackage",
+    "raster_import": "GeoTIFF",
+    "operators": [
+      "qgis-buffer@1.0.0",
+      "spatial-vector-summary@1.0.0"
+    ],
+    "workflow": "qgis-buffer-summary-v1",
+    "task_completion": "OPEN; no spatial acceptance template"
+  },
+  "data": "Repository-owned deterministic synthetic spatial fixtures; not field observations"
+}

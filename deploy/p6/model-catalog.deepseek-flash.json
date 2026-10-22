@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "default_profile_id": "deepseek-flash-2026-10-15",
+  "profiles": [
+    {
+      "profile_id": "deepseek-flash-2026-10-15",
+      "provider": "OPENAI_RESPONSES",
+      "model": "deepseek-flash",
+      "request_mode": "RESPONSES",
+      "supports_structured_output": true,
+      "supports_query_by_response_id": false,
+      "data_policy": "PROJECT_APPROVED_REMOTE",
+      "max_context_tokens": 100000,
+      "max_output_tokens": 1000,
+      "max_reasoning_tokens": 0,
+      "timeout_seconds": 180,
+      "pricing_revision": "deepseek-peak-cny-2026-10-15",
+      "pricing": {
+        "input_microunits_per_million": 2000000,
+        "output_microunits_per_million": 8000000,
+        "reasoning_microunits_per_million": 8000000
+      },
+      "credential_env": "DEEPSEEK_API_KEY",
+      "base_url": "https://api.deepseek.com",
+      "profile_digest": "sha256:3fa2393052d2ed8973f5e59a6e2d00cd4916d56e59224170c0f80aa26a1f2541"
+    }
+  ],
+  "catalog_digest": "sha256:853f89db1a7cc1c2c2e77b515ae3a8e0019c577e0346a665c9f75c2ddddfa5fb"
+}

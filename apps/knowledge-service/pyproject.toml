@@ -1,0 +1,26 @@
+[project]
+name = "groundwater-knowledge-service"
+version = "0.15.5"
+description = "Versioned text evidence, lexical discovery and lifecycle service for V7"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "groundwater-platform-contracts==0.15.5",
+    "fastapi>=0.115,<1",
+    "uvicorn>=0.34,<1",
+    "sqlalchemy>=2.0,<2.1",
+    "psycopg[binary]>=3,<4",
+    "alembic>=1.16,<2",
+    "httpx>=0.28,<0.29",
+]
+
+[project.scripts]
+knowledge-service = "platform_knowledge.api:main"
+knowledge-worker = "platform_knowledge.worker:main"
+knowledge-admin = "platform_knowledge.database:main"
+
+[build-system]
+requires = ["hatchling==1.27.0"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/platform_knowledge"]

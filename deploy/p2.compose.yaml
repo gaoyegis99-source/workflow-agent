@@ -1,0 +1,24 @@
+name: groundwater-v7-p2
+services:
+  postgres:
+    image: postgres@sha256:3645570cccdfa447589da9f57dd740faa29b30938e861289a5574b6ca6b03826
+    environment:
+      POSTGRES_USER: v7
+      POSTGRES_DB: v7_control
+      POSTGRES_PASSWORD: ${V7_POSTGRES_PASSWORD:?Set an independent V7 password}
+    ports:
+      - "127.0.0.1:${V7_POSTGRES_PORT:-5547}:5432"
+    volumes:
+      - control-data:/var/lib/postgresql/data
+    networks:
+      - control
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-U", "v7", "-d", "v7_control"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+    restart: unless-stopped
+volumes:
+  control-data:
+networks:
+  control:

@@ -1,0 +1,58 @@
+{
+  "ambiguous-layers.gpkg": {
+    "digest": "sha256:3fb7d1729246d02db516a13854cc4ed3e34d68dc4ab7eeec4deb734afe7fdda6",
+    "size": 118784
+  },
+  "corrupt.gpkg": {
+    "digest": "sha256:1bc33c78ce3c5256a28e1db2d31ba5e233dff9c9cffdeea9b31289df9e7e4a3d",
+    "size": 32
+  },
+  "corrupt.tif": {
+    "digest": "sha256:e0f52dcb5ff0c5d05f42b7176b80fd9b010b2b641c5b9aa96dd2927ca5d2b2c9",
+    "size": 17
+  },
+  "empty-geometry.gpkg": {
+    "digest": "sha256:5e647f972713ee26aa6c3f5acee3292136f3c34a9326fa31f7b0381a526fb42d",
+    "size": 98304
+  },
+  "empty.gpkg": {
+    "digest": "sha256:b165275a80120296eacb2bd62780379a6e6931b9cafd42881601bf1c782ba8e5",
+    "size": 98304
+  },
+  "invalid-geometry.gpkg": {
+    "digest": "sha256:a30f2f403667d87383c8070e50f7c97faaa50af5df3d303642b7d48d6170a982",
+    "size": 98304
+  },
+  "missing-crs.gpkg": {
+    "digest": "sha256:d43c9cf27e3276f410035ca170390ba36ea1ddabaa2c66bd91d09c73f3ba7a54",
+    "size": 98304
+  },
+  "missing-crs.tif": {
+    "digest": "sha256:438c8055efdcc4c26bf01da617dfb0ac6a3fdb438e12324a12bcb5b19b261fc6",
+    "size": 267
+  },
+  "multi-band-nodata.tif": {
+    "digest": "sha256:eddcedf751517279bea3999e5e704f22ce4914a7f3a619a94646a8d7bec2b10f",
+    "size": 432
+  },
+  "multi-layer.gpkg": {
+    "digest": "sha256:059b23e5e5647b76715223130d399ce71fa7be42d2d10b9561723613ff648cae",
+    "size": 118784
+  },
+  "points-feet.gpkg": {
+    "digest": "sha256:ef6ec63b60146686b75c34b3387c8f8961778bc1963f3cae6fa18327e005840a",
+    "size": 98304
+  },
+  "points-utm.gpkg": {
+    "digest": "sha256:6c7f66c15a86acd79ecd8d63c24f7cb9494977e1bd84472d327bdaf89f443790",
+    "size": 98304
+  },
+  "points-wgs84.gpkg": {
+    "digest": "sha256:b61095b5e4a910a16eebd299ae85817f982ec6523fedf635d61faf9f340c37bb",
+    "size": 98304
+  },
+  "single-band.tif": {
+    "digest": "sha256:3ec7e99e933f5e384bd276875af3f43c69279a780eda7b6cc5531e08efe20f11",
+    "size": 385
+  }
+}

@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "phase": "Capability Studio A6",
+  "version": "0.14.5",
+  "platform_schema": "0022_operator_proposals",
+  "database_migrations": false,
+  "public_routes_added": [
+    "GET /api/v1/projects/{project_id}/workflow-releases",
+    "POST /api/v1/projects/{project_id}/workflow-definitions/{definition_id}/releases/{version_label}/executions"
+  ],
+  "release_execution": {
+    "project_isolated_library": true,
+    "server_resolves_package_ref": true,
+    "client_target_override": false,
+    "action_freezes_release_identity": true,
+    "reuses_workflow_admission": true,
+    "qualification": "SAMPLE_VERIFIED",
+    "scientific_verified_implied": false
+  },
+  "tests": {
+    "a6_targeted": {
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0
+    },
+    "a6_and_api_after_release": {
+      "passed": 17,
+      "failed": 0,
+      "skipped": 0
+    },
+    "authoring_python": {
+      "passed": 104,
+      "failed": 0,
+      "skipped": 0,
+      "seconds": 168.38
+    },
+    "studio": {
+      "test_files": 2,
+      "passed": 7,
+      "failed": 0
+    },
+    "p7_catalog": {
+      "passed": 24,
+      "failed": 0,
+      "skipped": 0
+    },
+    "p1_rules": {
+      "passed": 13,
+      "failed": 0
+    },
+    "architecture_and_api": {
+      "passed": 44,
+      "failed": 0,
+      "skipped": 0
+    },
+    "compatibility": {
+      "passed": 919,
+      "failed": 0,
+      "skipped": 0,
+      "seconds": 2425.82
+    },
+    "distribution": {
+      "passed": true,
+      "wheel_count": 11,
+      "sdist_count": 11,
+      "postgresql": true,
+      "http": true,
+      "docker": true,
+      "toil": true,
+      "qgis": true
+    },
+    "ruff_check": "PASS",
+    "ruff_format_files": 686
+  },
+  "release": {
+    "lock_schema": 2,
+    "release_digest": "sha256:94aaef055a01d7581fbe6152d22876b50aaee34a7e5cc3ee735791a1ca0ff497",
+    "source_digest": "sha256:9134957cf4f5b856c537dadbb815b1a0c5556965f7c7ff8f70a747967c9db90d",
+    "source_files": 394,
+    "wheel_count": 11,
+    "catalog_count": 3,
+    "image_count": 7,
+    "web_asset_count": 3
+  },
+  "result": "PASS"
+}

@@ -1,0 +1,233 @@
+{
+  "phase": "P4.3.1a-remote-reliability",
+  "version": "0.5.1",
+  "status": "PASS",
+  "finished_at": "2026-10-13T10:27:32.452536+00:00",
+  "commands": [
+    "bash scripts/check_p43_reliability.sh --profile quick",
+    "bash scripts/check_p43_reliability.sh --profile standard",
+    "bash scripts/check_p43.sh --phase direct",
+    "bash scripts/check_p4.sh --phase cartography"
+  ],
+  "pytest": {
+    "unit_contract": {
+      "tests": 23,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "real_http": {
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "direct_regression": 208
+  },
+  "compatibility": {
+    "cartography_pytest": 535,
+    "p1_rules": 13
+  },
+  "schemas": {
+    "platform": "0006_service_binding_scope",
+    "data": "0003_spatial_import_runtime",
+    "execution": "0006_remote_reliability"
+  },
+  "packages": {
+    "groundwater-checker-pack": "0.5.1",
+    "groundwater-data-service": "0.5.1",
+    "groundwater-execution-service": "0.5.1",
+    "groundwater-operator-pack": "0.5.1",
+    "groundwater-platform-api": "0.5.1",
+    "groundwater-platform-contracts": "0.5.1",
+    "groundwater-platform-core": "0.5.1",
+    "groundwater-platform-infrastructure": "0.5.1"
+  },
+  "cwl_runtime": "0.5.1",
+  "remote": {
+    "host": "192.168.167.89",
+    "transport": "verified HTTPS with IP SAN",
+    "docker": "28.1.1",
+    "job_image": "sha256:7698ebc29b4f763d057c067dc7a2d1ad280a34344617d745a6225cc9f5b999cb",
+    "inspection": {
+      "action_id": "recover6fcb1bab784e4b90ae0d278bd82e2866",
+      "cap_drop": [
+        "ALL"
+      ],
+      "cleanup_state": "NOT_REQUIRED",
+      "container_id": "b21261f315167ef204890365c9f1037ac4583ba3e01433f433317ff30ba2ff23",
+      "container_name": "v7-remote-remote051-bfaf4844d091a1d1488ab0cf",
+      "executed": true,
+      "exit_code": 0,
+      "implementation_digest": "sha256:7698ebc29b4f763d057c067dc7a2d1ad280a34344617d745a6225cc9f5b999cb",
+      "label_action_matches": true,
+      "label_implementation_matches": true,
+      "memory_bytes": 1073741824,
+      "nano_cpus": 1000000000,
+      "network_mode": "none",
+      "pid": 0,
+      "pids_limit": 128,
+      "readonly_rootfs": true,
+      "revision": 5,
+      "security_opt": [
+        "no-new-privileges"
+      ],
+      "state": "SUCCEEDED"
+    },
+    "certificate_file_digest": "sha256:afa3e9989fea5c5279ac6b645ea5686e331bb47b259b66fee515870526376dc8",
+    "fault_probes": {
+      "queued_cancel": [
+        {
+          "action_id": "cancel6167fe9218a84abb93da063058251958",
+          "state": "CANCELLED",
+          "executed": false,
+          "cleanup_state": "CONFIRMED",
+          "revision": 4
+        },
+        {
+          "action_id": "cancelcb81d847c0c54a26a6b83a256c6c9967",
+          "state": "CANCELLED",
+          "executed": false,
+          "cleanup_state": "CONFIRMED",
+          "revision": 4
+        },
+        {
+          "action_id": "cancele006992d3a8c465d8d1c97372f1a97c0",
+          "state": "CANCELLED",
+          "executed": false,
+          "cleanup_state": "CONFIRMED",
+          "revision": 4
+        },
+        {
+          "action_id": "cancel536a424cb8a047c29b4305baf591fd3d",
+          "state": "CANCELLED",
+          "executed": false,
+          "cleanup_state": "CONFIRMED",
+          "revision": 4
+        },
+        {
+          "action_id": "canceldd3abb598914425396e51c9f92bfcff1",
+          "state": "CANCELLED",
+          "executed": false,
+          "cleanup_state": "CONFIRMED",
+          "revision": 4
+        }
+      ],
+      "running_cancel": {
+        "action_id": "runningc1ff6cbc15914414bca2c8e4ec2cfcf3",
+        "pre_cancel": {
+          "event_id": "r00da7da3ee00a317faf7dd66657f7c51:3",
+          "action_id": "runningc1ff6cbc15914414bca2c8e4ec2cfcf3",
+          "remote_execution_id": "r00da7da3ee00a317faf7dd66657f7c51",
+          "revision": 3,
+          "state": "RUNNING",
+          "executed": true,
+          "outputs": null,
+          "implementation_digest": "sha256:7698ebc29b4f763d057c067dc7a2d1ad280a34344617d745a6225cc9f5b999cb",
+          "started_at": "2026-10-13T10:20:29.843242Z",
+          "finished_at": null,
+          "cleanup_state": "NOT_REQUIRED"
+        },
+        "terminal": {
+          "event_id": "r00da7da3ee00a317faf7dd66657f7c51:5",
+          "action_id": "runningc1ff6cbc15914414bca2c8e4ec2cfcf3",
+          "remote_execution_id": "r00da7da3ee00a317faf7dd66657f7c51",
+          "revision": 5,
+          "state": "CANCELLED",
+          "executed": true,
+          "outputs": null,
+          "implementation_digest": "sha256:7698ebc29b4f763d057c067dc7a2d1ad280a34344617d745a6225cc9f5b999cb",
+          "started_at": "2026-10-13T10:20:29.843242Z",
+          "finished_at": "2026-10-13T10:20:30.124526Z",
+          "cleanup_state": "CONFIRMED"
+        }
+      },
+      "peer_restart": {
+        "action_id": "recover6fcb1bab784e4b90ae0d278bd82e2866",
+        "before_restart": {
+          "event_id": "rbfaf4844d091a1d1488ab0cfb53b5009:3",
+          "action_id": "recover6fcb1bab784e4b90ae0d278bd82e2866",
+          "remote_execution_id": "rbfaf4844d091a1d1488ab0cfb53b5009",
+          "revision": 3,
+          "state": "RUNNING",
+          "executed": true,
+          "outputs": null,
+          "implementation_digest": "sha256:7698ebc29b4f763d057c067dc7a2d1ad280a34344617d745a6225cc9f5b999cb",
+          "started_at": "2026-10-13T10:22:41.271085Z",
+          "finished_at": null,
+          "cleanup_state": "NOT_REQUIRED"
+        },
+        "terminal": {
+          "event_id": "rbfaf4844d091a1d1488ab0cfb53b5009:5",
+          "action_id": "recover6fcb1bab784e4b90ae0d278bd82e2866",
+          "remote_execution_id": "rbfaf4844d091a1d1488ab0cfb53b5009",
+          "revision": 5,
+          "state": "SUCCEEDED",
+          "executed": true,
+          "outputs": {
+            "method": {
+              "digest": "sha256:13fb181855e166c9c5f51373575bb29a06e433a285300219a53d72faabc22e1d",
+              "media_type": "application/json",
+              "path": "/v1/actions/recover6fcb1bab784e4b90ae0d278bd82e2866/outputs/method",
+              "size": 132
+            },
+            "summary": {
+              "digest": "sha256:13122ce7536523f4585353695bff2ace8c5fa287938c82dc4dec8d82e486e6c1",
+              "media_type": "application/json",
+              "path": "/v1/actions/recover6fcb1bab784e4b90ae0d278bd82e2866/outputs/summary",
+              "size": 2404
+            }
+          },
+          "implementation_digest": "sha256:7698ebc29b4f763d057c067dc7a2d1ad280a34344617d745a6225cc9f5b999cb",
+          "started_at": "2026-10-13T10:22:41.271085Z",
+          "finished_at": "2026-10-13T10:22:41.505520Z",
+          "cleanup_state": "NOT_REQUIRED"
+        },
+        "container_count_before": 1,
+        "container_count_after": 1
+      },
+      "security_concurrency": {
+        "authentication": {
+          "wrong_token_status": 401,
+          "untrusted_ca_rejected": true
+        },
+        "parallel_actions": [
+          {
+            "action_id": "parallel362d9e9e5f0e456fa8da0c44dcc5b172",
+            "remote_execution_id": "r9eb20a29b79d3eab47b382c08d9732f7",
+            "state": "SUCCEEDED",
+            "executed": true
+          },
+          {
+            "action_id": "parallel1539cd7d5da446a694b8479bb7612ee3",
+            "remote_execution_id": "r181e0cb29d5bd9e3bf6b35fb7491460b",
+            "state": "SUCCEEDED",
+            "executed": true
+          }
+        ],
+        "unique_actions": true,
+        "unique_executions": true
+      }
+    }
+  },
+  "python": "3.12.8",
+  "local_docker": "28.1.1",
+  "source_sha256": {
+    "packages/contracts/src/platform_contracts/remote.py": "sha256:ec04e53014171776b6253cf85a8d3d90b65331ba5b7359709c28f1a09f3696f6",
+    "packages/platform-core/src/platform_core/domain/remote.py": "sha256:15de4a94774be5ce413d54bf71b26f568972c6fed60eb1b6b0e4115260ac0645",
+    "packages/platform-infrastructure/src/platform_infrastructure/database.py": "sha256:e5bc32759e31b63fec2f93314a555fec2bf008926161dcce556e5ae0f0b5bb51",
+    "packages/platform-infrastructure/src/platform_infrastructure/migrations/versions/0006_service_binding_scope.py": "sha256:0dfeae1c4bedac4dcb92eec075d45f0124f8ddef74873769f7a642c9419a14ba",
+    "apps/execution-service/src/platform_execution/adapters/remote.py": "sha256:fb3a8646679d837661427ad85fddd8d3bbf98d21c78045e002842fd9318035b8",
+    "apps/execution-service/src/platform_execution/application/runner.py": "sha256:f805e802e065b0d48b62b4f6518c4755f24df3b45088ee121cc1790020de4911",
+    "apps/execution-service/src/platform_execution/database.py": "sha256:c910b46e9896e0626b8079a5e24fb8346e5e3dffedc813aeeb9fc487f432ff30",
+    "apps/execution-service/src/platform_execution/migrations/versions/0006_remote_reliability.py": "sha256:d7c140cca01ee9e6173a44d0be9553513918aa2c33eb805e1f97095714587337",
+    "deploy/p43/remote_peer.py": "sha256:04826f45b1825391846eaca7f504397939370fb767c84301fd48068108bfce4b",
+    "scripts/check_p43_reliability.sh": "sha256:0308b5769f1e1ba4ff447cd6bf89035ca8b57641b8476aedaae4548ca63bdc72"
+  },
+  "limits": [
+    "one registered remote target",
+    "direct operator execution only",
+    "single peer; no HA or automatic failover",
+    "no remote CWL nodes or mixed workflow"
+  ]
+}

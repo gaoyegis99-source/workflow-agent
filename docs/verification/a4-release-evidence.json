@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "phase": "Capability Studio A4",
+  "version": "0.14.3",
+  "platform_schema": "0022_operator_proposals",
+  "other_service_migrations": false,
+  "operator_count_before": 11,
+  "operator_count_after": 11,
+  "public_routes": [
+    "POST/GET /api/v1/projects/{project_id}/operator-proposals",
+    "GET /api/v1/projects/{project_id}/operator-proposals/{proposal_id}",
+    "POST /api/v1/projects/{project_id}/operator-proposals/{proposal_id}/revisions",
+    "POST /api/v1/projects/{project_id}/operator-proposals/{proposal_id}/submit"
+  ],
+  "web_review_or_deploy_routes": 0,
+  "tests": {
+    "a4_targeted": {"passed": 17, "failed": 0, "skipped": 0},
+    "authoring_python": {"passed": 69, "failed": 0, "skipped": 0, "seconds": 143.75},
+    "studio": {"passed": 4, "failed": 0},
+    "p7_catalog": {"passed": 24, "failed": 0, "skipped": 0},
+    "p1_rules": {"passed": 13, "failed": 0},
+    "compatibility": {"passed": 919, "failed": 0, "skipped": 0, "seconds": 2407.54},
+    "distribution": {
+      "passed": true,
+      "wheel_count": 11,
+      "postgresql": true,
+      "http": true,
+      "docker": true,
+      "toil": true,
+      "qgis": true
+    },
+    "ruff_check": "PASS",
+    "ruff_format_files": 671
+  },
+  "release": {
+    "lock_schema": 2,
+    "release_digest": "sha256:ad584cb967e4d303073a4f79d3ac32621f277fc548d6a9477d7213206040512d",
+    "source_digest": "sha256:4b32ea2796e3d6e63e5275ec4ac29a4c1f585abce5901671a8c157463eaec440",
+    "source_file_count": 384,
+    "wheel_count": 11,
+    "catalog_count": 3,
+    "image_count": 7,
+    "web_asset_count": 3
+  },
+  "security_invariants": {
+    "project_owner_can_review": false,
+    "project_owner_can_deploy": false,
+    "material_is_executed_or_fetched": false,
+    "approved_implies_executable": false,
+    "deployment_match_is_project_writable": false,
+    "unknown_protocol_or_resource_profile_allowed": false,
+    "same_version_semantic_overwrite_allowed": false
+  },
+  "a5_implemented": false,
+  "result": "PASS"
+}

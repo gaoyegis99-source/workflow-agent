@@ -1,0 +1,4 @@
+local:
+  netloc: weaver.p1.test:4001
+  ades: http://weaver.p1.test:4001
+  default: true

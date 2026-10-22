@@ -1,0 +1,77 @@
+{
+  "name": "table-profile-validate-v1",
+  "entrypoint": "main",
+  "profile": "v7-cwl-p4-v1",
+  "documents": {
+    "main": {
+      "cwlVersion": "v1.2",
+      "class": "Workflow",
+      "inputs": {
+        "table": "File",
+        "profile_parameters": {
+          "type": "record",
+          "name": "TableProfileParameters",
+          "fields": [{"name": "fields", "type": {"type": "array", "items": "string"}}]
+        },
+        "validate_parameters": {
+          "type": "record",
+          "name": "TableValidateParameters",
+          "fields": [{
+            "name": "rules",
+            "type": {
+              "type": "array",
+              "items": {
+                "type": "record",
+                "name": "TableRule",
+                "fields": [
+                  {"name": "rule_id", "type": "string"},
+                  {"name": "kind", "type": "string"},
+                  {"name": "field_id", "type": ["null", "string"]},
+                  {"name": "field_ids", "type": ["null", {"type": "array", "items": "string"}]},
+                  {"name": "expected_type", "type": ["null", "string"]},
+                  {"name": "minimum", "type": ["null", "string"]},
+                  {"name": "maximum", "type": ["null", "string"]},
+                  {"name": "allowed_values", "type": ["null", {"type": "array", "items": "string"}]}
+                ]
+              }
+            }
+          }]
+        }
+      },
+      "outputs": {
+        "profile_report": {"type": "File", "outputSource": "profile/report"},
+        "profile_table": {"type": "File", "outputSource": "profile/table"},
+        "profile_method": {"type": "File", "outputSource": "profile/method"},
+        "validation_report": {"type": "File", "outputSource": "validate/report"},
+        "validation_table": {"type": "File", "outputSource": "validate/table"},
+        "validation_method": {"type": "File", "outputSource": "validate/method"}
+      },
+      "steps": {
+        "profile": {
+          "run": "profile_operator",
+          "in": {"table": "table", "parameters": "profile_parameters"},
+          "out": ["report", "table", "method"]
+        },
+        "validate": {
+          "run": "validate_operator",
+          "in": {"table": "table", "parameters": "validate_parameters"},
+          "out": ["report", "table", "method"]
+        }
+      }
+    }
+  },
+  "implementations": {
+    "profile_operator": {
+      "kind": "OPERATOR",
+      "operator_id": "table-profile",
+      "version_id": "1.0.0",
+      "execution_binding": {"kind": "LOCAL", "implementation_id": "table-profile-native-v1"}
+    },
+    "validate_operator": {
+      "kind": "OPERATOR",
+      "operator_id": "table-validate",
+      "version_id": "1.0.0",
+      "execution_binding": {"kind": "LOCAL", "implementation_id": "table-validate-native-v1"}
+    }
+  }
+}

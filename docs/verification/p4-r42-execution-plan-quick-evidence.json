@@ -1,0 +1,1499 @@
+{
+  "schema_version": 1,
+  "kind": "p4-r42-execution-plan",
+  "version": "0.3.5",
+  "status": "PASS",
+  "finished_at": "2026-10-12T17:19:20.242423+00:00",
+  "profile": "quick",
+  "profile_configuration": {
+    "rows": 20000,
+    "groups": 200,
+    "nodes": 4,
+    "concurrency": 4,
+    "repeats": 1
+  },
+  "r41_baseline": {
+    "source": "docs/verification/p4-r41-engine-binding-evidence.json",
+    "workflow_seconds_median": 96.704482,
+    "maximum_r42_median": 101.539706,
+    "process_group_warnings": 0
+  },
+  "fixed_execution_workers": 2,
+  "disable_chaining": true,
+  "environment": {
+    "python": "3.12.8",
+    "platform": "Linux-5.15.0-139-generic-x86_64-with-glibc2.31",
+    "docker": "28.1.1",
+    "cwl_image": "sha256:899d13285427e3401be761e8e828c852a721843e141af40c41dfd04fc83dfce9",
+    "performance_operator_image": "sha256:68afb403edba4c2ca649061c022813c27436e3a9e73cc37a79399fe6bc43b833"
+  },
+  "source_sha256": {
+    "runtimes/cwl/bridge.py": "6a1063ed4d301ee84fcf71341b398e5bde86599ffaec68c0a32f6001cebe8656",
+    "runtimes/cwl/engine.py": "2578a4df44d57fe784e3633330a395ca904207dcbad6e62e4070a625e37c72d1",
+    "apps/execution-service/src/platform_execution/api.py": "fb91b69f8d7312cf701418f7e5ada36f39009c92428335553de3e7f086d6b3d3",
+    "apps/execution-service/src/platform_execution/trace.py": "a5c291077bcc9ae1aae9d7c0f103f903db58a68345193767f28423d05e421292",
+    "apps/execution-service/src/platform_execution/adapters/docker.py": "c748282fbe7d5412012eb7aa90f169f628c65769b8cc818df2a462b0f1bc3b77",
+    "apps/execution-service/src/platform_execution/application/workflow_runner.py": "c8dcb6d5ae2fd55c331a1513b728ca764acc80d3ee4966db0ccc07fc6ce600a7",
+    "packages/platform-core/src/platform_core/domain/workflows.py": "b66bb9b4a6edc846c6a1182febfc078f5809a9411c899e4b001e71dceef3fd7e",
+    "packages/platform-core/src/platform_core/application/workflow_plan.py": "9286c4b2e16beaa2c7c225bebfa99c433122a99f905149c54da5b0b42ae72d57",
+    "packages/platform-core/src/platform_core/application/workflows.py": "ef7f97985f1ad9788afc2fb1a656048a6084ca6090eb11bd689ec9e22a9ba129",
+    "packages/contracts/src/platform_contracts/workflows.py": "f378ea1250dfabac2ee8ef36545beaaf7bff9ecc3448e486617f050aea31d309",
+    "benchmarks/p4/scheduler_r42.py": "356a5efdab6065839afe9be35e1b7eb15ca8da7f6bc6fc73b26cc7b93a220a97",
+    "tests/performance/probe_worker.py": "47e6a9431c9db6ddb44c8cf540cf5a36a6cac9069a6198275c865c30164c3b49",
+    "scripts/check_p4_scheduler_r42.sh": "46e6bae592623eb6a83c3feac21bc76fbdeff55cd359a4b64c63f07b3a5dee5d"
+  },
+  "runs": [
+    {
+      "configuration": {
+        "id": "R42_EXECUTION_PLAN",
+        "workflow": "nested",
+        "workers": 2,
+        "init": true,
+        "baseline_resources": false,
+        "cwl_image": "sha256:899d13285427e3401be761e8e828c852a721843e141af40c41dfd04fc83dfce9"
+      },
+      "repeat": 1,
+      "dataset": {
+        "rows": 20000,
+        "groups": 200,
+        "bytes": 860019,
+        "sha256": "ca7fa902c80f969bb9e2e02e99ccb1059bb5208ceae02768a6725a574adbaa29",
+        "generation_seconds": 0.17556,
+        "synthetic": true,
+        "generator": "round-robin groups; hourly UTC; y=100+group/100+sample/8",
+        "setup_seconds": 0.596712
+      },
+      "compiled_document_count": 5,
+      "compiled_invocation_count": 1,
+      "package_validation_seconds": 2.548728,
+      "workflow": {
+        "workflow_seconds": 60.162161,
+        "first_node_seconds": 11.492725,
+        "nodes_started": 4,
+        "peak_in_flight_observed": 4,
+        "poll_samples": 289,
+        "container_seconds": {
+          "min": 30.539507,
+          "mean": 30.55111,
+          "p50": 30.550277,
+          "p95": 30.563131,
+          "max": 30.563131,
+          "sum": 122.204441,
+          "compute_window": 32.552379,
+          "effective_parallelism": 3.754086,
+          "overlap_peak": 4,
+          "timeline": [
+            {
+              "start_offset": 0.0,
+              "duration": 30.551526
+            },
+            {
+              "start_offset": 0.038201,
+              "duration": 30.539507
+            },
+            {
+              "start_offset": 1.070058,
+              "duration": 30.563131
+            },
+            {
+              "start_offset": 2.002102,
+              "duration": 30.550277
+            }
+          ]
+        },
+        "effective_parallelism_over_workflow": 2.031251,
+        "engine": {
+          "epochs": 1,
+          "container_seconds_total": 58.413908,
+          "process_group_warnings": 0,
+          "failed_workers": 0,
+          "running_containers": 0,
+          "nonzero_container_pids": 0,
+          "processes_after_exit": 0
+        },
+        "budget": {
+          "execution_count": 4,
+          "max_in_flight": 4,
+          "task_id": "f938c9b241674f1b872e5fe02ea1d7c5",
+          "used": 4,
+          "reserved": 0,
+          "in_flight": 0
+        }
+      },
+      "average_compute_parallelism": 3.754086,
+      "slot_utilization_percent": 93.85215,
+      "trace": {
+        "event_count": 72,
+        "required_event_completeness": 1.0,
+        "query_ms": 8.078221,
+        "write_probe_ms": {
+          "count": 32,
+          "min": 1.455649,
+          "median": 1.659695,
+          "p95": 2.714282,
+          "p99": 2.849929,
+          "max": 2.849929
+        },
+        "estimated_total_write_ms": 119.49804,
+        "estimated_overhead_percent": 0.198627,
+        "engine_start_to_first_bridge_ms": 9618.68967,
+        "engine_start_to_first_node_accept_ms": 9706.288767,
+        "accepted_to_first_claim_ms": {
+          "count": 4,
+          "min": 88.215368,
+          "median": 138.315853,
+          "p95": 185.647699,
+          "p99": 185.647699,
+          "max": 185.647699
+        },
+        "permit_http_ms": {
+          "count": 8,
+          "min": 17.432282,
+          "median": 22.187451,
+          "p95": 30.830582,
+          "p99": 30.830582,
+          "max": 30.830582
+        },
+        "permit_to_container_start_ms": {
+          "count": 4,
+          "min": 522.02207,
+          "median": 542.761587,
+          "p95": 565.77518,
+          "p99": 565.77518,
+          "max": 565.77518
+        },
+        "container_exit_to_bridge_return_ms": {
+          "count": 4,
+          "min": 390.112785,
+          "median": 468.336461,
+          "p95": 1209.190174,
+          "p99": 1209.190174,
+          "max": 1209.190174
+        },
+        "previous_container_exit_to_next_node_accept_ms": null,
+        "container_start_interval_ms": {
+          "count": 3,
+          "min": 43.340998,
+          "median": 920.357968,
+          "p95": 1031.796535,
+          "p99": 1031.796535,
+          "max": 1031.796535
+        },
+        "last_bridge_to_engine_exit_ms": 14546.744849,
+        "engine_exit_to_gather_ms": 11.890185,
+        "last_bridge_to_gather_ms": 14558.635034,
+        "gather_to_publish_ms": 394.061583,
+        "events": [
+          {
+            "event_key": "ac14716115e3833b0af8b5ee2c9520ec898f6a892fa7db82aa840abfc43e86c1",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": null,
+            "engine_epoch": 0,
+            "worker_generation": 2,
+            "source": "PLATFORM_CLIENT",
+            "event_type": "PERMIT_REQUESTED",
+            "source_monotonic_ns": 6737761653469335,
+            "duration_ms": null,
+            "attributes": {
+              "phase": "PREPARED"
+            },
+            "observed_at": "2026-10-12T17:18:18.683140+00:00"
+          },
+          {
+            "event_key": "9d7b1d14688122b872058dc6ac19220ea941c59f712bd5212ca35d99b3bf1e56",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": null,
+            "engine_epoch": 0,
+            "worker_generation": 2,
+            "source": "PLATFORM_CLIENT",
+            "event_type": "PERMIT_ALLOWED",
+            "source_monotonic_ns": 6737761681449317,
+            "duration_ms": 27.986224,
+            "attributes": {
+              "decision": "ALLOW"
+            },
+            "observed_at": "2026-10-12T17:18:18.711269+00:00"
+          },
+          {
+            "event_key": "68a9457bbcbd16bc015cf9f02fdb9959a13ef875fb5177a84261a843f77741e4",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": null,
+            "engine_epoch": 1,
+            "worker_generation": 2,
+            "source": "ENGINE",
+            "event_type": "ENGINE_CREATED",
+            "source_monotonic_ns": 6737761750694765,
+            "duration_ms": null,
+            "attributes": {
+              "container_id": "c1fa72c39b309544886996e8a1aea49d4cd6f1277f702de569abfecf1af41377"
+            },
+            "observed_at": "2026-10-12T17:18:18.780033+00:00"
+          },
+          {
+            "event_key": "c374c4c56d7788ab237af208cc910c762075e98d9dd495a3a2d0845ddee59c05",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": null,
+            "engine_epoch": 1,
+            "worker_generation": 3,
+            "source": "ENGINE",
+            "event_type": "ENGINE_STARTED",
+            "source_monotonic_ns": 6737762144512616,
+            "duration_ms": null,
+            "attributes": {
+              "container_id": "c1fa72c39b309544886996e8a1aea49d4cd6f1277f702de569abfecf1af41377"
+            },
+            "observed_at": "2026-10-12T17:18:19.174325+00:00"
+          },
+          {
+            "event_key": "8b544f5c4901b867640e1ccf56b347c964b986c5f3a92493a5b63f462dc7b59f",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_bacb10f8bfcf3ceb762e2a15c17fb0c7411137b77571bc1924ee863a4b74b93d",
+            "engine_epoch": 1,
+            "worker_generation": null,
+            "source": "BRIDGE",
+            "event_type": "BRIDGE_STARTED",
+            "source_monotonic_ns": 6737771763202286,
+            "duration_ms": null,
+            "attributes": {
+              "bridge_instance_id": "766247588da6cef549e40995451da576"
+            },
+            "observed_at": "2026-10-12T17:18:28.895649+00:00"
+          },
+          {
+            "event_key": "c310e04e6f84548a01d745e88f1c777695886a5f43f65105e54c9725e1c41a5f",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_bacb10f8bfcf3ceb762e2a15c17fb0c7411137b77571bc1924ee863a4b74b93d",
+            "engine_epoch": 1,
+            "worker_generation": null,
+            "source": "BRIDGE",
+            "event_type": "ENGINE_BINDING_OBSERVED",
+            "source_monotonic_ns": 6737771850801383,
+            "duration_ms": null,
+            "attributes": {
+              "kind": "toil",
+              "binding_id": "kind-CWLJob/instance-i3kn9trb"
+            },
+            "observed_at": "2026-10-12T17:18:28.898882+00:00"
+          },
+          {
+            "event_key": "f32f83f3e1900c97be32ae58a825ab63b87dc1a27c9c017f97d7eac63ea218be",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_23e921d7ca304556900613c2c79385878788df38273368f6201257bf7b767a14",
+            "engine_epoch": 1,
+            "worker_generation": null,
+            "source": "BRIDGE",
+            "event_type": "BRIDGE_STARTED",
+            "source_monotonic_ns": 6737771806002171,
+            "duration_ms": null,
+            "attributes": {
+              "bridge_instance_id": "52af096b0e42d70e8d59252fd20ec42b"
+            },
+            "observed_at": "2026-10-12T17:18:28.899111+00:00"
+          },
+          {
+            "event_key": "b4b0c47ae6046e27bf2d230a14ac726b90d356d8915d0d980ec030313ffb655d",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_bacb10f8bfcf3ceb762e2a15c17fb0c7411137b77571bc1924ee863a4b74b93d",
+            "engine_epoch": 1,
+            "worker_generation": null,
+            "source": "EXECUTION_API",
+            "event_type": "NODE_ACCEPTED",
+            "source_monotonic_ns": 6737771850801383,
+            "duration_ms": null,
+            "attributes": {
+              "created": true
+            },
+            "observed_at": "2026-10-12T17:18:28.901233+00:00"
+          },
+          {
+            "event_key": "816dc5237d4307864b89008d3c61d940d77485d00b3f3d748c23e21847af2896",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_23e921d7ca304556900613c2c79385878788df38273368f6201257bf7b767a14",
+            "engine_epoch": 1,
+            "worker_generation": null,
+            "source": "BRIDGE",
+            "event_type": "ENGINE_BINDING_OBSERVED",
+            "source_monotonic_ns": 6737771851259565,
+            "duration_ms": null,
+            "attributes": {
+              "kind": "toil",
+              "binding_id": "kind-CWLJob/instance-qt_r8dkg"
+            },
+            "observed_at": "2026-10-12T17:18:28.902904+00:00"
+          },
+          {
+            "event_key": "b462359e82655b88c0894d6250adf1143ed1611ac695b4d5d1682396b897da8a",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_23e921d7ca304556900613c2c79385878788df38273368f6201257bf7b767a14",
+            "engine_epoch": 1,
+            "worker_generation": null,
+            "source": "EXECUTION_API",
+            "event_type": "NODE_ACCEPTED",
+            "source_monotonic_ns": 6737771851259565,
+            "duration_ms": null,
+            "attributes": {
+              "created": true
+            },
+            "observed_at": "2026-10-12T17:18:28.905986+00:00"
+          },
+          {
+            "event_key": "43c1bc8a11eeeed93c24c9e877d9226a110a880da99e59e2eadd53d30bce1a81",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_bacb10f8bfcf3ceb762e2a15c17fb0c7411137b77571bc1924ee863a4b74b93d",
+            "engine_epoch": 1,
+            "worker_generation": 1,
+            "source": "EXECUTION_WORKER",
+            "event_type": "EXECUTION_CLAIMED",
+            "source_monotonic_ns": 6737771999845233,
+            "duration_ms": null,
+            "attributes": {
+              "phase": "ACCEPTED"
+            },
+            "observed_at": "2026-10-12T17:18:29.033711+00:00"
+          },
+          {
+            "event_key": "41a642d9b046c76e092a48ceb6533dd23b004ddefee7b45905d90988f2fcf1b6",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_23e921d7ca304556900613c2c79385878788df38273368f6201257bf7b767a14",
+            "engine_epoch": 1,
+            "worker_generation": 1,
+            "source": "EXECUTION_WORKER",
+            "event_type": "EXECUTION_CLAIMED",
+            "source_monotonic_ns": 6737772036907264,
+            "duration_ms": null,
+            "attributes": {
+              "phase": "ACCEPTED"
+            },
+            "observed_at": "2026-10-12T17:18:29.065426+00:00"
+          },
+          {
+            "event_key": "324a3d679d979e5658fe096037bebbb58471a75e8628ea0dcb503b90d0126127",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_bacb10f8bfcf3ceb762e2a15c17fb0c7411137b77571bc1924ee863a4b74b93d",
+            "engine_epoch": 1,
+            "worker_generation": 2,
+            "source": "EXECUTION_WORKER",
+            "event_type": "PERMIT_REQUESTED",
+            "source_monotonic_ns": 6737772476753136,
+            "duration_ms": null,
+            "attributes": {
+              "phase": "PREPARED"
+            },
+            "observed_at": "2026-10-12T17:18:29.506520+00:00"
+          },
+          {
+            "event_key": "0a4ad6780ca0724d09d896772b1da55475acc9302701221d56ebbb21025d37fc",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_bacb10f8bfcf3ceb762e2a15c17fb0c7411137b77571bc1924ee863a4b74b93d",
+            "engine_epoch": 1,
+            "worker_generation": 2,
+            "source": "EXECUTION_WORKER",
+            "event_type": "PERMIT_ALLOWED",
+            "source_monotonic_ns": 6737772507575302,
+            "duration_ms": 30.830582,
+            "attributes": {
+              "decision": "ALLOW"
+            },
+            "observed_at": "2026-10-12T17:18:29.537357+00:00"
+          },
+          {
+            "event_key": "167c1c86332e53512394b1cf1d515a567f17fdadee49f08c148786134041ffd1",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_23e921d7ca304556900613c2c79385878788df38273368f6201257bf7b767a14",
+            "engine_epoch": 1,
+            "worker_generation": 2,
+            "source": "EXECUTION_WORKER",
+            "event_type": "PERMIT_REQUESTED",
+            "source_monotonic_ns": 6737772508212628,
+            "duration_ms": null,
+            "attributes": {
+              "phase": "PREPARED"
+            },
+            "observed_at": "2026-10-12T17:18:29.537740+00:00"
+          },
+          {
+            "event_key": "6879de91b4fa0e038603c38a6c4c4387c26a5bc96ddf16cab84767fb9fb0a589",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_23e921d7ca304556900613c2c79385878788df38273368f6201257bf7b767a14",
+            "engine_epoch": 1,
+            "worker_generation": 2,
+            "source": "EXECUTION_WORKER",
+            "event_type": "PERMIT_ALLOWED",
+            "source_monotonic_ns": 6737772530753974,
+            "duration_ms": 22.59765,
+            "attributes": {
+              "decision": "ALLOW"
+            },
+            "observed_at": "2026-10-12T17:18:29.560214+00:00"
+          },
+          {
+            "event_key": "5d76977753ad68ea37c23915db13db9303dd1cdc6c125f2e27883d536c2e02c0",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_bacb10f8bfcf3ceb762e2a15c17fb0c7411137b77571bc1924ee863a4b74b93d",
+            "engine_epoch": 1,
+            "worker_generation": 2,
+            "source": "EXECUTION_WORKER",
+            "event_type": "CONTAINER_CREATED",
+            "source_monotonic_ns": 6737772581498986,
+            "duration_ms": null,
+            "attributes": {
+              "container_id": "94a858236ef1d200c673bd9ed6abb1a594f17a24b55c36830ebabb4d91391784"
+            },
+            "observed_at": "2026-10-12T17:18:29.610745+00:00"
+          },
+          {
+            "event_key": "600373f054d098f94cf874e2a9b06aec9ed53aa11bccd46d61cb301f44113bcd",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_23e921d7ca304556900613c2c79385878788df38273368f6201257bf7b767a14",
+            "engine_epoch": 1,
+            "worker_generation": 2,
+            "source": "EXECUTION_WORKER",
+            "event_type": "CONTAINER_CREATED",
+            "source_monotonic_ns": 6737772597243031,
+            "duration_ms": null,
+            "attributes": {
+              "container_id": "ef7736f6be0d91ab0fa067b16843f377caf6ab9d7361edcd0b3c0e5904f4b5c1"
+            },
+            "observed_at": "2026-10-12T17:18:29.625790+00:00"
+          },
+          {
+            "event_key": "ce86e9e5fe9c38d1b48cc09404c85ddfad2f573ce599b72af593206f03362f69",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_bacb10f8bfcf3ceb762e2a15c17fb0c7411137b77571bc1924ee863a4b74b93d",
+            "engine_epoch": 1,
+            "worker_generation": 3,
+            "source": "EXECUTION_WORKER",
+            "event_type": "PERMIT_REQUESTED",
+            "source_monotonic_ns": 6737772847242376,
+            "duration_ms": null,
+            "attributes": {
+              "phase": "CREATED"
+            },
+            "observed_at": "2026-10-12T17:18:29.877133+00:00"
+          },
+          {
+            "event_key": "b00f066e34a0bd62860081b934f6e1fbe907057bf45b89d46e49e3d531f64b45",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_bacb10f8bfcf3ceb762e2a15c17fb0c7411137b77571bc1924ee863a4b74b93d",
+            "engine_epoch": 1,
+            "worker_generation": 3,
+            "source": "EXECUTION_WORKER",
+            "event_type": "PERMIT_ALLOWED",
+            "source_monotonic_ns": 6737772867192198,
+            "duration_ms": 19.953599,
+            "attributes": {
+              "decision": "ALLOW"
+            },
+            "observed_at": "2026-10-12T17:18:29.897015+00:00"
+          },
+          {
+            "event_key": "327ac50dc654d576ac09425759b716eb422706a6c50f462ab48619d79eb07be1",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_23e921d7ca304556900613c2c79385878788df38273368f6201257bf7b767a14",
+            "engine_epoch": 1,
+            "worker_generation": 3,
+            "source": "EXECUTION_WORKER",
+            "event_type": "PERMIT_REQUESTED",
+            "source_monotonic_ns": 6737772885168817,
+            "duration_ms": null,
+            "attributes": {
+              "phase": "CREATED"
+            },
+            "observed_at": "2026-10-12T17:18:29.914292+00:00"
+          },
+          {
+            "event_key": "5183007f10618a005ca950f309eae40648705e537bb9c3b2705cc247f00f3551",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_23e921d7ca304556900613c2c79385878788df38273368f6201257bf7b767a14",
+            "engine_epoch": 1,
+            "worker_generation": 3,
+            "source": "EXECUTION_WORKER",
+            "event_type": "PERMIT_ALLOWED",
+            "source_monotonic_ns": 6737772902598742,
+            "duration_ms": 17.432282,
+            "attributes": {
+              "decision": "ALLOW"
+            },
+            "observed_at": "2026-10-12T17:18:29.931540+00:00"
+          },
+          {
+            "event_key": "258a6d8e87588a1593ec814fba7aba50d73e802feb0b7cf624232c88fb52a735",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_ad9257ed8cf4d104ecea77e61967b2956d762369e4eca1ce28682111e63488a1",
+            "engine_epoch": 1,
+            "worker_generation": null,
+            "source": "BRIDGE",
+            "event_type": "BRIDGE_STARTED",
+            "source_monotonic_ns": 6737772918875424,
+            "duration_ms": null,
+            "attributes": {
+              "bridge_instance_id": "1578b2f86f657b313e3f4283279bd5e3"
+            },
+            "observed_at": "2026-10-12T17:18:30.001838+00:00"
+          },
+          {
+            "event_key": "7f0bd2f5f36f9c1a82a27dd2748efd13eee99606d0ffdc1115b08a7e5cdf1a5e",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_ad9257ed8cf4d104ecea77e61967b2956d762369e4eca1ce28682111e63488a1",
+            "engine_epoch": 1,
+            "worker_generation": null,
+            "source": "BRIDGE",
+            "event_type": "ENGINE_BINDING_OBSERVED",
+            "source_monotonic_ns": 6737772962664865,
+            "duration_ms": null,
+            "attributes": {
+              "kind": "toil",
+              "binding_id": "kind-CWLJob/instance-5mz5k0jm"
+            },
+            "observed_at": "2026-10-12T17:18:30.003946+00:00"
+          },
+          {
+            "event_key": "b4b4c084e0785ff820e9363cf20bca3232bfb3c82fa7f971d89c31a8fe1bd7d9",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_ad9257ed8cf4d104ecea77e61967b2956d762369e4eca1ce28682111e63488a1",
+            "engine_epoch": 1,
+            "worker_generation": null,
+            "source": "EXECUTION_API",
+            "event_type": "NODE_ACCEPTED",
+            "source_monotonic_ns": 6737772962664865,
+            "duration_ms": null,
+            "attributes": {
+              "created": true
+            },
+            "observed_at": "2026-10-12T17:18:30.006040+00:00"
+          },
+          {
+            "event_key": "c76256f5c6706b2ccf011bda2f3cc81104288479f2ca4df6e6b0fb18322d1c12",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_bacb10f8bfcf3ceb762e2a15c17fb0c7411137b77571bc1924ee863a4b74b93d",
+            "engine_epoch": 1,
+            "worker_generation": 3,
+            "source": "EXECUTION_WORKER",
+            "event_type": "CONTAINER_STARTED",
+            "source_monotonic_ns": 6737773029597372,
+            "duration_ms": null,
+            "attributes": {
+              "container_id": "94a858236ef1d200c673bd9ed6abb1a594f17a24b55c36830ebabb4d91391784"
+            },
+            "observed_at": "2026-10-12T17:18:30.058728+00:00"
+          },
+          {
+            "event_key": "9aebc9bbf0a28099b9a35b435931e94c55dd0b9ba1d24c7c78421102e4af6e16",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_23e921d7ca304556900613c2c79385878788df38273368f6201257bf7b767a14",
+            "engine_epoch": 1,
+            "worker_generation": 3,
+            "source": "EXECUTION_WORKER",
+            "event_type": "CONTAINER_STARTED",
+            "source_monotonic_ns": 6737773072938370,
+            "duration_ms": null,
+            "attributes": {
+              "container_id": "ef7736f6be0d91ab0fa067b16843f377caf6ab9d7361edcd0b3c0e5904f4b5c1"
+            },
+            "observed_at": "2026-10-12T17:18:30.102059+00:00"
+          },
+          {
+            "event_key": "9d7e88fccd7d80f71a4d55ec6023d487ac6dadab7faa81e5df254be471ec1661",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_ad9257ed8cf4d104ecea77e61967b2956d762369e4eca1ce28682111e63488a1",
+            "engine_epoch": 1,
+            "worker_generation": 1,
+            "source": "EXECUTION_WORKER",
+            "event_type": "EXECUTION_CLAIMED",
+            "source_monotonic_ns": 6737773090252721,
+            "duration_ms": null,
+            "attributes": {
+              "phase": "ACCEPTED"
+            },
+            "observed_at": "2026-10-12T17:18:30.118982+00:00"
+          },
+          {
+            "event_key": "a9d335d617a4333f67ea3b55d97b522ffef2a726d3f7e0e8df5572514bfd4d0e",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_bacb10f8bfcf3ceb762e2a15c17fb0c7411137b77571bc1924ee863a4b74b93d",
+            "engine_epoch": 1,
+            "worker_generation": 4,
+            "source": "EXECUTION_WORKER",
+            "event_type": "NODE_OBSERVATION_REPORTED",
+            "source_monotonic_ns": 6737773311301062,
+            "duration_ms": null,
+            "attributes": {
+              "state": "RUNNING",
+              "revision": 2
+            },
+            "observed_at": "2026-10-12T17:18:30.340280+00:00"
+          },
+          {
+            "event_key": "80b49590b144485e81fac74cb172e14d5385f8e49736621bc392845d857e51ca",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_23e921d7ca304556900613c2c79385878788df38273368f6201257bf7b767a14",
+            "engine_epoch": 1,
+            "worker_generation": 4,
+            "source": "EXECUTION_WORKER",
+            "event_type": "NODE_OBSERVATION_REPORTED",
+            "source_monotonic_ns": 6737773382238060,
+            "duration_ms": null,
+            "attributes": {
+              "state": "RUNNING",
+              "revision": 2
+            },
+            "observed_at": "2026-10-12T17:18:30.411690+00:00"
+          },
+          {
+            "event_key": "9a70cf37ee7ae171744e260cc61e4ccfe011ff160ac653c1af6815ab94d1980e",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_ad9257ed8cf4d104ecea77e61967b2956d762369e4eca1ce28682111e63488a1",
+            "engine_epoch": 1,
+            "worker_generation": 2,
+            "source": "EXECUTION_WORKER",
+            "event_type": "PERMIT_REQUESTED",
+            "source_monotonic_ns": 6737773537117597,
+            "duration_ms": null,
+            "attributes": {
+              "phase": "PREPARED"
+            },
+            "observed_at": "2026-10-12T17:18:30.566431+00:00"
+          },
+          {
+            "event_key": "9a2efe71e80a2a6ead62449d654d096e74a389cc91c81409d7e1fe83d9de2e05",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_ad9257ed8cf4d104ecea77e61967b2956d762369e4eca1ce28682111e63488a1",
+            "engine_epoch": 1,
+            "worker_generation": 2,
+            "source": "EXECUTION_WORKER",
+            "event_type": "PERMIT_ALLOWED",
+            "source_monotonic_ns": 6737773561396128,
+            "duration_ms": 24.283994,
+            "attributes": {
+              "decision": "ALLOW"
+            },
+            "observed_at": "2026-10-12T17:18:30.589943+00:00"
+          },
+          {
+            "event_key": "e5f0c31b4f4ea8ff3e484ee0ac4b17c5432a1b06e38ee7fb769e1a33573216bc",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_ad9257ed8cf4d104ecea77e61967b2956d762369e4eca1ce28682111e63488a1",
+            "engine_epoch": 1,
+            "worker_generation": 2,
+            "source": "EXECUTION_WORKER",
+            "event_type": "CONTAINER_CREATED",
+            "source_monotonic_ns": 6737773634838721,
+            "duration_ms": null,
+            "attributes": {
+              "container_id": "77421ec3e6dcb384e43001a8ae28d60977578bdc75d42ac0c80acd2eafa80677"
+            },
+            "observed_at": "2026-10-12T17:18:30.664364+00:00"
+          },
+          {
+            "event_key": "d3826abf1f0a0598400edabde0fa0539b4abdfbcabf2fc686ba682cc8101149f",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_33839646056138996e7c86b557c8c13b9db22d035eca071f0c1c393488717868",
+            "engine_epoch": 1,
+            "worker_generation": null,
+            "source": "BRIDGE",
+            "event_type": "BRIDGE_STARTED",
+            "source_monotonic_ns": 6737773856669416,
+            "duration_ms": null,
+            "attributes": {
+              "bridge_instance_id": "bccd9547991b9107256c7beb3bab0eb6"
+            },
+            "observed_at": "2026-10-12T17:18:30.937011+00:00"
+          },
+          {
+            "event_key": "6c1d689a0bcf1253f75865e9b9dabd08b6ddc74502ac8d9aa9dd991a6dacfa92",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_33839646056138996e7c86b557c8c13b9db22d035eca071f0c1c393488717868",
+            "engine_epoch": 1,
+            "worker_generation": null,
+            "source": "BRIDGE",
+            "event_type": "ENGINE_BINDING_OBSERVED",
+            "source_monotonic_ns": 6737773898183319,
+            "duration_ms": null,
+            "attributes": {
+              "kind": "toil",
+              "binding_id": "kind-CWLJob/instance-lwy04ib9"
+            },
+            "observed_at": "2026-10-12T17:18:30.939429+00:00"
+          },
+          {
+            "event_key": "70490c802a1953f920230e152fb4fdc2737da9a90a8a8569e961945b930539a0",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_33839646056138996e7c86b557c8c13b9db22d035eca071f0c1c393488717868",
+            "engine_epoch": 1,
+            "worker_generation": null,
+            "source": "EXECUTION_API",
+            "event_type": "NODE_ACCEPTED",
+            "source_monotonic_ns": 6737773898183319,
+            "duration_ms": null,
+            "attributes": {
+              "created": true
+            },
+            "observed_at": "2026-10-12T17:18:30.943679+00:00"
+          },
+          {
+            "event_key": "b528d6db737d1e1a738ba3f7c58199b8887bddd9845b5b2ed4c0a9e48338ce1c",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_ad9257ed8cf4d104ecea77e61967b2956d762369e4eca1ce28682111e63488a1",
+            "engine_epoch": 1,
+            "worker_generation": 3,
+            "source": "EXECUTION_WORKER",
+            "event_type": "PERMIT_REQUESTED",
+            "source_monotonic_ns": 6737773915801166,
+            "duration_ms": null,
+            "attributes": {
+              "phase": "CREATED"
+            },
+            "observed_at": "2026-10-12T17:18:30.944949+00:00"
+          },
+          {
+            "event_key": "ab46be79ab728d1999f514da9593e9ce28c2544fa966ccf9f3125bc6232fdeb4",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_ad9257ed8cf4d104ecea77e61967b2956d762369e4eca1ce28682111e63488a1",
+            "engine_epoch": 1,
+            "worker_generation": 3,
+            "source": "EXECUTION_WORKER",
+            "event_type": "PERMIT_ALLOWED",
+            "source_monotonic_ns": 6737773937121111,
+            "duration_ms": 21.321599,
+            "attributes": {
+              "decision": "ALLOW"
+            },
+            "observed_at": "2026-10-12T17:18:30.965719+00:00"
+          },
+          {
+            "event_key": "f1fcba050f8c6fd8e2cffcb064eb9d3ac96df0b18a86bd786b34783afd7d5e86",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_33839646056138996e7c86b557c8c13b9db22d035eca071f0c1c393488717868",
+            "engine_epoch": 1,
+            "worker_generation": 1,
+            "source": "EXECUTION_WORKER",
+            "event_type": "EXECUTION_CLAIMED",
+            "source_monotonic_ns": 6737773986398687,
+            "duration_ms": null,
+            "attributes": {
+              "phase": "ACCEPTED"
+            },
+            "observed_at": "2026-10-12T17:18:31.014689+00:00"
+          },
+          {
+            "event_key": "d6af3447f3e2f18d63def901933626d9e481ad8a792564bfaeb2585981c9c6c4",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_ad9257ed8cf4d104ecea77e61967b2956d762369e4eca1ce28682111e63488a1",
+            "engine_epoch": 1,
+            "worker_generation": 3,
+            "source": "EXECUTION_WORKER",
+            "event_type": "CONTAINER_STARTED",
+            "source_monotonic_ns": 6737774104734905,
+            "duration_ms": null,
+            "attributes": {
+              "container_id": "77421ec3e6dcb384e43001a8ae28d60977578bdc75d42ac0c80acd2eafa80677"
+            },
+            "observed_at": "2026-10-12T17:18:31.134011+00:00"
+          },
+          {
+            "event_key": "a7555f2da76d4968003d3d529d695e40d4b7514b0d913ce77b890f7037e0b860",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_33839646056138996e7c86b557c8c13b9db22d035eca071f0c1c393488717868",
+            "engine_epoch": 1,
+            "worker_generation": 2,
+            "source": "EXECUTION_WORKER",
+            "event_type": "PERMIT_REQUESTED",
+            "source_monotonic_ns": 6737774431202025,
+            "duration_ms": null,
+            "attributes": {
+              "phase": "PREPARED"
+            },
+            "observed_at": "2026-10-12T17:18:31.460929+00:00"
+          },
+          {
+            "event_key": "0b7532f289c86c727b015f6efd53b46b4a0bf6adff2902e895d62d8b20f669ab",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_33839646056138996e7c86b557c8c13b9db22d035eca071f0c1c393488717868",
+            "engine_epoch": 1,
+            "worker_generation": 2,
+            "source": "EXECUTION_WORKER",
+            "event_type": "PERMIT_ALLOWED",
+            "source_monotonic_ns": 6737774459317693,
+            "duration_ms": 28.118986,
+            "attributes": {
+              "decision": "ALLOW"
+            },
+            "observed_at": "2026-10-12T17:18:31.488447+00:00"
+          },
+          {
+            "event_key": "0c02007091553c00080f352ed872c4aae0b0c11f0ae567353f670d4527aaf2d5",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_ad9257ed8cf4d104ecea77e61967b2956d762369e4eca1ce28682111e63488a1",
+            "engine_epoch": 1,
+            "worker_generation": 4,
+            "source": "EXECUTION_WORKER",
+            "event_type": "NODE_OBSERVATION_REPORTED",
+            "source_monotonic_ns": 6737774481266924,
+            "duration_ms": null,
+            "attributes": {
+              "state": "RUNNING",
+              "revision": 2
+            },
+            "observed_at": "2026-10-12T17:18:31.509940+00:00"
+          },
+          {
+            "event_key": "13a4bbeee78f112ec48729f0d495e49e6d23bd45bdf4834db7a0310dd94d7a2a",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_33839646056138996e7c86b557c8c13b9db22d035eca071f0c1c393488717868",
+            "engine_epoch": 1,
+            "worker_generation": 2,
+            "source": "EXECUTION_WORKER",
+            "event_type": "CONTAINER_CREATED",
+            "source_monotonic_ns": 6737774523489323,
+            "duration_ms": null,
+            "attributes": {
+              "container_id": "76894490e782e7c65819a4ec93ebf9988fbe6125007dc0bf5cd2477a5ee2f40d"
+            },
+            "observed_at": "2026-10-12T17:18:31.552812+00:00"
+          },
+          {
+            "event_key": "26d8455698ec141b9c76961bb9699b8ba28a2ee5d84e8a73c9e4a4c4bd9062a9",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_33839646056138996e7c86b557c8c13b9db22d035eca071f0c1c393488717868",
+            "engine_epoch": 1,
+            "worker_generation": 3,
+            "source": "EXECUTION_WORKER",
+            "event_type": "PERMIT_REQUESTED",
+            "source_monotonic_ns": 6737774845257582,
+            "duration_ms": null,
+            "attributes": {
+              "phase": "CREATED"
+            },
+            "observed_at": "2026-10-12T17:18:31.875210+00:00"
+          },
+          {
+            "event_key": "fdefaa7d02b74c86c1c80d206588e5e3697755d050871a04985347dd30f718fa",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_33839646056138996e7c86b557c8c13b9db22d035eca071f0c1c393488717868",
+            "engine_epoch": 1,
+            "worker_generation": 3,
+            "source": "EXECUTION_WORKER",
+            "event_type": "PERMIT_ALLOWED",
+            "source_monotonic_ns": 6737774867028352,
+            "duration_ms": 21.777251,
+            "attributes": {
+              "decision": "ALLOW"
+            },
+            "observed_at": "2026-10-12T17:18:31.895710+00:00"
+          },
+          {
+            "event_key": "875f98afa7847be78eb61d53bf87b1228ae27f841648bf102530fe9412a56971",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_33839646056138996e7c86b557c8c13b9db22d035eca071f0c1c393488717868",
+            "engine_epoch": 1,
+            "worker_generation": 3,
+            "source": "EXECUTION_WORKER",
+            "event_type": "CONTAINER_STARTED",
+            "source_monotonic_ns": 6737775025092873,
+            "duration_ms": null,
+            "attributes": {
+              "container_id": "76894490e782e7c65819a4ec93ebf9988fbe6125007dc0bf5cd2477a5ee2f40d"
+            },
+            "observed_at": "2026-10-12T17:18:32.054454+00:00"
+          },
+          {
+            "event_key": "8031e39148f91ee9a9c99193542fbc42914a305314b3d7053d25a9504c9368ed",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_33839646056138996e7c86b557c8c13b9db22d035eca071f0c1c393488717868",
+            "engine_epoch": 1,
+            "worker_generation": 4,
+            "source": "EXECUTION_WORKER",
+            "event_type": "NODE_OBSERVATION_REPORTED",
+            "source_monotonic_ns": 6737775346986909,
+            "duration_ms": null,
+            "attributes": {
+              "state": "RUNNING",
+              "revision": 2
+            },
+            "observed_at": "2026-10-12T17:18:32.376400+00:00"
+          },
+          {
+            "event_key": "e81aa2c72b1b60b439d5ad52db2b727c0f9f36862e120188848263b3c635f4b2",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_bacb10f8bfcf3ceb762e2a15c17fb0c7411137b77571bc1924ee863a4b74b93d",
+            "engine_epoch": 1,
+            "worker_generation": 105,
+            "source": "EXECUTION_WORKER",
+            "event_type": "CONTAINER_EXITED",
+            "source_monotonic_ns": 6737803515845945,
+            "duration_ms": null,
+            "attributes": {
+              "exit_code": 0,
+              "container_id": "94a858236ef1d200c673bd9ed6abb1a594f17a24b55c36830ebabb4d91391784"
+            },
+            "observed_at": "2026-10-12T17:19:00.544627+00:00"
+          },
+          {
+            "event_key": "86899aaebc91c8966e5b0064f7e813dbcede65b41191e4de708d53383ddf0bf7",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_bacb10f8bfcf3ceb762e2a15c17fb0c7411137b77571bc1924ee863a4b74b93d",
+            "engine_epoch": 1,
+            "worker_generation": 105,
+            "source": "EXECUTION_WORKER",
+            "event_type": "OUTPUT_VERIFIED",
+            "source_monotonic_ns": 6737803519196714,
+            "duration_ms": null,
+            "attributes": {
+              "file_count": 4
+            },
+            "observed_at": "2026-10-12T17:19:00.547283+00:00"
+          },
+          {
+            "event_key": "55f2d5b40c57075e20c6eaf60a89840415dff3e475f2eb9b9c13bf2097e6e214",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_23e921d7ca304556900613c2c79385878788df38273368f6201257bf7b767a14",
+            "engine_epoch": 1,
+            "worker_generation": 106,
+            "source": "EXECUTION_WORKER",
+            "event_type": "CONTAINER_EXITED",
+            "source_monotonic_ns": 6737803804881271,
+            "duration_ms": null,
+            "attributes": {
+              "exit_code": 0,
+              "container_id": "ef7736f6be0d91ab0fa067b16843f377caf6ab9d7361edcd0b3c0e5904f4b5c1"
+            },
+            "observed_at": "2026-10-12T17:19:00.834312+00:00"
+          },
+          {
+            "event_key": "cd5a4746d6afa7b647fee986f16e45f613dc4b816334c83b1fbbd747e162e26d",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_23e921d7ca304556900613c2c79385878788df38273368f6201257bf7b767a14",
+            "engine_epoch": 1,
+            "worker_generation": 106,
+            "source": "EXECUTION_WORKER",
+            "event_type": "OUTPUT_VERIFIED",
+            "source_monotonic_ns": 6737803810486935,
+            "duration_ms": null,
+            "attributes": {
+              "file_count": 4
+            },
+            "observed_at": "2026-10-12T17:19:00.838793+00:00"
+          },
+          {
+            "event_key": "ef55fda148aa2190615eb8b115af2b8716ff08061d46bad202e94ddbc6f236d3",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_bacb10f8bfcf3ceb762e2a15c17fb0c7411137b77571bc1924ee863a4b74b93d",
+            "engine_epoch": 1,
+            "worker_generation": 106,
+            "source": "EXECUTION_WORKER",
+            "event_type": "NODE_OBSERVATION_REPORTED",
+            "source_monotonic_ns": 6737803831686636,
+            "duration_ms": null,
+            "attributes": {
+              "state": "SUCCEEDED",
+              "revision": 3
+            },
+            "observed_at": "2026-10-12T17:19:00.863200+00:00"
+          },
+          {
+            "event_key": "e348db7c196fa660363b8b47d7c902e7fbdf6eccdd805da8b4692d22f85c2f4a",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_bacb10f8bfcf3ceb762e2a15c17fb0c7411137b77571bc1924ee863a4b74b93d",
+            "engine_epoch": 1,
+            "worker_generation": null,
+            "source": "EXECUTION_API",
+            "event_type": "NODE_TERMINAL_OBSERVED",
+            "source_monotonic_ns": 6737803954838471,
+            "duration_ms": null,
+            "attributes": {
+              "state": "SUCCEEDED",
+              "revision": 3,
+              "bridge_instance_id": "766247588da6cef549e40995451da576"
+            },
+            "observed_at": "2026-10-12T17:19:00.984711+00:00"
+          },
+          {
+            "event_key": "e9138f7f1d71449fbed3966d309ea2ce441fc3c48212e51e12fd338b1b1329f4",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_bacb10f8bfcf3ceb762e2a15c17fb0c7411137b77571bc1924ee863a4b74b93d",
+            "engine_epoch": 1,
+            "worker_generation": null,
+            "source": "BRIDGE",
+            "event_type": "BRIDGE_RETURNED",
+            "source_monotonic_ns": 6737803988602495,
+            "duration_ms": null,
+            "attributes": {
+              "revision": 3,
+              "bridge_instance_id": "766247588da6cef549e40995451da576"
+            },
+            "observed_at": "2026-10-12T17:19:01.026459+00:00"
+          },
+          {
+            "event_key": "c841cb66bc7ee6e5c1ddfcb0040847345b117991918717c69ba7e48f03de0326",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_23e921d7ca304556900613c2c79385878788df38273368f6201257bf7b767a14",
+            "engine_epoch": 1,
+            "worker_generation": 107,
+            "source": "EXECUTION_WORKER",
+            "event_type": "NODE_OBSERVATION_REPORTED",
+            "source_monotonic_ns": 6737804109356635,
+            "duration_ms": null,
+            "attributes": {
+              "state": "SUCCEEDED",
+              "revision": 3
+            },
+            "observed_at": "2026-10-12T17:19:01.138526+00:00"
+          },
+          {
+            "event_key": "a952de680fdeb3f2a09922cb3f31e04a69b41a857b705ac85f16d58606969132",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_ad9257ed8cf4d104ecea77e61967b2956d762369e4eca1ce28682111e63488a1",
+            "engine_epoch": 1,
+            "worker_generation": 105,
+            "source": "EXECUTION_WORKER",
+            "event_type": "CONTAINER_EXITED",
+            "source_monotonic_ns": 6737804603649450,
+            "duration_ms": null,
+            "attributes": {
+              "exit_code": 0,
+              "container_id": "77421ec3e6dcb384e43001a8ae28d60977578bdc75d42ac0c80acd2eafa80677"
+            },
+            "observed_at": "2026-10-12T17:19:01.632851+00:00"
+          },
+          {
+            "event_key": "a6bc67022299ed48fede99bcdc8f80952bab8b93ecdfdec6570b34c8a50f9947",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_ad9257ed8cf4d104ecea77e61967b2956d762369e4eca1ce28682111e63488a1",
+            "engine_epoch": 1,
+            "worker_generation": 105,
+            "source": "EXECUTION_WORKER",
+            "event_type": "OUTPUT_VERIFIED",
+            "source_monotonic_ns": 6737804607166475,
+            "duration_ms": null,
+            "attributes": {
+              "file_count": 4
+            },
+            "observed_at": "2026-10-12T17:19:01.635876+00:00"
+          },
+          {
+            "event_key": "e9db9a130944f6f707507103b9f641eaba88a5e94717ebdbcfb35b3f8d1aadcb",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_ad9257ed8cf4d104ecea77e61967b2956d762369e4eca1ce28682111e63488a1",
+            "engine_epoch": 1,
+            "worker_generation": 106,
+            "source": "EXECUTION_WORKER",
+            "event_type": "NODE_OBSERVATION_REPORTED",
+            "source_monotonic_ns": 6737804868661287,
+            "duration_ms": null,
+            "attributes": {
+              "state": "SUCCEEDED",
+              "revision": 3
+            },
+            "observed_at": "2026-10-12T17:19:01.897869+00:00"
+          },
+          {
+            "event_key": "ff31645a39bdf87255c25723028dfa7c9803829dabd5f8027cfd7e0418b7ab18",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_23e921d7ca304556900613c2c79385878788df38273368f6201257bf7b767a14",
+            "engine_epoch": 1,
+            "worker_generation": null,
+            "source": "EXECUTION_API",
+            "event_type": "NODE_TERMINAL_OBSERVED",
+            "source_monotonic_ns": 6737804982826606,
+            "duration_ms": null,
+            "attributes": {
+              "state": "SUCCEEDED",
+              "revision": 3,
+              "bridge_instance_id": "52af096b0e42d70e8d59252fd20ec42b"
+            },
+            "observed_at": "2026-10-12T17:19:02.011676+00:00"
+          },
+          {
+            "event_key": "b62ab17c20979f6f70b059caf0612dad33565d5a782bff97190db97bf5f585f2",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_23e921d7ca304556900613c2c79385878788df38273368f6201257bf7b767a14",
+            "engine_epoch": 1,
+            "worker_generation": null,
+            "source": "BRIDGE",
+            "event_type": "BRIDGE_RETURNED",
+            "source_monotonic_ns": 6737805014071445,
+            "duration_ms": null,
+            "attributes": {
+              "revision": 3,
+              "bridge_instance_id": "52af096b0e42d70e8d59252fd20ec42b"
+            },
+            "observed_at": "2026-10-12T17:19:02.047538+00:00"
+          },
+          {
+            "event_key": "b9441c7112669127b27bf02b973f04f4d2115eba8364ba91204ca2f40baddecf",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_ad9257ed8cf4d104ecea77e61967b2956d762369e4eca1ce28682111e63488a1",
+            "engine_epoch": 1,
+            "worker_generation": null,
+            "source": "EXECUTION_API",
+            "event_type": "NODE_TERMINAL_OBSERVED",
+            "source_monotonic_ns": 6737805044729653,
+            "duration_ms": null,
+            "attributes": {
+              "state": "SUCCEEDED",
+              "revision": 3,
+              "bridge_instance_id": "1578b2f86f657b313e3f4283279bd5e3"
+            },
+            "observed_at": "2026-10-12T17:19:02.073402+00:00"
+          },
+          {
+            "event_key": "4f7bffe0ee0a4a2197bff3f27da9d4965dd195ea7bbbc1ef216c683d07f247d8",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_ad9257ed8cf4d104ecea77e61967b2956d762369e4eca1ce28682111e63488a1",
+            "engine_epoch": 1,
+            "worker_generation": null,
+            "source": "BRIDGE",
+            "event_type": "BRIDGE_RETURNED",
+            "source_monotonic_ns": 6737805067565821,
+            "duration_ms": null,
+            "attributes": {
+              "revision": 3,
+              "bridge_instance_id": "1578b2f86f657b313e3f4283279bd5e3"
+            },
+            "observed_at": "2026-10-12T17:19:02.100713+00:00"
+          },
+          {
+            "event_key": "a5bc3b7602f781d8716444e25b9a57f1252303871cd5a254ee76a07abec67fcb",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_33839646056138996e7c86b557c8c13b9db22d035eca071f0c1c393488717868",
+            "engine_epoch": 1,
+            "worker_generation": 106,
+            "source": "EXECUTION_WORKER",
+            "event_type": "CONTAINER_EXITED",
+            "source_monotonic_ns": 6737805623611931,
+            "duration_ms": null,
+            "attributes": {
+              "exit_code": 0,
+              "container_id": "76894490e782e7c65819a4ec93ebf9988fbe6125007dc0bf5cd2477a5ee2f40d"
+            },
+            "observed_at": "2026-10-12T17:19:02.652806+00:00"
+          },
+          {
+            "event_key": "14d9708cd1db2daf8a23514e0c4c7f5246eb4865fdba07db94832869d30ef917",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_33839646056138996e7c86b557c8c13b9db22d035eca071f0c1c393488717868",
+            "engine_epoch": 1,
+            "worker_generation": 106,
+            "source": "EXECUTION_WORKER",
+            "event_type": "OUTPUT_VERIFIED",
+            "source_monotonic_ns": 6737805626906112,
+            "duration_ms": null,
+            "attributes": {
+              "file_count": 4
+            },
+            "observed_at": "2026-10-12T17:19:02.655236+00:00"
+          },
+          {
+            "event_key": "ab0cb79537ca4ecaaedd7e1e9f8d926ea9bed6b3132913f5e33218ee9b9527a7",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_33839646056138996e7c86b557c8c13b9db22d035eca071f0c1c393488717868",
+            "engine_epoch": 1,
+            "worker_generation": 107,
+            "source": "EXECUTION_WORKER",
+            "event_type": "NODE_OBSERVATION_REPORTED",
+            "source_monotonic_ns": 6737805862438245,
+            "duration_ms": null,
+            "attributes": {
+              "state": "SUCCEEDED",
+              "revision": 3
+            },
+            "observed_at": "2026-10-12T17:19:02.891190+00:00"
+          },
+          {
+            "event_key": "8e8cd67d39846cb7f919500c5674bff6fbd49ebf8799d03b83676c7ae8138fc5",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_33839646056138996e7c86b557c8c13b9db22d035eca071f0c1c393488717868",
+            "engine_epoch": 1,
+            "worker_generation": null,
+            "source": "EXECUTION_API",
+            "event_type": "NODE_TERMINAL_OBSERVED",
+            "source_monotonic_ns": 6737805984735748,
+            "duration_ms": null,
+            "attributes": {
+              "state": "SUCCEEDED",
+              "revision": 3,
+              "bridge_instance_id": "bccd9547991b9107256c7beb3bab0eb6"
+            },
+            "observed_at": "2026-10-12T17:19:03.015071+00:00"
+          },
+          {
+            "event_key": "475681b98ae724ba726d037d56fdb623fa491efcb9ae6dbe46cd4168dadbd333",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": "node_33839646056138996e7c86b557c8c13b9db22d035eca071f0c1c393488717868",
+            "engine_epoch": 1,
+            "worker_generation": null,
+            "source": "BRIDGE",
+            "event_type": "BRIDGE_RETURNED",
+            "source_monotonic_ns": 6737806013724716,
+            "duration_ms": null,
+            "attributes": {
+              "revision": 3,
+              "bridge_instance_id": "bccd9547991b9107256c7beb3bab0eb6"
+            },
+            "observed_at": "2026-10-12T17:19:03.047106+00:00"
+          },
+          {
+            "event_key": "c069a5b24ec5b8a8b84add21aacbffa92d84af00d8d8f7aefee5771827644e03",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": null,
+            "engine_epoch": 1,
+            "worker_generation": 215,
+            "source": "ENGINE",
+            "event_type": "ENGINE_EXITED",
+            "source_monotonic_ns": 6737820560469565,
+            "duration_ms": null,
+            "attributes": {
+              "exit_code": 0,
+              "container_id": "c1fa72c39b309544886996e8a1aea49d4cd6f1277f702de569abfecf1af41377"
+            },
+            "observed_at": "2026-10-12T17:19:17.590348+00:00"
+          },
+          {
+            "event_key": "8928fe53078dc5710604001e789a228f9e087634080a7ddc3de5e7f3b4a7d79a",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": null,
+            "engine_epoch": 1,
+            "worker_generation": 215,
+            "source": "ENGINE",
+            "event_type": "GATHER_FINISHED",
+            "source_monotonic_ns": 6737820572359750,
+            "duration_ms": null,
+            "attributes": {
+              "member_count": 4
+            },
+            "observed_at": "2026-10-12T17:19:17.600616+00:00"
+          },
+          {
+            "event_key": "b1a49cf726607436499f8f2cc809617bc7a0cc857d294b3034664939fd98fcaf",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": null,
+            "engine_epoch": 1,
+            "worker_generation": 216,
+            "source": "DATA_CLIENT",
+            "event_type": "PUBLICATION_PREPARED",
+            "source_monotonic_ns": 6737820859583338,
+            "duration_ms": null,
+            "attributes": {
+              "state": "PENDING"
+            },
+            "observed_at": "2026-10-12T17:19:17.889506+00:00"
+          },
+          {
+            "event_key": "39f62b02dbe83e33c276c8a93c066a6a1c322998c8dde460557ce32861ef3864",
+            "workflow_execution_id": "e5e7715fcc09b7f8f26fb8ea54ab751d6",
+            "node_action_id": null,
+            "engine_epoch": 1,
+            "worker_generation": 216,
+            "source": "DATA_CLIENT",
+            "event_type": "PUBLICATION_COMMITTED",
+            "source_monotonic_ns": 6737820966421333,
+            "duration_ms": null,
+            "attributes": {
+              "state": "COMMITTED"
+            },
+            "observed_at": "2026-10-12T17:19:17.996235+00:00"
+          }
+        ]
+      },
+      "process_rss_mib": {
+        "bridge": {
+          "count": 630,
+          "min": 15.800781,
+          "median": 22.503906,
+          "p95": 22.613281,
+          "p99": 22.613281,
+          "max": 22.613281
+        },
+        "tagger": {
+          "count": 911,
+          "min": 14.875,
+          "median": 44.664062,
+          "p95": 56.613281,
+          "p99": 61.015625,
+          "max": 61.015625
+        },
+        "toil_worker": {
+          "count": 1492,
+          "min": 0.0,
+          "median": 0.929688,
+          "p95": 62.265625,
+          "p99": 62.265625,
+          "max": 64.320312
+        }
+      },
+      "execution_database_connections": {
+        "total": {
+          "count": 289,
+          "min": 4,
+          "median": 6,
+          "p95": 6,
+          "p99": 6,
+          "max": 6
+        },
+        "active": {
+          "count": 289,
+          "min": 0,
+          "median": 0,
+          "p95": 1,
+          "p99": 1,
+          "max": 1
+        }
+      },
+      "engine_init_observed": true,
+      "engine": {
+        "epochs": 1,
+        "container_seconds_total": 58.413908,
+        "process_group_warnings": 0,
+        "failed_workers": 0,
+        "running_containers": 0,
+        "nonzero_container_pids": 0,
+        "processes_after_exit": 0
+      },
+      "status": "PASS",
+      "node_http": {
+        "post_requests": 4,
+        "long_poll_get_requests": 29,
+        "http_requests": 33,
+        "node_state_db_reads": 195
+      },
+      "node_submit_posts": 4,
+      "repeated_node_submit_posts": 0
+    }
+  ],
+  "total_seconds": 71.752219,
+  "summary": {
+    "runs": 1,
+    "workflow_seconds": {
+      "count": 1,
+      "min": 60.162161,
+      "median": 60.162161,
+      "p95": 60.162161,
+      "p99": 60.162161,
+      "max": 60.162161
+    },
+    "compute_window_seconds": {
+      "count": 1,
+      "min": 32.552379,
+      "median": 32.552379,
+      "p95": 32.552379,
+      "p99": 32.552379,
+      "max": 32.552379
+    },
+    "effective_parallelism": {
+      "count": 1,
+      "min": 3.754086,
+      "median": 3.754086,
+      "p95": 3.754086,
+      "p99": 3.754086,
+      "max": 3.754086
+    },
+    "slot_utilization_percent": {
+      "count": 1,
+      "min": 93.85215,
+      "median": 93.85215,
+      "p95": 93.85215,
+      "p99": 93.85215,
+      "max": 93.85215
+    },
+    "overlap_peak": {
+      "count": 1,
+      "min": 4,
+      "median": 4,
+      "p95": 4,
+      "p99": 4,
+      "max": 4
+    },
+    "container_start_interval_p95_ms": {
+      "count": 1,
+      "min": 1031.796535,
+      "median": 1031.796535,
+      "p95": 1031.796535,
+      "p99": 1031.796535,
+      "max": 1031.796535
+    },
+    "eligible_container_start_delay_ms": {
+      "count": 4,
+      "min": 0.0,
+      "median": 554.1295,
+      "p95": 2002.102,
+      "p99": 2002.102,
+      "max": 2002.102
+    },
+    "execution_queue_p95_ms": {
+      "count": 1,
+      "min": 185.647699,
+      "median": 185.647699,
+      "p95": 185.647699,
+      "p99": 185.647699,
+      "max": 185.647699
+    },
+    "post_requests": {
+      "count": 1,
+      "min": 4,
+      "median": 4,
+      "p95": 4,
+      "p99": 4,
+      "max": 4
+    },
+    "long_poll_get_requests": {
+      "count": 1,
+      "min": 29,
+      "median": 29,
+      "p95": 29,
+      "p99": 29,
+      "max": 29
+    },
+    "http_requests": {
+      "count": 1,
+      "min": 33,
+      "median": 33,
+      "p95": 33,
+      "p99": 33,
+      "max": 33
+    },
+    "node_state_db_reads": {
+      "count": 1,
+      "min": 195,
+      "median": 195,
+      "p95": 195,
+      "p99": 195,
+      "max": 195
+    },
+    "execution_database_connection_peak": {
+      "count": 1,
+      "min": 6,
+      "median": 6,
+      "p95": 6,
+      "p99": 6,
+      "max": 6
+    },
+    "execution_database_active_peak": {
+      "count": 1,
+      "min": 1,
+      "median": 1,
+      "p95": 1,
+      "p99": 1,
+      "max": 1
+    },
+    "process_group_warnings": {
+      "count": 1,
+      "min": 0,
+      "median": 0,
+      "p95": 0,
+      "p99": 0,
+      "max": 0
+    },
+    "trace_overhead_percent": {
+      "count": 1,
+      "min": 0.198627,
+      "median": 0.198627,
+      "p95": 0.198627,
+      "p99": 0.198627,
+      "max": 0.198627
+    }
+  },
+  "gates": {
+    "status": "PASS",
+    "failures": []
+  }
+}

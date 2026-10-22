@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "phase": "P7.0-closeout",
+  "version": "0.10.1",
+  "release_digest": "sha256:e3a1277122922d6b462cc4efd836dc00039fbcdcc4544951d9b28c5769afde0e",
+  "tests": {
+    "p70": 24,
+    "p1_rules": 13,
+    "p0_p3_compatibility": 322,
+    "p4": 228,
+    "p5": 86,
+    "p6": 159,
+    "total": 832,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "distribution": {
+    "python": "3.12.8",
+    "wheel_count": 10,
+    "outside_repository_install": "PASS",
+    "dependency_check": "PASS"
+  },
+  "schemas": {
+    "platform": "0018_agent_acceptance_identity",
+    "data": "0004_document_assets",
+    "execution": "0006_remote_reliability",
+    "knowledge": "0002_lifecycle_outbox"
+  },
+  "performance_matrix_rerun": false,
+  "performance_rerun_reason": "P7.0 closeout changes identity and deployment boundaries only; full P4 functional and fault regression passed"
+}

@@ -1,0 +1,3005 @@
+{
+  "schema_version": 1,
+  "kind": "p4-r5-chaining-selection",
+  "version": "0.3.8",
+  "status": "PASS",
+  "finished_at": "2026-10-12T22:08:23.497877+00:00",
+  "profile": "quick",
+  "profile_configuration": {
+    "rows": 20000,
+    "groups": 200,
+    "nodes": 4,
+    "concurrency": 4,
+    "repeats": 1
+  },
+  "execution_worker_roles": [
+    "supervisor",
+    "node",
+    "node",
+    "node",
+    "node",
+    "node",
+    "node",
+    "node",
+    "node",
+    "publication"
+  ],
+  "run_order": [
+    "toil-single-host-v2-chaining-off",
+    "toil-single-host-v2-chaining-on"
+  ],
+  "safety_qualification": {
+    "status": "NOT_REQUIRED",
+    "command": "uv run --locked pytest -q tests/p4/test_chaining_profiles_e2e.py"
+  },
+  "environment": {
+    "python": "3.12.8",
+    "platform": "Linux-5.15.0-139-generic-x86_64-with-glibc2.31",
+    "docker": "28.1.1",
+    "cwl_image": "sha256:652754092f5cf48486a9c8bb42f113d1d95d25141ef7d846be44ff8a18504a09",
+    "performance_operator_image": "sha256:b1980f19bbcb6c75c761ef995d344568a004c4e65b9133b905e67d471eaa0481"
+  },
+  "source_sha256": {
+    "packages/contracts/src/platform_contracts/engine_runtime.py": "82824a7313ba0ed1a6faed5f04e155028208ff1a12b94416e700e90123480cd2",
+    "apps/execution-service/src/platform_execution/api.py": "f6aaf037755d90c6ece2104cbedf28b90a544ab3a0a91d56fd2a698b97b6d8e3",
+    "apps/execution-service/src/platform_execution/adapters/docker.py": "da015653cd05deab11deae95b1ebe609531bd73a7e2b0b3fe781b44e94913456",
+    "apps/execution-service/src/platform_execution/adapters/repository.py": "dd3e8075f3bde9cbb177f31adcdcaffef97c49b6213bc3af13bc528def98a109",
+    "apps/execution-service/src/platform_execution/application/workflow_runner.py": "0446ead2d3d916cca389be827d3f7c1a2f172d2e02cf08fa53e5bd57a70b3c5b",
+    "runtimes/cwl/engine.py": "689215a99a4bb52ca580b8a7de006bd329cbe6aeaf3126d426bee5c52b6a83d9",
+    "benchmarks/p4/scheduler_diagnostics.py": "0b1cfae0f85563e05266d3c2d3f715c24d12803c992150699a4f24f76859ead7",
+    "benchmarks/p4/scheduler_r5.py": "fe63191a5205d807c9f675725003a776a9aeb1077ef78aa4cc943fcfa5a8a082",
+    "tests/p4/test_chaining_profiles_e2e.py": "c251e038b5e66a75010acfdb9e9edb4b0c36f14d81095ef32117243667e3047c",
+    "tests/performance/test_scheduler_r5.py": "869cd2d17a86d97e49b0ec72f53a29b064be2185e0c57de75dd136fd5fdb12b3",
+    "tests/performance/profile_execution_service.py": "738f93ec158253b57de433bda8c44cdd4aa42d7af9ecf338aad73a7a4e75c804",
+    "scripts/check_p4_scheduler_r5.sh": "4fee60c22bf4d269161dedc2c41f8a395e18ea9a9d87d5cf225ca6d0972fe595"
+  },
+  "runs": [
+    {
+      "configuration": {
+        "id": "CHAINING_OFF",
+        "workflow": "nested",
+        "workers": 10,
+        "roles": [
+          "supervisor",
+          "node",
+          "node",
+          "node",
+          "node",
+          "node",
+          "node",
+          "node",
+          "node",
+          "publication"
+        ],
+        "init": true,
+        "baseline_resources": false,
+        "cwl_image": "sha256:652754092f5cf48486a9c8bb42f113d1d95d25141ef7d846be44ff8a18504a09",
+        "engine_profile_id": "toil-single-host-v2-chaining-off"
+      },
+      "repeat": 1,
+      "dataset": {
+        "rows": 20000,
+        "groups": 200,
+        "bytes": 860019,
+        "sha256": "ca7fa902c80f969bb9e2e02e99ccb1059bb5208ceae02768a6725a574adbaa29",
+        "generation_seconds": 0.102303,
+        "synthetic": true,
+        "generator": "round-robin groups; hourly UTC; y=100+group/100+sample/8",
+        "setup_seconds": 0.667352
+      },
+      "compiled_document_count": 5,
+      "compiled_invocation_count": 1,
+      "package_validation_seconds": 2.3639,
+      "workflow": {
+        "workflow_seconds": 49.030227,
+        "first_node_seconds": 7.783922,
+        "nodes_started": 4,
+        "peak_in_flight_observed": 4,
+        "poll_samples": 230,
+        "container_seconds": {
+          "min": 30.504702,
+          "mean": 30.529398,
+          "p50": 30.51958,
+          "p95": 30.568118,
+          "max": 30.568118,
+          "sum": 122.117591,
+          "compute_window": 30.632833,
+          "effective_parallelism": 3.986494,
+          "overlap_peak": 4,
+          "timeline": [
+            {
+              "start_offset": 0.0,
+              "duration": 30.51958
+            },
+            {
+              "start_offset": 0.033268,
+              "duration": 30.525191
+            },
+            {
+              "start_offset": 0.064715,
+              "duration": 30.568118
+            },
+            {
+              "start_offset": 0.069637,
+              "duration": 30.504702
+            }
+          ]
+        },
+        "effective_parallelism_over_workflow": 2.490659,
+        "engine": {
+          "epochs": 1,
+          "container_seconds_total": 46.906033,
+          "process_group_warnings": 0,
+          "failed_workers": 0,
+          "running_containers": 0,
+          "nonzero_container_pids": 0,
+          "processes_after_exit": 0
+        },
+        "budget": {
+          "execution_count": 4,
+          "max_in_flight": 4,
+          "task_id": "f0d7e21a089e4837b5fc288c9286605d",
+          "used": 4,
+          "reserved": 0,
+          "in_flight": 0
+        }
+      },
+      "engine_strategy": "flat_v1",
+      "engine_package_digest": "sha256:90dd60365690c7e507b142cb15052d934a92f451e32c5b648a0be4dc4b630d56",
+      "engine_profile": {
+        "profile_id": "toil-single-host-v2-chaining-off",
+        "profile_digest": "sha256:dd107004376a86bb02e96d08107fc7f8036dff7d75ae6a86eedaf42aa24c84cb",
+        "chaining_enabled": false
+      },
+      "average_compute_parallelism": 3.986494,
+      "slot_utilization_percent": 99.66235,
+      "trace": {
+        "event_count": 72,
+        "required_event_completeness": 1.0,
+        "query_ms": 8.461868,
+        "write_probe_ms": {
+          "count": 32,
+          "min": 1.319963,
+          "median": 1.582444,
+          "p95": 2.679613,
+          "p99": 3.565848,
+          "max": 3.565848
+        },
+        "estimated_total_write_ms": 113.935968,
+        "estimated_overhead_percent": 0.232379,
+        "engine_start_to_first_bridge_ms": 5941.889672,
+        "engine_start_to_first_node_accept_ms": 6044.121814,
+        "accepted_to_first_claim_ms": {
+          "count": 4,
+          "min": 17.672041,
+          "median": 52.30462,
+          "p95": 103.866268,
+          "p99": 103.866268,
+          "max": 103.866268
+        },
+        "permit_http_ms": {
+          "count": 8,
+          "min": 19.00869,
+          "median": 28.277745,
+          "p95": 60.499063,
+          "p99": 60.499063,
+          "max": 60.499063
+        },
+        "permit_to_container_start_ms": {
+          "count": 4,
+          "min": 496.913536,
+          "median": 508.139882,
+          "p95": 517.033503,
+          "p99": 517.033503,
+          "max": 517.033503
+        },
+        "container_exit_to_bridge_return_ms": {
+          "count": 4,
+          "min": 486.784783,
+          "median": 604.131021,
+          "p95": 626.864469,
+          "p99": 626.864469,
+          "max": 626.864469
+        },
+        "previous_container_exit_to_next_node_accept_ms": null,
+        "container_start_interval_ms": {
+          "count": 3,
+          "min": 5.533755,
+          "median": 30.406267,
+          "p95": 40.895555,
+          "p99": 40.895555,
+          "max": 40.895555
+        },
+        "last_bridge_to_engine_exit_ms": 8583.995458,
+        "engine_exit_to_gather_ms": 11.305912,
+        "last_bridge_to_gather_ms": 8595.30137,
+        "gather_to_publish_ms": 419.611954,
+        "events": [
+          {
+            "event_key": "fbd5542cdcd804e088ebca3aa2ee50cec7dae97aca3130cea4957e8d02bf3c48",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": null,
+            "engine_epoch": 0,
+            "worker_generation": 2,
+            "source": "PLATFORM_CLIENT",
+            "event_type": "PERMIT_REQUESTED",
+            "source_monotonic_ns": 6755058996925773,
+            "duration_ms": null,
+            "attributes": {
+              "phase": "PREPARED"
+            },
+            "observed_at": "2026-10-12T22:06:36.027185+00:00"
+          },
+          {
+            "event_key": "620fb5ee29810dddff5bef11a5049990805fc9845372c6174e6fdb38d1f96514",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": null,
+            "engine_epoch": 0,
+            "worker_generation": 2,
+            "source": "PLATFORM_CLIENT",
+            "event_type": "PERMIT_ALLOWED",
+            "source_monotonic_ns": 6755059025606555,
+            "duration_ms": 28.68885,
+            "attributes": {
+              "decision": "ALLOW"
+            },
+            "observed_at": "2026-10-12T22:06:36.054641+00:00"
+          },
+          {
+            "event_key": "6f970b0efc32bfe1483d74962e5f3049dbbaac82334cae7a15594da1e5b83c7c",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": null,
+            "engine_epoch": 1,
+            "worker_generation": 2,
+            "source": "ENGINE",
+            "event_type": "ENGINE_CREATED",
+            "source_monotonic_ns": 6755059099049120,
+            "duration_ms": null,
+            "attributes": {
+              "container_id": "5f9e1a3669f3015cc3ec20f08aabde37aaff72b01818cf1380e8bfd12de3092f"
+            },
+            "observed_at": "2026-10-12T22:06:36.128938+00:00"
+          },
+          {
+            "event_key": "848f17dc9cc64b46e688feb5c7fbb72f4cf549f93d63dbb54c2604727ef33dcd",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": null,
+            "engine_epoch": 1,
+            "worker_generation": 3,
+            "source": "ENGINE",
+            "event_type": "ENGINE_STARTED",
+            "source_monotonic_ns": 6755059486590278,
+            "duration_ms": null,
+            "attributes": {
+              "container_id": "5f9e1a3669f3015cc3ec20f08aabde37aaff72b01818cf1380e8bfd12de3092f"
+            },
+            "observed_at": "2026-10-12T22:06:36.516252+00:00"
+          },
+          {
+            "event_key": "c2c708b3ab78c4dfc843f3e0072b349a84436795f52b02c14231f306ac05e1e5",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_7caecf652684f3ede0901438c085566fd155fdcbc683386187467a4e1e3bce87",
+            "engine_epoch": 1,
+            "worker_generation": null,
+            "source": "BRIDGE",
+            "event_type": "BRIDGE_STARTED",
+            "source_monotonic_ns": 6755065428479950,
+            "duration_ms": null,
+            "attributes": {
+              "bridge_instance_id": "dc5bfc14b2027a2b96ff1ae7db0edab9"
+            },
+            "observed_at": "2026-10-12T22:06:42.571511+00:00"
+          },
+          {
+            "event_key": "de843371b563fbbeb2b686b5e431864fe9fec912922b2d62926263291d63d1d9",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_7caecf652684f3ede0901438c085566fd155fdcbc683386187467a4e1e3bce87",
+            "engine_epoch": 1,
+            "worker_generation": null,
+            "source": "BRIDGE",
+            "event_type": "ENGINE_BINDING_OBSERVED",
+            "source_monotonic_ns": 6755065530712092,
+            "duration_ms": null,
+            "attributes": {
+              "kind": "toil",
+              "binding_id": "kind-CWLJob/instance-_dkh984x"
+            },
+            "observed_at": "2026-10-12T22:06:42.573679+00:00"
+          },
+          {
+            "event_key": "36a829e007ccdba3aecc3b5658c4acc3686e8a9729aface3eb933b4732aa97f6",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_7caecf652684f3ede0901438c085566fd155fdcbc683386187467a4e1e3bce87",
+            "engine_epoch": 1,
+            "worker_generation": null,
+            "source": "EXECUTION_API",
+            "event_type": "NODE_ACCEPTED",
+            "source_monotonic_ns": 6755065530712092,
+            "duration_ms": null,
+            "attributes": {
+              "created": true
+            },
+            "observed_at": "2026-10-12T22:06:42.575495+00:00"
+          },
+          {
+            "event_key": "e694e000bebbf8e8a4b964e84d2813e99f4d361b59d4ce997f2754d87bf47e56",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_74fc78017602ae37ec42e9f0d74feb49ad51b88ae29c75092f1ab113f260518d",
+            "engine_epoch": 1,
+            "worker_generation": null,
+            "source": "BRIDGE",
+            "event_type": "BRIDGE_STARTED",
+            "source_monotonic_ns": 6755065532030529,
+            "duration_ms": null,
+            "attributes": {
+              "bridge_instance_id": "730974d4e8dc32a13efab42b7256c84e"
+            },
+            "observed_at": "2026-10-12T22:06:42.657131+00:00"
+          },
+          {
+            "event_key": "7870f5d07180225c3c2fc470c32244c7def29a0c04845b4ab80f27cbbc9c15db",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_74fc78017602ae37ec42e9f0d74feb49ad51b88ae29c75092f1ab113f260518d",
+            "engine_epoch": 1,
+            "worker_generation": null,
+            "source": "BRIDGE",
+            "event_type": "ENGINE_BINDING_OBSERVED",
+            "source_monotonic_ns": 6755065617038805,
+            "duration_ms": null,
+            "attributes": {
+              "kind": "toil",
+              "binding_id": "kind-CWLJob/instance-boea7jye"
+            },
+            "observed_at": "2026-10-12T22:06:42.664792+00:00"
+          },
+          {
+            "event_key": "b9d62ba5c76ca1064919f95b4afc71092090b86ad52d01f0ced02717b0e5b4be",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_7caecf652684f3ede0901438c085566fd155fdcbc683386187467a4e1e3bce87",
+            "engine_epoch": 1,
+            "worker_generation": 1,
+            "source": "EXECUTION_WORKER",
+            "event_type": "EXECUTION_CLAIMED",
+            "source_monotonic_ns": 6755065634578360,
+            "duration_ms": null,
+            "attributes": {
+              "phase": "ACCEPTED"
+            },
+            "observed_at": "2026-10-12T22:06:42.666290+00:00"
+          },
+          {
+            "event_key": "975a01bd4c5f20e3f4e4011e06e74f4a7e90d1bbcf15131cc6c20fb32917346e",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_74fc78017602ae37ec42e9f0d74feb49ad51b88ae29c75092f1ab113f260518d",
+            "engine_epoch": 1,
+            "worker_generation": 1,
+            "source": "EXECUTION_WORKER",
+            "event_type": "EXECUTION_CLAIMED",
+            "source_monotonic_ns": 6755065634710846,
+            "duration_ms": null,
+            "attributes": {
+              "phase": "ACCEPTED"
+            },
+            "observed_at": "2026-10-12T22:06:42.666507+00:00"
+          },
+          {
+            "event_key": "380d3849e1a9c13e9907928451910e09629bf7a0818193fb41b0cba8fbc55813",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_74fc78017602ae37ec42e9f0d74feb49ad51b88ae29c75092f1ab113f260518d",
+            "engine_epoch": 1,
+            "worker_generation": null,
+            "source": "EXECUTION_API",
+            "event_type": "NODE_ACCEPTED",
+            "source_monotonic_ns": 6755065617038805,
+            "duration_ms": null,
+            "attributes": {
+              "created": true
+            },
+            "observed_at": "2026-10-12T22:06:42.667765+00:00"
+          },
+          {
+            "event_key": "d1eb62c8952edd962ba5852be440e7b919f7b403b0893d25883956b15c53f5f9",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_7275a2eb8148954a5e27cbc836315adb3431d091071c6b5c22f05b26377d7906",
+            "engine_epoch": 1,
+            "worker_generation": null,
+            "source": "BRIDGE",
+            "event_type": "BRIDGE_STARTED",
+            "source_monotonic_ns": 6755065544094054,
+            "duration_ms": null,
+            "attributes": {
+              "bridge_instance_id": "5c7b101570ab56e411595d045882fe0c"
+            },
+            "observed_at": "2026-10-12T22:06:42.699521+00:00"
+          },
+          {
+            "event_key": "69eb518f6c4aa48bf6e9cd427d96f47cb28998fe33bc81ab672a693b999af391",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_7275a2eb8148954a5e27cbc836315adb3431d091071c6b5c22f05b26377d7906",
+            "engine_epoch": 1,
+            "worker_generation": null,
+            "source": "BRIDGE",
+            "event_type": "ENGINE_BINDING_OBSERVED",
+            "source_monotonic_ns": 6755065633602043,
+            "duration_ms": null,
+            "attributes": {
+              "kind": "toil",
+              "binding_id": "kind-CWLJob/instance-6g0g50t3"
+            },
+            "observed_at": "2026-10-12T22:06:42.707286+00:00"
+          },
+          {
+            "event_key": "a38bb1f526208398ccee7585c813fd79e6ab1abb681466866df17c3d32f3f74a",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_7275a2eb8148954a5e27cbc836315adb3431d091071c6b5c22f05b26377d7906",
+            "engine_epoch": 1,
+            "worker_generation": null,
+            "source": "EXECUTION_API",
+            "event_type": "NODE_ACCEPTED",
+            "source_monotonic_ns": 6755065633602043,
+            "duration_ms": null,
+            "attributes": {
+              "created": true
+            },
+            "observed_at": "2026-10-12T22:06:42.712350+00:00"
+          },
+          {
+            "event_key": "9bf2b71dcfe9feb257d8c836c448a91796e30f914aa0f43f2c0a73a07686ef9a",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_305887230d295e9644d40f32adf40e84210101fd4a58a2a95fe302b9aa63d57b",
+            "engine_epoch": 1,
+            "worker_generation": null,
+            "source": "BRIDGE",
+            "event_type": "BRIDGE_STARTED",
+            "source_monotonic_ns": 6755065629048351,
+            "duration_ms": null,
+            "attributes": {
+              "bridge_instance_id": "f3a428bf75378af5e12c9d3377b6456a"
+            },
+            "observed_at": "2026-10-12T22:06:42.716319+00:00"
+          },
+          {
+            "event_key": "46eadf97cd77e87cb84fafcf3c1127a76c2f3e9d7372931b69c817d146fb763c",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_305887230d295e9644d40f32adf40e84210101fd4a58a2a95fe302b9aa63d57b",
+            "engine_epoch": 1,
+            "worker_generation": null,
+            "source": "BRIDGE",
+            "event_type": "ENGINE_BINDING_OBSERVED",
+            "source_monotonic_ns": 6755065670657322,
+            "duration_ms": null,
+            "attributes": {
+              "kind": "toil",
+              "binding_id": "kind-CWLJob/instance-9jtl06xk"
+            },
+            "observed_at": "2026-10-12T22:06:42.718935+00:00"
+          },
+          {
+            "event_key": "4500a83647cab3b1715b3f145dbf348f12615cbf600753bdabf1620f08c0c919",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_305887230d295e9644d40f32adf40e84210101fd4a58a2a95fe302b9aa63d57b",
+            "engine_epoch": 1,
+            "worker_generation": null,
+            "source": "EXECUTION_API",
+            "event_type": "NODE_ACCEPTED",
+            "source_monotonic_ns": 6755065670657322,
+            "duration_ms": null,
+            "attributes": {
+              "created": true
+            },
+            "observed_at": "2026-10-12T22:06:42.724147+00:00"
+          },
+          {
+            "event_key": "f4347210b6071b3aa54c96e2dc70528f345ff491c84a22352e86f0821adb5c48",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_305887230d295e9644d40f32adf40e84210101fd4a58a2a95fe302b9aa63d57b",
+            "engine_epoch": 1,
+            "worker_generation": 1,
+            "source": "EXECUTION_WORKER",
+            "event_type": "EXECUTION_CLAIMED",
+            "source_monotonic_ns": 6755065703726583,
+            "duration_ms": null,
+            "attributes": {
+              "phase": "ACCEPTED"
+            },
+            "observed_at": "2026-10-12T22:06:42.733896+00:00"
+          },
+          {
+            "event_key": "dd0569f11e6a66f9ee734872e22743736b84d3c51676aecebfb71410d073605c",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_7275a2eb8148954a5e27cbc836315adb3431d091071c6b5c22f05b26377d7906",
+            "engine_epoch": 1,
+            "worker_generation": 1,
+            "source": "EXECUTION_WORKER",
+            "event_type": "EXECUTION_CLAIMED",
+            "source_monotonic_ns": 6755065705142022,
+            "duration_ms": null,
+            "attributes": {
+              "phase": "ACCEPTED"
+            },
+            "observed_at": "2026-10-12T22:06:42.734901+00:00"
+          },
+          {
+            "event_key": "67c955fc2df73132c85996f88adcd2f989964567a9580e2845d39189751685bf",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_7caecf652684f3ede0901438c085566fd155fdcbc683386187467a4e1e3bce87",
+            "engine_epoch": 1,
+            "worker_generation": 2,
+            "source": "EXECUTION_WORKER",
+            "event_type": "PERMIT_REQUESTED",
+            "source_monotonic_ns": 6755066080460681,
+            "duration_ms": null,
+            "attributes": {
+              "phase": "PREPARED"
+            },
+            "observed_at": "2026-10-12T22:06:43.110959+00:00"
+          },
+          {
+            "event_key": "b282a4620c497b81e927f28ba3341a7db9e8ea0e74a7d280e11bd74dbd99fb18",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_74fc78017602ae37ec42e9f0d74feb49ad51b88ae29c75092f1ab113f260518d",
+            "engine_epoch": 1,
+            "worker_generation": 2,
+            "source": "EXECUTION_WORKER",
+            "event_type": "PERMIT_REQUESTED",
+            "source_monotonic_ns": 6755066081582801,
+            "duration_ms": null,
+            "attributes": {
+              "phase": "PREPARED"
+            },
+            "observed_at": "2026-10-12T22:06:43.111565+00:00"
+          },
+          {
+            "event_key": "bec79fe16fcad7b2562b65d4eb078c6a83c9e29049e7e4ebbb2ed431d4cfc07c",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_7caecf652684f3ede0901438c085566fd155fdcbc683386187467a4e1e3bce87",
+            "engine_epoch": 1,
+            "worker_generation": 2,
+            "source": "EXECUTION_WORKER",
+            "event_type": "PERMIT_ALLOWED",
+            "source_monotonic_ns": 6755066114869800,
+            "duration_ms": 34.416781,
+            "attributes": {
+              "decision": "ALLOW"
+            },
+            "observed_at": "2026-10-12T22:06:43.143859+00:00"
+          },
+          {
+            "event_key": "e46d33f0de5f20c0d5cb65b8cfbbfd7931fa5550c21f9a6e0023d31711f49b24",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_74fc78017602ae37ec42e9f0d74feb49ad51b88ae29c75092f1ab113f260518d",
+            "engine_epoch": 1,
+            "worker_generation": 2,
+            "source": "EXECUTION_WORKER",
+            "event_type": "PERMIT_ALLOWED",
+            "source_monotonic_ns": 6755066142077047,
+            "duration_ms": 60.499063,
+            "attributes": {
+              "decision": "ALLOW"
+            },
+            "observed_at": "2026-10-12T22:06:43.171666+00:00"
+          },
+          {
+            "event_key": "a3c0bda4d9bc44a9151df4e51a81de3ca1b00cf52e5191cc64af5bbec8965274",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_305887230d295e9644d40f32adf40e84210101fd4a58a2a95fe302b9aa63d57b",
+            "engine_epoch": 1,
+            "worker_generation": 2,
+            "source": "EXECUTION_WORKER",
+            "event_type": "PERMIT_REQUESTED",
+            "source_monotonic_ns": 6755066146862546,
+            "duration_ms": null,
+            "attributes": {
+              "phase": "PREPARED"
+            },
+            "observed_at": "2026-10-12T22:06:43.176149+00:00"
+          },
+          {
+            "event_key": "89cb253642dc52f658b56f37b3071ceaae70b8f2745bf092b7abc485bfb2f250",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_7275a2eb8148954a5e27cbc836315adb3431d091071c6b5c22f05b26377d7906",
+            "engine_epoch": 1,
+            "worker_generation": 2,
+            "source": "EXECUTION_WORKER",
+            "event_type": "PERMIT_REQUESTED",
+            "source_monotonic_ns": 6755066147608728,
+            "duration_ms": null,
+            "attributes": {
+              "phase": "PREPARED"
+            },
+            "observed_at": "2026-10-12T22:06:43.177629+00:00"
+          },
+          {
+            "event_key": "52ede8b81f6cf16227f9f5ab463e31fc4bad3ec21e0be081e0c583bd3384bd90",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_305887230d295e9644d40f32adf40e84210101fd4a58a2a95fe302b9aa63d57b",
+            "engine_epoch": 1,
+            "worker_generation": 2,
+            "source": "EXECUTION_WORKER",
+            "event_type": "PERMIT_ALLOWED",
+            "source_monotonic_ns": 6755066182116004,
+            "duration_ms": 35.256771,
+            "attributes": {
+              "decision": "ALLOW"
+            },
+            "observed_at": "2026-10-12T22:06:43.211773+00:00"
+          },
+          {
+            "event_key": "946e6ca97a4aaf7b1c6171a5fd8afd9b14f5e4ae9e2c43def08d55e47f3486d1",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_7caecf652684f3ede0901438c085566fd155fdcbc683386187467a4e1e3bce87",
+            "engine_epoch": 1,
+            "worker_generation": 2,
+            "source": "EXECUTION_WORKER",
+            "event_type": "CONTAINER_CREATED",
+            "source_monotonic_ns": 6755066185357352,
+            "duration_ms": null,
+            "attributes": {
+              "container_id": "e01450856a560f1e373c90db97215ef4fed5a1746366bef9840952eedc794526"
+            },
+            "observed_at": "2026-10-12T22:06:43.214910+00:00"
+          },
+          {
+            "event_key": "2699da472382891650482b32d8be4295f338ae38cdd3c702e68970c763b68c53",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_7275a2eb8148954a5e27cbc836315adb3431d091071c6b5c22f05b26377d7906",
+            "engine_epoch": 1,
+            "worker_generation": 2,
+            "source": "EXECUTION_WORKER",
+            "event_type": "PERMIT_ALLOWED",
+            "source_monotonic_ns": 6755066192603281,
+            "duration_ms": 45.004924,
+            "attributes": {
+              "decision": "ALLOW"
+            },
+            "observed_at": "2026-10-12T22:06:43.221117+00:00"
+          },
+          {
+            "event_key": "9e2a200f7ab3143afd20980d0e6951bfe37bf03eead3e55397753198fc2baf5a",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_74fc78017602ae37ec42e9f0d74feb49ad51b88ae29c75092f1ab113f260518d",
+            "engine_epoch": 1,
+            "worker_generation": 2,
+            "source": "EXECUTION_WORKER",
+            "event_type": "CONTAINER_CREATED",
+            "source_monotonic_ns": 6755066216436034,
+            "duration_ms": null,
+            "attributes": {
+              "container_id": "c062d445a1f9d5063e9cc6d9af11156d4572ffdf951f33ef66a9000d33c4e634"
+            },
+            "observed_at": "2026-10-12T22:06:43.246194+00:00"
+          },
+          {
+            "event_key": "a7912f15d5002c9b648634783b498f92aae4e4d642b63415ab97e4ab5b8e37b2",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_305887230d295e9644d40f32adf40e84210101fd4a58a2a95fe302b9aa63d57b",
+            "engine_epoch": 1,
+            "worker_generation": 2,
+            "source": "EXECUTION_WORKER",
+            "event_type": "CONTAINER_CREATED",
+            "source_monotonic_ns": 6755066249641654,
+            "duration_ms": null,
+            "attributes": {
+              "container_id": "e81634076ccc8f5ca88595c4329c648e27d082a98436483617f1109eb4f8af19"
+            },
+            "observed_at": "2026-10-12T22:06:43.279331+00:00"
+          },
+          {
+            "event_key": "e84108a21670b7af049ead81a207116f63718774c17b68bce2d074b497807db0",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_7275a2eb8148954a5e27cbc836315adb3431d091071c6b5c22f05b26377d7906",
+            "engine_epoch": 1,
+            "worker_generation": 2,
+            "source": "EXECUTION_WORKER",
+            "event_type": "CONTAINER_CREATED",
+            "source_monotonic_ns": 6755066257761696,
+            "duration_ms": null,
+            "attributes": {
+              "container_id": "899595f313b661379286964b0033410a1b96a81457110c71b91af3b1a459c9f7"
+            },
+            "observed_at": "2026-10-12T22:06:43.287340+00:00"
+          },
+          {
+            "event_key": "a40578b4716a7b0a437bc1788a0ff84195aa9832188a0b316661dd1d9a26a73d",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_7caecf652684f3ede0901438c085566fd155fdcbc683386187467a4e1e3bce87",
+            "engine_epoch": 1,
+            "worker_generation": 3,
+            "source": "EXECUTION_WORKER",
+            "event_type": "PERMIT_REQUESTED",
+            "source_monotonic_ns": 6755066438582863,
+            "duration_ms": null,
+            "attributes": {
+              "phase": "CREATED"
+            },
+            "observed_at": "2026-10-12T22:06:43.467332+00:00"
+          },
+          {
+            "event_key": "73cc28717ed54098abbde8e2b71c688710aae66dfb8fc46351762d2d18f0354a",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_7caecf652684f3ede0901438c085566fd155fdcbc683386187467a4e1e3bce87",
+            "engine_epoch": 1,
+            "worker_generation": 3,
+            "source": "EXECUTION_WORKER",
+            "event_type": "PERMIT_ALLOWED",
+            "source_monotonic_ns": 6755066457700934,
+            "duration_ms": 19.114046,
+            "attributes": {
+              "decision": "ALLOW"
+            },
+            "observed_at": "2026-10-12T22:06:43.487512+00:00"
+          },
+          {
+            "event_key": "7cb535b5425aedb78ce95ff22b7f749c0db64b891e60d536711039a3f3a521f2",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_74fc78017602ae37ec42e9f0d74feb49ad51b88ae29c75092f1ab113f260518d",
+            "engine_epoch": 1,
+            "worker_generation": 3,
+            "source": "EXECUTION_WORKER",
+            "event_type": "PERMIT_REQUESTED",
+            "source_monotonic_ns": 6755066472327069,
+            "duration_ms": null,
+            "attributes": {
+              "phase": "CREATED"
+            },
+            "observed_at": "2026-10-12T22:06:43.502064+00:00"
+          },
+          {
+            "event_key": "9d309d484fad2c0c00f794e720184d3a362bd6b91b7266372fd7988c7255e2fa",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_74fc78017602ae37ec42e9f0d74feb49ad51b88ae29c75092f1ab113f260518d",
+            "engine_epoch": 1,
+            "worker_generation": 3,
+            "source": "EXECUTION_WORKER",
+            "event_type": "PERMIT_ALLOWED",
+            "source_monotonic_ns": 6755066491331617,
+            "duration_ms": 19.00869,
+            "attributes": {
+              "decision": "ALLOW"
+            },
+            "observed_at": "2026-10-12T22:06:43.521170+00:00"
+          },
+          {
+            "event_key": "19091526741488f2e20be26622674b5e93f36b822b7dbe82fc0e1cd435b12075",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_305887230d295e9644d40f32adf40e84210101fd4a58a2a95fe302b9aa63d57b",
+            "engine_epoch": 1,
+            "worker_generation": 3,
+            "source": "EXECUTION_WORKER",
+            "event_type": "PERMIT_REQUESTED",
+            "source_monotonic_ns": 6755066499861684,
+            "duration_ms": null,
+            "attributes": {
+              "phase": "CREATED"
+            },
+            "observed_at": "2026-10-12T22:06:43.529131+00:00"
+          },
+          {
+            "event_key": "9dbba19f0abdc034951d5d1816ad87dfa351ecf0c91919cd9222843d887ce3cd",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_7275a2eb8148954a5e27cbc836315adb3431d091071c6b5c22f05b26377d7906",
+            "engine_epoch": 1,
+            "worker_generation": 3,
+            "source": "EXECUTION_WORKER",
+            "event_type": "PERMIT_REQUESTED",
+            "source_monotonic_ns": 6755066503353065,
+            "duration_ms": null,
+            "attributes": {
+              "phase": "CREATED"
+            },
+            "observed_at": "2026-10-12T22:06:43.533284+00:00"
+          },
+          {
+            "event_key": "f634ab919a23bde98cc2492c7363f8a910f07a0700a76d211825b4114da7eca8",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_305887230d295e9644d40f32adf40e84210101fd4a58a2a95fe302b9aa63d57b",
+            "engine_epoch": 1,
+            "worker_generation": 3,
+            "source": "EXECUTION_WORKER",
+            "event_type": "PERMIT_ALLOWED",
+            "source_monotonic_ns": 6755066521596860,
+            "duration_ms": 21.743525,
+            "attributes": {
+              "decision": "ALLOW"
+            },
+            "observed_at": "2026-10-12T22:06:43.550431+00:00"
+          },
+          {
+            "event_key": "b482fc1d5db69c2d67b0d59d212d61e8efa9d69858849faf965860c029028c8a",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_7275a2eb8148954a5e27cbc836315adb3431d091071c6b5c22f05b26377d7906",
+            "engine_epoch": 1,
+            "worker_generation": 3,
+            "source": "EXECUTION_WORKER",
+            "event_type": "PERMIT_ALLOWED",
+            "source_monotonic_ns": 6755066525492136,
+            "duration_ms": 22.138708,
+            "attributes": {
+              "decision": "ALLOW"
+            },
+            "observed_at": "2026-10-12T22:06:43.555157+00:00"
+          },
+          {
+            "event_key": "7bfff1d756ab07e6d76c2df505f9f00637de69ce15fa66dcbd42f26db7632d22",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_7caecf652684f3ede0901438c085566fd155fdcbc683386187467a4e1e3bce87",
+            "engine_epoch": 1,
+            "worker_generation": 3,
+            "source": "EXECUTION_WORKER",
+            "event_type": "CONTAINER_STARTED",
+            "source_monotonic_ns": 6755066618214995,
+            "duration_ms": null,
+            "attributes": {
+              "container_id": "e01450856a560f1e373c90db97215ef4fed5a1746366bef9840952eedc794526"
+            },
+            "observed_at": "2026-10-12T22:06:43.647207+00:00"
+          },
+          {
+            "event_key": "f022f756740907ee1fcdd52916254fd488e33f2f3bfaffcf23641c3b6a4ce916",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_74fc78017602ae37ec42e9f0d74feb49ad51b88ae29c75092f1ab113f260518d",
+            "engine_epoch": 1,
+            "worker_generation": 3,
+            "source": "EXECUTION_WORKER",
+            "event_type": "CONTAINER_STARTED",
+            "source_monotonic_ns": 6755066659110550,
+            "duration_ms": null,
+            "attributes": {
+              "container_id": "c062d445a1f9d5063e9cc6d9af11156d4572ffdf951f33ef66a9000d33c4e634"
+            },
+            "observed_at": "2026-10-12T22:06:43.687952+00:00"
+          },
+          {
+            "event_key": "e0cf87e91ab87ad152def04f081e65a452997600f8d7460dc9e220e722c9cf8a",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_7275a2eb8148954a5e27cbc836315adb3431d091071c6b5c22f05b26377d7906",
+            "engine_epoch": 1,
+            "worker_generation": 3,
+            "source": "EXECUTION_WORKER",
+            "event_type": "CONTAINER_STARTED",
+            "source_monotonic_ns": 6755066689516817,
+            "duration_ms": null,
+            "attributes": {
+              "container_id": "899595f313b661379286964b0033410a1b96a81457110c71b91af3b1a459c9f7"
+            },
+            "observed_at": "2026-10-12T22:06:43.719437+00:00"
+          },
+          {
+            "event_key": "8bdf002fd74a38bcff6eb1841bab0e64bd2b9333c0835e237e767c0aba48d2e7",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_305887230d295e9644d40f32adf40e84210101fd4a58a2a95fe302b9aa63d57b",
+            "engine_epoch": 1,
+            "worker_generation": 3,
+            "source": "EXECUTION_WORKER",
+            "event_type": "CONTAINER_STARTED",
+            "source_monotonic_ns": 6755066695050572,
+            "duration_ms": null,
+            "attributes": {
+              "container_id": "e81634076ccc8f5ca88595c4329c648e27d082a98436483617f1109eb4f8af19"
+            },
+            "observed_at": "2026-10-12T22:06:43.725166+00:00"
+          },
+          {
+            "event_key": "cd1b71e6b5d3c7815240854590e6260d499c18f7463e6bb3321edb03c5c1ad9d",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_7caecf652684f3ede0901438c085566fd155fdcbc683386187467a4e1e3bce87",
+            "engine_epoch": 1,
+            "worker_generation": 4,
+            "source": "EXECUTION_WORKER",
+            "event_type": "NODE_OBSERVATION_REPORTED",
+            "source_monotonic_ns": 6755066859575723,
+            "duration_ms": null,
+            "attributes": {
+              "state": "RUNNING",
+              "revision": 2
+            },
+            "observed_at": "2026-10-12T22:06:43.889291+00:00"
+          },
+          {
+            "event_key": "be20a8e35c801e08ff441cbd5750083f5f00ea1c369473d2e34ded30a6195e8b",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_74fc78017602ae37ec42e9f0d74feb49ad51b88ae29c75092f1ab113f260518d",
+            "engine_epoch": 1,
+            "worker_generation": 4,
+            "source": "EXECUTION_WORKER",
+            "event_type": "NODE_OBSERVATION_REPORTED",
+            "source_monotonic_ns": 6755066891739135,
+            "duration_ms": null,
+            "attributes": {
+              "state": "RUNNING",
+              "revision": 2
+            },
+            "observed_at": "2026-10-12T22:06:43.921102+00:00"
+          },
+          {
+            "event_key": "34a239bbd414fe6b6fec9677e382d8105720d55e97078013fdb07519a84cc0ab",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_7275a2eb8148954a5e27cbc836315adb3431d091071c6b5c22f05b26377d7906",
+            "engine_epoch": 1,
+            "worker_generation": 4,
+            "source": "EXECUTION_WORKER",
+            "event_type": "NODE_OBSERVATION_REPORTED",
+            "source_monotonic_ns": 6755066920480095,
+            "duration_ms": null,
+            "attributes": {
+              "state": "RUNNING",
+              "revision": 2
+            },
+            "observed_at": "2026-10-12T22:06:43.949316+00:00"
+          },
+          {
+            "event_key": "bb35ab8f1d92b9adb9bc3e4aa4632fb7d2895e17764e2b2d1b5781d56fcbf6bb",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_305887230d295e9644d40f32adf40e84210101fd4a58a2a95fe302b9aa63d57b",
+            "engine_epoch": 1,
+            "worker_generation": 4,
+            "source": "EXECUTION_WORKER",
+            "event_type": "NODE_OBSERVATION_REPORTED",
+            "source_monotonic_ns": 6755066927341557,
+            "duration_ms": null,
+            "attributes": {
+              "state": "RUNNING",
+              "revision": 2
+            },
+            "observed_at": "2026-10-12T22:06:43.955929+00:00"
+          },
+          {
+            "event_key": "cc93a201e93eb14bc76a444b471bcca7bb72d20b6ac93b632a86bcab60f9b5fb",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_7caecf652684f3ede0901438c085566fd155fdcbc683386187467a4e1e3bce87",
+            "engine_epoch": 1,
+            "worker_generation": 129,
+            "source": "EXECUTION_WORKER",
+            "event_type": "CONTAINER_EXITED",
+            "source_monotonic_ns": 6755097059734052,
+            "duration_ms": null,
+            "attributes": {
+              "exit_code": 0,
+              "container_id": "e01450856a560f1e373c90db97215ef4fed5a1746366bef9840952eedc794526"
+            },
+            "observed_at": "2026-10-12T22:07:14.089019+00:00"
+          },
+          {
+            "event_key": "6d84dcc59c5ac425fc0ad2186f970dc5caca33ff6d7efbcfa6a9c1936fe99a50",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_7caecf652684f3ede0901438c085566fd155fdcbc683386187467a4e1e3bce87",
+            "engine_epoch": 1,
+            "worker_generation": 129,
+            "source": "EXECUTION_WORKER",
+            "event_type": "OUTPUT_VERIFIED",
+            "source_monotonic_ns": 6755097063588860,
+            "duration_ms": null,
+            "attributes": {
+              "file_count": 4
+            },
+            "observed_at": "2026-10-12T22:07:14.092963+00:00"
+          },
+          {
+            "event_key": "c2c0791000bc409ed5dd8928e42ebccabc6d8277402c2a193ed0f36eec0df5a0",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_305887230d295e9644d40f32adf40e84210101fd4a58a2a95fe302b9aa63d57b",
+            "engine_epoch": 1,
+            "worker_generation": 130,
+            "source": "EXECUTION_WORKER",
+            "event_type": "CONTAINER_EXITED",
+            "source_monotonic_ns": 6755097262866630,
+            "duration_ms": null,
+            "attributes": {
+              "exit_code": 0,
+              "container_id": "e81634076ccc8f5ca88595c4329c648e27d082a98436483617f1109eb4f8af19"
+            },
+            "observed_at": "2026-10-12T22:07:14.291411+00:00"
+          },
+          {
+            "event_key": "681824b712d282d96c76c13a7f8d34facca3514493651b3e70d65b9402d6cbea",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_305887230d295e9644d40f32adf40e84210101fd4a58a2a95fe302b9aa63d57b",
+            "engine_epoch": 1,
+            "worker_generation": 130,
+            "source": "EXECUTION_WORKER",
+            "event_type": "OUTPUT_VERIFIED",
+            "source_monotonic_ns": 6755097265683590,
+            "duration_ms": null,
+            "attributes": {
+              "file_count": 4
+            },
+            "observed_at": "2026-10-12T22:07:14.293631+00:00"
+          },
+          {
+            "event_key": "eb3f28e38017a13057ca717f6d23d37236b3b14f3c69e5e7b1e3ba7520f9e894",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_74fc78017602ae37ec42e9f0d74feb49ad51b88ae29c75092f1ab113f260518d",
+            "engine_epoch": 1,
+            "worker_generation": 130,
+            "source": "EXECUTION_WORKER",
+            "event_type": "CONTAINER_EXITED",
+            "source_monotonic_ns": 6755097261374045,
+            "duration_ms": null,
+            "attributes": {
+              "exit_code": 0,
+              "container_id": "c062d445a1f9d5063e9cc6d9af11156d4572ffdf951f33ef66a9000d33c4e634"
+            },
+            "observed_at": "2026-10-12T22:07:14.294058+00:00"
+          },
+          {
+            "event_key": "2feef7d45e937933e09de85a2ae813945a707b0df54a650ce94466534edd6270",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_7275a2eb8148954a5e27cbc836315adb3431d091071c6b5c22f05b26377d7906",
+            "engine_epoch": 1,
+            "worker_generation": 130,
+            "source": "EXECUTION_WORKER",
+            "event_type": "CONTAINER_EXITED",
+            "source_monotonic_ns": 6755097265638912,
+            "duration_ms": null,
+            "attributes": {
+              "exit_code": 0,
+              "container_id": "899595f313b661379286964b0033410a1b96a81457110c71b91af3b1a459c9f7"
+            },
+            "observed_at": "2026-10-12T22:07:14.294476+00:00"
+          },
+          {
+            "event_key": "19d676578fd84a35184b2276683ca5f2af7478474754ea23052bab7317d38f2a",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_7275a2eb8148954a5e27cbc836315adb3431d091071c6b5c22f05b26377d7906",
+            "engine_epoch": 1,
+            "worker_generation": 130,
+            "source": "EXECUTION_WORKER",
+            "event_type": "OUTPUT_VERIFIED",
+            "source_monotonic_ns": 6755097268873457,
+            "duration_ms": null,
+            "attributes": {
+              "file_count": 4
+            },
+            "observed_at": "2026-10-12T22:07:14.297194+00:00"
+          },
+          {
+            "event_key": "9b6f3e3f2d1d756ab5e43f94019826bbb06247348de735c0bdf5d57a3d80319e",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_74fc78017602ae37ec42e9f0d74feb49ad51b88ae29c75092f1ab113f260518d",
+            "engine_epoch": 1,
+            "worker_generation": 130,
+            "source": "EXECUTION_WORKER",
+            "event_type": "OUTPUT_VERIFIED",
+            "source_monotonic_ns": 6755097268856075,
+            "duration_ms": null,
+            "attributes": {
+              "file_count": 4
+            },
+            "observed_at": "2026-10-12T22:07:14.297329+00:00"
+          },
+          {
+            "event_key": "d8ed0ede6b06fe449f9d21051d409297a05dd1a31591ce85284db0a244b21324",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_7caecf652684f3ede0901438c085566fd155fdcbc683386187467a4e1e3bce87",
+            "engine_epoch": 1,
+            "worker_generation": 130,
+            "source": "EXECUTION_WORKER",
+            "event_type": "NODE_OBSERVATION_REPORTED",
+            "source_monotonic_ns": 6755097303313795,
+            "duration_ms": null,
+            "attributes": {
+              "state": "SUCCEEDED",
+              "revision": 3
+            },
+            "observed_at": "2026-10-12T22:07:14.333744+00:00"
+          },
+          {
+            "event_key": "32fbdfe3d045091c7efca31cb68c35013d4ab672d4dcb1f96a498146411d7c5e",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_305887230d295e9644d40f32adf40e84210101fd4a58a2a95fe302b9aa63d57b",
+            "engine_epoch": 1,
+            "worker_generation": 131,
+            "source": "EXECUTION_WORKER",
+            "event_type": "NODE_OBSERVATION_REPORTED",
+            "source_monotonic_ns": 6755097505254221,
+            "duration_ms": null,
+            "attributes": {
+              "state": "SUCCEEDED",
+              "revision": 3
+            },
+            "observed_at": "2026-10-12T22:07:14.535251+00:00"
+          },
+          {
+            "event_key": "bc74d985db5530d511f023ae992092587c264830f7830ee14d791d11d5d96e3d",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_74fc78017602ae37ec42e9f0d74feb49ad51b88ae29c75092f1ab113f260518d",
+            "engine_epoch": 1,
+            "worker_generation": 131,
+            "source": "EXECUTION_WORKER",
+            "event_type": "NODE_OBSERVATION_REPORTED",
+            "source_monotonic_ns": 6755097521780480,
+            "duration_ms": null,
+            "attributes": {
+              "state": "SUCCEEDED",
+              "revision": 3
+            },
+            "observed_at": "2026-10-12T22:07:14.550849+00:00"
+          },
+          {
+            "event_key": "8ad89763cdb0a7bc46977929f4dc0310ea9dc753b1471d8b94fc1ad0e9e5e563",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_7275a2eb8148954a5e27cbc836315adb3431d091071c6b5c22f05b26377d7906",
+            "engine_epoch": 1,
+            "worker_generation": 131,
+            "source": "EXECUTION_WORKER",
+            "event_type": "NODE_OBSERVATION_REPORTED",
+            "source_monotonic_ns": 6755097527788607,
+            "duration_ms": null,
+            "attributes": {
+              "state": "SUCCEEDED",
+              "revision": 3
+            },
+            "observed_at": "2026-10-12T22:07:14.556923+00:00"
+          },
+          {
+            "event_key": "05e7255359a4e20372b5fd7c0fe8bf422004ad00bf95aef6c6f6220bf3c40ff8",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_7caecf652684f3ede0901438c085566fd155fdcbc683386187467a4e1e3bce87",
+            "engine_epoch": 1,
+            "worker_generation": null,
+            "source": "EXECUTION_API",
+            "event_type": "NODE_TERMINAL_OBSERVED",
+            "source_monotonic_ns": 6755097613888769,
+            "duration_ms": null,
+            "attributes": {
+              "state": "SUCCEEDED",
+              "revision": 3,
+              "bridge_instance_id": "dc5bfc14b2027a2b96ff1ae7db0edab9"
+            },
+            "observed_at": "2026-10-12T22:07:14.642703+00:00"
+          },
+          {
+            "event_key": "4face6dff3086752d8f4962d7b67c405b74b3b91b84984688227b965b285f34e",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_7caecf652684f3ede0901438c085566fd155fdcbc683386187467a4e1e3bce87",
+            "engine_epoch": 1,
+            "worker_generation": null,
+            "source": "BRIDGE",
+            "event_type": "BRIDGE_RETURNED",
+            "source_monotonic_ns": 6755097643843107,
+            "duration_ms": null,
+            "attributes": {
+              "revision": 3,
+              "bridge_instance_id": "dc5bfc14b2027a2b96ff1ae7db0edab9"
+            },
+            "observed_at": "2026-10-12T22:07:14.678891+00:00"
+          },
+          {
+            "event_key": "89f52a7d65541439616af564a44e941c8a74475e202a28ae662d86cc13a86a48",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_74fc78017602ae37ec42e9f0d74feb49ad51b88ae29c75092f1ab113f260518d",
+            "engine_epoch": 1,
+            "worker_generation": null,
+            "source": "EXECUTION_API",
+            "event_type": "NODE_TERMINAL_OBSERVED",
+            "source_monotonic_ns": 6755097719040997,
+            "duration_ms": null,
+            "attributes": {
+              "state": "SUCCEEDED",
+              "revision": 3,
+              "bridge_instance_id": "730974d4e8dc32a13efab42b7256c84e"
+            },
+            "observed_at": "2026-10-12T22:07:14.748359+00:00"
+          },
+          {
+            "event_key": "893643091ed4e993bc93cce312685ecb8541649f9da939c273cb75f397ef0c7d",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_74fc78017602ae37ec42e9f0d74feb49ad51b88ae29c75092f1ab113f260518d",
+            "engine_epoch": 1,
+            "worker_generation": null,
+            "source": "BRIDGE",
+            "event_type": "BRIDGE_RETURNED",
+            "source_monotonic_ns": 6755097748158828,
+            "duration_ms": null,
+            "attributes": {
+              "revision": 3,
+              "bridge_instance_id": "730974d4e8dc32a13efab42b7256c84e"
+            },
+            "observed_at": "2026-10-12T22:07:14.781528+00:00"
+          },
+          {
+            "event_key": "510729dc162a1528dad3bb65b48c8f4972c96547433424e3714cabdbc2150818",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_305887230d295e9644d40f32adf40e84210101fd4a58a2a95fe302b9aa63d57b",
+            "engine_epoch": 1,
+            "worker_generation": null,
+            "source": "EXECUTION_API",
+            "event_type": "NODE_TERMINAL_OBSERVED",
+            "source_monotonic_ns": 6755097798088906,
+            "duration_ms": null,
+            "attributes": {
+              "state": "SUCCEEDED",
+              "revision": 3,
+              "bridge_instance_id": "f3a428bf75378af5e12c9d3377b6456a"
+            },
+            "observed_at": "2026-10-12T22:07:14.828557+00:00"
+          },
+          {
+            "event_key": "e4be864a2564dddac8e9f491fd34e9c253916ce969676659215ad38abd16d114",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_7275a2eb8148954a5e27cbc836315adb3431d091071c6b5c22f05b26377d7906",
+            "engine_epoch": 1,
+            "worker_generation": null,
+            "source": "EXECUTION_API",
+            "event_type": "NODE_TERMINAL_OBSERVED",
+            "source_monotonic_ns": 6755097798462433,
+            "duration_ms": null,
+            "attributes": {
+              "state": "SUCCEEDED",
+              "revision": 3,
+              "bridge_instance_id": "5c7b101570ab56e411595d045882fe0c"
+            },
+            "observed_at": "2026-10-12T22:07:14.828651+00:00"
+          },
+          {
+            "event_key": "3b6124de1c5dcf94f6cb1cc4db4504a8ee9375a08c230120295cec7881a7a588",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_7275a2eb8148954a5e27cbc836315adb3431d091071c6b5c22f05b26377d7906",
+            "engine_epoch": 1,
+            "worker_generation": null,
+            "source": "BRIDGE",
+            "event_type": "BRIDGE_RETURNED",
+            "source_monotonic_ns": 6755097889791899,
+            "duration_ms": null,
+            "attributes": {
+              "revision": 3,
+              "bridge_instance_id": "5c7b101570ab56e411595d045882fe0c"
+            },
+            "observed_at": "2026-10-12T22:07:14.927201+00:00"
+          },
+          {
+            "event_key": "56982b1e2004e8ed0fc45334ef425affb93e438cca8bd27d014d31c90217b7a1",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": "node_305887230d295e9644d40f32adf40e84210101fd4a58a2a95fe302b9aa63d57b",
+            "engine_epoch": 1,
+            "worker_generation": null,
+            "source": "BRIDGE",
+            "event_type": "BRIDGE_RETURNED",
+            "source_monotonic_ns": 6755097889731099,
+            "duration_ms": null,
+            "attributes": {
+              "revision": 3,
+              "bridge_instance_id": "f3a428bf75378af5e12c9d3377b6456a"
+            },
+            "observed_at": "2026-10-12T22:07:14.927297+00:00"
+          },
+          {
+            "event_key": "9a55f7e310df83be794c7fbe06af43196e95f12b1fd74ec0d6acf9ae3cfe4e86",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": null,
+            "engine_epoch": 1,
+            "worker_generation": 192,
+            "source": "ENGINE",
+            "event_type": "ENGINE_EXITED",
+            "source_monotonic_ns": 6755106473787357,
+            "duration_ms": null,
+            "attributes": {
+              "exit_code": 0,
+              "container_id": "5f9e1a3669f3015cc3ec20f08aabde37aaff72b01818cf1380e8bfd12de3092f"
+            },
+            "observed_at": "2026-10-12T22:07:23.503082+00:00"
+          },
+          {
+            "event_key": "65b47646fab1bf59dca472e185f7a189181cb094c93db7af230004c8214db30a",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": null,
+            "engine_epoch": 1,
+            "worker_generation": 192,
+            "source": "ENGINE",
+            "event_type": "GATHER_FINISHED",
+            "source_monotonic_ns": 6755106485093269,
+            "duration_ms": null,
+            "attributes": {
+              "member_count": 4
+            },
+            "observed_at": "2026-10-12T22:07:23.513839+00:00"
+          },
+          {
+            "event_key": "f7153ab38c2be2112e16fd0b3565d28b56ba60cbea66139a0fe700561a0a5a0a",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": null,
+            "engine_epoch": 1,
+            "worker_generation": 193,
+            "source": "DATA_CLIENT",
+            "event_type": "PUBLICATION_PREPARED",
+            "source_monotonic_ns": 6755106781838962,
+            "duration_ms": null,
+            "attributes": {
+              "state": "PENDING"
+            },
+            "observed_at": "2026-10-12T22:07:23.811651+00:00"
+          },
+          {
+            "event_key": "bd5d8011e81524918b739179cbbb81b8c85cef595a6d2d3540d6911cce2b8951",
+            "workflow_execution_id": "eec3581787dacbea941d6f63ef20ce886",
+            "node_action_id": null,
+            "engine_epoch": 1,
+            "worker_generation": 193,
+            "source": "DATA_CLIENT",
+            "event_type": "PUBLICATION_COMMITTED",
+            "source_monotonic_ns": 6755106904705223,
+            "duration_ms": null,
+            "attributes": {
+              "state": "COMMITTED"
+            },
+            "observed_at": "2026-10-12T22:07:23.933773+00:00"
+          }
+        ]
+      },
+      "process_rss_mib": {
+        "bridge": {
+          "count": 613,
+          "min": 5.414062,
+          "median": 22.65625,
+          "p95": 22.667969,
+          "p99": 22.667969,
+          "max": 22.667969
+        },
+        "tagger": {
+          "count": 829,
+          "min": 27.902344,
+          "median": 44.710938,
+          "p95": 57.515625,
+          "p99": 61.375,
+          "max": 61.375
+        },
+        "toil_worker": {
+          "count": 1323,
+          "min": 0.0,
+          "median": 0.902344,
+          "p95": 62.21875,
+          "p99": 62.21875,
+          "max": 62.652344
+        }
+      },
+      "execution_database_connections": {
+        "total": {
+          "count": 230,
+          "min": 12,
+          "median": 13.0,
+          "p95": 13,
+          "p99": 13,
+          "max": 13
+        },
+        "active": {
+          "count": 230,
+          "min": 0,
+          "median": 0.0,
+          "p95": 0,
+          "p99": 1,
+          "max": 1
+        }
+      },
+      "engine_init_observed": true,
+      "engine": {
+        "epochs": 1,
+        "container_seconds_total": 46.906033,
+        "process_group_warnings": 0,
+        "failed_workers": 0,
+        "running_containers": 0,
+        "nonzero_container_pids": 0,
+        "processes_after_exit": 0
+      },
+      "status": "PASS",
+      "node_http": {
+        "post_requests": 4,
+        "long_poll_get_requests": 30,
+        "http_requests": 34,
+        "node_state_db_reads": 196
+      },
+      "node_submit_posts": 4,
+      "repeated_node_submit_posts": 0,
+      "sequence": 1
+    },
+    {
+      "configuration": {
+        "id": "CHAINING_ON",
+        "workflow": "nested",
+        "workers": 10,
+        "roles": [
+          "supervisor",
+          "node",
+          "node",
+          "node",
+          "node",
+          "node",
+          "node",
+          "node",
+          "node",
+          "publication"
+        ],
+        "init": true,
+        "baseline_resources": false,
+        "cwl_image": "sha256:652754092f5cf48486a9c8bb42f113d1d95d25141ef7d846be44ff8a18504a09",
+        "engine_profile_id": "toil-single-host-v2-chaining-on"
+      },
+      "repeat": 1,
+      "dataset": {
+        "rows": 20000,
+        "groups": 200,
+        "bytes": 860019,
+        "sha256": "ca7fa902c80f969bb9e2e02e99ccb1059bb5208ceae02768a6725a574adbaa29",
+        "generation_seconds": 0.175969,
+        "synthetic": true,
+        "generator": "round-robin groups; hourly UTC; y=100+group/100+sample/8",
+        "setup_seconds": 0.793624
+      },
+      "compiled_document_count": 5,
+      "compiled_invocation_count": 1,
+      "package_validation_seconds": 2.480543,
+      "workflow": {
+        "workflow_seconds": 48.704484,
+        "first_node_seconds": 7.645411,
+        "nodes_started": 4,
+        "peak_in_flight_observed": 4,
+        "poll_samples": 226,
+        "container_seconds": {
+          "min": 30.550565,
+          "mean": 30.593266,
+          "p50": 30.581316,
+          "p95": 30.649465,
+          "max": 30.649465,
+          "sum": 122.373066,
+          "compute_window": 30.688437,
+          "effective_parallelism": 3.987595,
+          "overlap_peak": 4,
+          "timeline": [
+            {
+              "start_offset": 0.0,
+              "duration": 30.59172
+            },
+            {
+              "start_offset": 0.000413,
+              "duration": 30.550565
+            },
+            {
+              "start_offset": 0.038972,
+              "duration": 30.649465
+            },
+            {
+              "start_offset": 0.047677,
+              "duration": 30.581316
+            }
+          ]
+        },
+        "effective_parallelism_over_workflow": 2.512563,
+        "engine": {
+          "epochs": 1,
+          "container_seconds_total": 46.804052,
+          "process_group_warnings": 0,
+          "failed_workers": 0,
+          "running_containers": 0,
+          "nonzero_container_pids": 0,
+          "processes_after_exit": 0
+        },
+        "budget": {
+          "execution_count": 4,
+          "max_in_flight": 4,
+          "task_id": "0830ea35f9c54b76add7bda4c8f861eb",
+          "used": 4,
+          "reserved": 0,
+          "in_flight": 0
+        }
+      },
+      "engine_strategy": "flat_v1",
+      "engine_package_digest": "sha256:520bf043a64d3a2a5fbd11af2517f4b3078ed8b5a8b92572ddf664004c7df3ba",
+      "engine_profile": {
+        "profile_id": "toil-single-host-v2-chaining-on",
+        "profile_digest": "sha256:12723b6ddc16bf4753914821d2468ed59529db340ed4a4af600464a46cb91396",
+        "chaining_enabled": true
+      },
+      "average_compute_parallelism": 3.987595,
+      "slot_utilization_percent": 99.689875,
+      "trace": {
+        "event_count": 72,
+        "required_event_completeness": 1.0,
+        "query_ms": 8.057758,
+        "write_probe_ms": {
+          "count": 32,
+          "min": 1.326968,
+          "median": 1.53385,
+          "p95": 2.190645,
+          "p99": 3.036307,
+          "max": 3.036307
+        },
+        "estimated_total_write_ms": 110.4372,
+        "estimated_overhead_percent": 0.22675,
+        "engine_start_to_first_bridge_ms": 5780.893841,
+        "engine_start_to_first_node_accept_ms": 5878.433378,
+        "accepted_to_first_claim_ms": {
+          "count": 4,
+          "min": 44.608053,
+          "median": 59.425808,
+          "p95": 84.183641,
+          "p99": 84.183641,
+          "max": 84.183641
+        },
+        "permit_http_ms": {
+          "count": 8,
+          "min": 21.311291,
+          "median": 29.812918,
+          "p95": 46.928221,
+          "p99": 46.928221,
+          "max": 46.928221
+        },
+        "permit_to_container_start_ms": {
+          "count": 4,
+          "min": 503.108441,
+          "median": 543.156116,
+          "p95": 553.241279,
+          "p99": 553.241279,
+          "max": 553.241279
+        },
+        "container_exit_to_bridge_return_ms": {
+          "count": 4,
+          "min": 366.78562,
+          "median": 466.693945,
+          "p95": 502.380512,
+          "p99": 502.380512,
+          "max": 502.380512
+        },
+        "previous_container_exit_to_next_node_accept_ms": null,
+        "container_start_interval_ms": {
+          "count": 3,
+          "min": 1.710448,
+          "median": 2.815024,
+          "p95": 48.564057,
+          "p99": 48.564057,
+          "max": 48.564057
+        },
+        "last_bridge_to_engine_exit_ms": 8799.15197,
+        "engine_exit_to_gather_ms": 15.353669,
+        "last_bridge_to_gather_ms": 8814.505639,
+        "gather_to_publish_ms": 414.542007,
+        "events": [
+          {
+            "event_key": "e242c4fc995ea77312e5c504b2c3061e8ce98f6f183d893502ecb3fdbdcf181c",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": null,
+            "engine_epoch": 0,
+            "worker_generation": 2,
+            "source": "PLATFORM_CLIENT",
+            "event_type": "PERMIT_REQUESTED",
+            "source_monotonic_ns": 6755116082361850,
+            "duration_ms": null,
+            "attributes": {
+              "phase": "PREPARED"
+            },
+            "observed_at": "2026-10-12T22:07:33.111468+00:00"
+          },
+          {
+            "event_key": "41382874eff637e2b32b8ffec4ddf8030fa0727f9b46fad6d60ca13cc470eaf1",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": null,
+            "engine_epoch": 0,
+            "worker_generation": 2,
+            "source": "PLATFORM_CLIENT",
+            "event_type": "PERMIT_ALLOWED",
+            "source_monotonic_ns": 6755116133931129,
+            "duration_ms": 51.576785,
+            "attributes": {
+              "decision": "ALLOW"
+            },
+            "observed_at": "2026-10-12T22:07:33.163889+00:00"
+          },
+          {
+            "event_key": "346219b44694d4301e14fee6a730099eb81f65bd0dc94f32a2258b0c0f8ce32d",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": null,
+            "engine_epoch": 1,
+            "worker_generation": 2,
+            "source": "ENGINE",
+            "event_type": "ENGINE_CREATED",
+            "source_monotonic_ns": 6755116238148927,
+            "duration_ms": null,
+            "attributes": {
+              "container_id": "cf7fbaa7173ac0d4e77ebb3955c8b09795c10be8b5e9d6508997ccc9bd12a2fe"
+            },
+            "observed_at": "2026-10-12T22:07:33.269497+00:00"
+          },
+          {
+            "event_key": "f411f76c4207b24b8c4ac5676bc36d998f28a8bbda67e1f1b39ac671054b6e15",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": null,
+            "engine_epoch": 1,
+            "worker_generation": 3,
+            "source": "ENGINE",
+            "event_type": "ENGINE_STARTED",
+            "source_monotonic_ns": 6755116634521974,
+            "duration_ms": null,
+            "attributes": {
+              "container_id": "cf7fbaa7173ac0d4e77ebb3955c8b09795c10be8b5e9d6508997ccc9bd12a2fe"
+            },
+            "observed_at": "2026-10-12T22:07:33.664011+00:00"
+          },
+          {
+            "event_key": "839f4b79cc7fc3eabd0d6c5900913e5c866909bd04aff2eac21026330c33e7c4",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_efa9a23876de3faa72d6f8037f253f700d953833e6c9adbf42e371c3f7664a38",
+            "engine_epoch": 1,
+            "worker_generation": null,
+            "source": "BRIDGE",
+            "event_type": "BRIDGE_STARTED",
+            "source_monotonic_ns": 6755122415415815,
+            "duration_ms": null,
+            "attributes": {
+              "bridge_instance_id": "bfe4627f7999779382a02cbce62bdb44"
+            },
+            "observed_at": "2026-10-12T22:07:39.552917+00:00"
+          },
+          {
+            "event_key": "62cd7be6553c9e58b219e277cbdbed85d8abfdca39bd6980bb0a82177c2d1b73",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_efa9a23876de3faa72d6f8037f253f700d953833e6c9adbf42e371c3f7664a38",
+            "engine_epoch": 1,
+            "worker_generation": null,
+            "source": "BRIDGE",
+            "event_type": "ENGINE_BINDING_OBSERVED",
+            "source_monotonic_ns": 6755122512955352,
+            "duration_ms": null,
+            "attributes": {
+              "kind": "toil",
+              "binding_id": "kind-CWLJob/instance-w40aapi2"
+            },
+            "observed_at": "2026-10-12T22:07:39.555337+00:00"
+          },
+          {
+            "event_key": "f01a86da603ba145083e0fd13205dd1dc42b69c94ae921803dd93cdba74c7d5f",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_efa9a23876de3faa72d6f8037f253f700d953833e6c9adbf42e371c3f7664a38",
+            "engine_epoch": 1,
+            "worker_generation": null,
+            "source": "EXECUTION_API",
+            "event_type": "NODE_ACCEPTED",
+            "source_monotonic_ns": 6755122512955352,
+            "duration_ms": null,
+            "attributes": {
+              "created": true
+            },
+            "observed_at": "2026-10-12T22:07:39.557236+00:00"
+          },
+          {
+            "event_key": "aaf9e21c98cd900e8b122532f8888778b3974213ac8e2c916d4e434f3342a587",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_efa9a23876de3faa72d6f8037f253f700d953833e6c9adbf42e371c3f7664a38",
+            "engine_epoch": 1,
+            "worker_generation": 1,
+            "source": "EXECUTION_WORKER",
+            "event_type": "EXECUTION_CLAIMED",
+            "source_monotonic_ns": 6755122564168318,
+            "duration_ms": null,
+            "attributes": {
+              "phase": "ACCEPTED"
+            },
+            "observed_at": "2026-10-12T22:07:39.593984+00:00"
+          },
+          {
+            "event_key": "5ca9cbeb8163d5754ddbb72b5ecfba8b4b4976f8e8c15b19d791e40aadafc061",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_dd65978de1ef8cd2c6670619ac10a66ee7d4a8d40f86b95d6115a8352b5b07d2",
+            "engine_epoch": 1,
+            "worker_generation": null,
+            "source": "BRIDGE",
+            "event_type": "BRIDGE_STARTED",
+            "source_monotonic_ns": 6755122501464264,
+            "duration_ms": null,
+            "attributes": {
+              "bridge_instance_id": "fe2a6f6b7c40fdd989e96dd941a1cc52"
+            },
+            "observed_at": "2026-10-12T22:07:39.614218+00:00"
+          },
+          {
+            "event_key": "52cc22f1190c74013cb194046e68ab629c6b4429823bb027d1bdbcf74312be4c",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_dd65978de1ef8cd2c6670619ac10a66ee7d4a8d40f86b95d6115a8352b5b07d2",
+            "engine_epoch": 1,
+            "worker_generation": null,
+            "source": "BRIDGE",
+            "event_type": "ENGINE_BINDING_OBSERVED",
+            "source_monotonic_ns": 6755122543093093,
+            "duration_ms": null,
+            "attributes": {
+              "kind": "toil",
+              "binding_id": "kind-CWLJob/instance-cesubmd4"
+            },
+            "observed_at": "2026-10-12T22:07:39.619499+00:00"
+          },
+          {
+            "event_key": "32e6da1c67137eb6a8319715ac801c199d99e51544b41d017bfef4276b56ca87",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_dd65978de1ef8cd2c6670619ac10a66ee7d4a8d40f86b95d6115a8352b5b07d2",
+            "engine_epoch": 1,
+            "worker_generation": null,
+            "source": "EXECUTION_API",
+            "event_type": "NODE_ACCEPTED",
+            "source_monotonic_ns": 6755122543093093,
+            "duration_ms": null,
+            "attributes": {
+              "created": true
+            },
+            "observed_at": "2026-10-12T22:07:39.639264+00:00"
+          },
+          {
+            "event_key": "dc8695ff2952afe1352cd4207d5f23b90a3ee9d0f58fb669b4a7b48ce8472423",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_dd65978de1ef8cd2c6670619ac10a66ee7d4a8d40f86b95d6115a8352b5b07d2",
+            "engine_epoch": 1,
+            "worker_generation": 1,
+            "source": "EXECUTION_WORKER",
+            "event_type": "EXECUTION_CLAIMED",
+            "source_monotonic_ns": 6755122610731743,
+            "duration_ms": null,
+            "attributes": {
+              "phase": "ACCEPTED"
+            },
+            "observed_at": "2026-10-12T22:07:39.647957+00:00"
+          },
+          {
+            "event_key": "307bc48d5cb9d9e42cfc1e1168e47bb6df5c7f22674825262a8af4f0a3cb995a",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_b01528c513413bf41aef3d594004f2ac7396a4cb40578329b667bbff30202394",
+            "engine_epoch": 1,
+            "worker_generation": null,
+            "source": "BRIDGE",
+            "event_type": "BRIDGE_STARTED",
+            "source_monotonic_ns": 6755122510372273,
+            "duration_ms": null,
+            "attributes": {
+              "bridge_instance_id": "7bbf2350eaaa80f422c0b61580658a82"
+            },
+            "observed_at": "2026-10-12T22:07:39.667000+00:00"
+          },
+          {
+            "event_key": "471fd0608db83d6eaf7e6aa2ea847214f4b3db61c9a03a6190419c57d313edb2",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_b01528c513413bf41aef3d594004f2ac7396a4cb40578329b667bbff30202394",
+            "engine_epoch": 1,
+            "worker_generation": null,
+            "source": "BRIDGE",
+            "event_type": "ENGINE_BINDING_OBSERVED",
+            "source_monotonic_ns": 6755122592665372,
+            "duration_ms": null,
+            "attributes": {
+              "kind": "toil",
+              "binding_id": "kind-CWLJob/instance-e0qppjsp"
+            },
+            "observed_at": "2026-10-12T22:07:39.671131+00:00"
+          },
+          {
+            "event_key": "8c7e8becba5dfff99713873d44de09541a216be2d0c86e4aacc6dd93492b2d28",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_aca57e8698df8f6dae2aff53cd4c469711d53d35c566b2748c0d97d26eafe928",
+            "engine_epoch": 1,
+            "worker_generation": null,
+            "source": "BRIDGE",
+            "event_type": "BRIDGE_STARTED",
+            "source_monotonic_ns": 6755122540748716,
+            "duration_ms": null,
+            "attributes": {
+              "bridge_instance_id": "d438fc57cbd2111bed482ed6ee37374d"
+            },
+            "observed_at": "2026-10-12T22:07:39.673558+00:00"
+          },
+          {
+            "event_key": "1fc4a97ad1fad37caabb427d53a7facf744707f34e9fdf8cd07f30871b688279",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_b01528c513413bf41aef3d594004f2ac7396a4cb40578329b667bbff30202394",
+            "engine_epoch": 1,
+            "worker_generation": null,
+            "source": "EXECUTION_API",
+            "event_type": "NODE_ACCEPTED",
+            "source_monotonic_ns": 6755122592665372,
+            "duration_ms": null,
+            "attributes": {
+              "created": true
+            },
+            "observed_at": "2026-10-12T22:07:39.674641+00:00"
+          },
+          {
+            "event_key": "f89cbf96941db090e3cf19ba7db907c37220728b96c0bd3717bebb385837da9e",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_aca57e8698df8f6dae2aff53cd4c469711d53d35c566b2748c0d97d26eafe928",
+            "engine_epoch": 1,
+            "worker_generation": null,
+            "source": "BRIDGE",
+            "event_type": "ENGINE_BINDING_OBSERVED",
+            "source_monotonic_ns": 6755122631991539,
+            "duration_ms": null,
+            "attributes": {
+              "kind": "toil",
+              "binding_id": "kind-CWLJob/instance-ef2rtm7g"
+            },
+            "observed_at": "2026-10-12T22:07:39.676132+00:00"
+          },
+          {
+            "event_key": "842aff9ed169fb6d5ba918cd8d253b5d99aa9a83d370331b0d247380fd9dbd42",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_aca57e8698df8f6dae2aff53cd4c469711d53d35c566b2748c0d97d26eafe928",
+            "engine_epoch": 1,
+            "worker_generation": null,
+            "source": "EXECUTION_API",
+            "event_type": "NODE_ACCEPTED",
+            "source_monotonic_ns": 6755122631991539,
+            "duration_ms": null,
+            "attributes": {
+              "created": true
+            },
+            "observed_at": "2026-10-12T22:07:39.678687+00:00"
+          },
+          {
+            "event_key": "d56096685e287c5c1be01af776e78ea35b723bb75a9dcb2de299a07ba6c56ea5",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_b01528c513413bf41aef3d594004f2ac7396a4cb40578329b667bbff30202394",
+            "engine_epoch": 1,
+            "worker_generation": 1,
+            "source": "EXECUTION_WORKER",
+            "event_type": "EXECUTION_CLAIMED",
+            "source_monotonic_ns": 6755122676849013,
+            "duration_ms": null,
+            "attributes": {
+              "phase": "ACCEPTED"
+            },
+            "observed_at": "2026-10-12T22:07:39.706446+00:00"
+          },
+          {
+            "event_key": "2290154645088d300768f27c0cb5df823f0a58f74d2beb86c4529199f2f9c406",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_aca57e8698df8f6dae2aff53cd4c469711d53d35c566b2748c0d97d26eafe928",
+            "engine_epoch": 1,
+            "worker_generation": 1,
+            "source": "EXECUTION_WORKER",
+            "event_type": "EXECUTION_CLAIMED",
+            "source_monotonic_ns": 6755122676599592,
+            "duration_ms": null,
+            "attributes": {
+              "phase": "ACCEPTED"
+            },
+            "observed_at": "2026-10-12T22:07:39.706565+00:00"
+          },
+          {
+            "event_key": "ff93abc9c284597d7819e43d6bf39171a1b4dc0096a4e7e67c1cce9f946fe627",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_efa9a23876de3faa72d6f8037f253f700d953833e6c9adbf42e371c3f7664a38",
+            "engine_epoch": 1,
+            "worker_generation": 2,
+            "source": "EXECUTION_WORKER",
+            "event_type": "PERMIT_REQUESTED",
+            "source_monotonic_ns": 6755123054368278,
+            "duration_ms": null,
+            "attributes": {
+              "phase": "PREPARED"
+            },
+            "observed_at": "2026-10-12T22:07:40.083627+00:00"
+          },
+          {
+            "event_key": "72a410ae4e4fbe28203f6d3537b34b065ca86d3475b7d445ec07ffd49891e23e",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_dd65978de1ef8cd2c6670619ac10a66ee7d4a8d40f86b95d6115a8352b5b07d2",
+            "engine_epoch": 1,
+            "worker_generation": 2,
+            "source": "EXECUTION_WORKER",
+            "event_type": "PERMIT_REQUESTED",
+            "source_monotonic_ns": 6755123055577960,
+            "duration_ms": null,
+            "attributes": {
+              "phase": "PREPARED"
+            },
+            "observed_at": "2026-10-12T22:07:40.084848+00:00"
+          },
+          {
+            "event_key": "3dfe4777e41e95a3c810b6642227f83bdeb9cdfcbdc8319d6531bf5e6d22c270",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_efa9a23876de3faa72d6f8037f253f700d953833e6c9adbf42e371c3f7664a38",
+            "engine_epoch": 1,
+            "worker_generation": 2,
+            "source": "EXECUTION_WORKER",
+            "event_type": "PERMIT_ALLOWED",
+            "source_monotonic_ns": 6755123086100048,
+            "duration_ms": 31.734499,
+            "attributes": {
+              "decision": "ALLOW"
+            },
+            "observed_at": "2026-10-12T22:07:40.115292+00:00"
+          },
+          {
+            "event_key": "e29dbbba26e7f1ac1e9d1f0935203ea38aeb5e85736734cd173b7063f9fa071a",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_dd65978de1ef8cd2c6670619ac10a66ee7d4a8d40f86b95d6115a8352b5b07d2",
+            "engine_epoch": 1,
+            "worker_generation": 2,
+            "source": "EXECUTION_WORKER",
+            "event_type": "PERMIT_ALLOWED",
+            "source_monotonic_ns": 6755123102262182,
+            "duration_ms": 46.690708,
+            "attributes": {
+              "decision": "ALLOW"
+            },
+            "observed_at": "2026-10-12T22:07:40.131055+00:00"
+          },
+          {
+            "event_key": "abeb08425eea3f2aae9e64f5d6a55fef080586533f4fb25c32dbc5e9291f890d",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_b01528c513413bf41aef3d594004f2ac7396a4cb40578329b667bbff30202394",
+            "engine_epoch": 1,
+            "worker_generation": 2,
+            "source": "EXECUTION_WORKER",
+            "event_type": "PERMIT_REQUESTED",
+            "source_monotonic_ns": 6755123113816298,
+            "duration_ms": null,
+            "attributes": {
+              "phase": "PREPARED"
+            },
+            "observed_at": "2026-10-12T22:07:40.143280+00:00"
+          },
+          {
+            "event_key": "6119a3a88130971914e95a1ed440d52ef970df093230b28dfebf319fa2aa2d3f",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_b01528c513413bf41aef3d594004f2ac7396a4cb40578329b667bbff30202394",
+            "engine_epoch": 1,
+            "worker_generation": 2,
+            "source": "EXECUTION_WORKER",
+            "event_type": "PERMIT_ALLOWED",
+            "source_monotonic_ns": 6755123136330257,
+            "duration_ms": 22.513364,
+            "attributes": {
+              "decision": "ALLOW"
+            },
+            "observed_at": "2026-10-12T22:07:40.165388+00:00"
+          },
+          {
+            "event_key": "17df855c31af70d966b73a137d7942d6d7ad4f83c0c5e736da2a5b15723b2666",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_aca57e8698df8f6dae2aff53cd4c469711d53d35c566b2748c0d97d26eafe928",
+            "engine_epoch": 1,
+            "worker_generation": 2,
+            "source": "EXECUTION_WORKER",
+            "event_type": "PERMIT_REQUESTED",
+            "source_monotonic_ns": 6755123136728525,
+            "duration_ms": null,
+            "attributes": {
+              "phase": "PREPARED"
+            },
+            "observed_at": "2026-10-12T22:07:40.167135+00:00"
+          },
+          {
+            "event_key": "beee3c121083c643ef33427d4bd363ea1b2887e8413db5280aace184c1fdc5f8",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_aca57e8698df8f6dae2aff53cd4c469711d53d35c566b2748c0d97d26eafe928",
+            "engine_epoch": 1,
+            "worker_generation": 2,
+            "source": "EXECUTION_WORKER",
+            "event_type": "PERMIT_ALLOWED",
+            "source_monotonic_ns": 6755123183648071,
+            "duration_ms": 46.928221,
+            "attributes": {
+              "decision": "ALLOW"
+            },
+            "observed_at": "2026-10-12T22:07:40.212701+00:00"
+          },
+          {
+            "event_key": "47a4601d9fdd4bf1670e57035cb1fb9f1bc5354ba16b2d745bc811060cbc1194",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_efa9a23876de3faa72d6f8037f253f700d953833e6c9adbf42e371c3f7664a38",
+            "engine_epoch": 1,
+            "worker_generation": 2,
+            "source": "EXECUTION_WORKER",
+            "event_type": "CONTAINER_CREATED",
+            "source_monotonic_ns": 6755123191733346,
+            "duration_ms": null,
+            "attributes": {
+              "container_id": "1942abdbf4534fb690833610236d2ba19e09e5675280a62176586c8bd5f9a745"
+            },
+            "observed_at": "2026-10-12T22:07:40.220933+00:00"
+          },
+          {
+            "event_key": "661fb69e22f2952967717300e06599a22687d1a29bb0a723541809ec0c115ee8",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_dd65978de1ef8cd2c6670619ac10a66ee7d4a8d40f86b95d6115a8352b5b07d2",
+            "engine_epoch": 1,
+            "worker_generation": 2,
+            "source": "EXECUTION_WORKER",
+            "event_type": "CONTAINER_CREATED",
+            "source_monotonic_ns": 6755123193515753,
+            "duration_ms": null,
+            "attributes": {
+              "container_id": "8e7ad5c27d2ef189a08bc98af1903664ef1a9eb51a5fa3f22f2da2536a1a00e9"
+            },
+            "observed_at": "2026-10-12T22:07:40.223235+00:00"
+          },
+          {
+            "event_key": "483991f85786af54eb6fa8ee1ad90e940dbe124dcbe4f389d5e9f4d30ce7b636",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_b01528c513413bf41aef3d594004f2ac7396a4cb40578329b667bbff30202394",
+            "engine_epoch": 1,
+            "worker_generation": 2,
+            "source": "EXECUTION_WORKER",
+            "event_type": "CONTAINER_CREATED",
+            "source_monotonic_ns": 6755123226861732,
+            "duration_ms": null,
+            "attributes": {
+              "container_id": "9ab42b988b6dd6ed86bc626efdac894257447ae438f30539f9dd5391c8be9a45"
+            },
+            "observed_at": "2026-10-12T22:07:40.255630+00:00"
+          },
+          {
+            "event_key": "016ec9c90de39514205d90db23647413410e07b7503af5ade657c4b717c27d01",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_aca57e8698df8f6dae2aff53cd4c469711d53d35c566b2748c0d97d26eafe928",
+            "engine_epoch": 1,
+            "worker_generation": 2,
+            "source": "EXECUTION_WORKER",
+            "event_type": "CONTAINER_CREATED",
+            "source_monotonic_ns": 6755123251764682,
+            "duration_ms": null,
+            "attributes": {
+              "container_id": "ea59984888e6d0c294196e2c8008b02dcca9a0e84de8c6bd55bb0f044c804beb"
+            },
+            "observed_at": "2026-10-12T22:07:40.281451+00:00"
+          },
+          {
+            "event_key": "d832b0abba9aec4bd4740048e32c2acd40aa7c02814c3867769429cbd5d070a2",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_efa9a23876de3faa72d6f8037f253f700d953833e6c9adbf42e371c3f7664a38",
+            "engine_epoch": 1,
+            "worker_generation": 3,
+            "source": "EXECUTION_WORKER",
+            "event_type": "PERMIT_REQUESTED",
+            "source_monotonic_ns": 6755123440985632,
+            "duration_ms": null,
+            "attributes": {
+              "phase": "CREATED"
+            },
+            "observed_at": "2026-10-12T22:07:40.469962+00:00"
+          },
+          {
+            "event_key": "27efc56901f6371eeae899091ac97a4a47c67472ebff5ceb3e9db9039d79af8d",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_dd65978de1ef8cd2c6670619ac10a66ee7d4a8d40f86b95d6115a8352b5b07d2",
+            "engine_epoch": 1,
+            "worker_generation": 3,
+            "source": "EXECUTION_WORKER",
+            "event_type": "PERMIT_REQUESTED",
+            "source_monotonic_ns": 6755123443256823,
+            "duration_ms": null,
+            "attributes": {
+              "phase": "CREATED"
+            },
+            "observed_at": "2026-10-12T22:07:40.472103+00:00"
+          },
+          {
+            "event_key": "2babb984ca751774733224c89cad66b742409ae2cc0fa5a37271adaa29f922e8",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_efa9a23876de3faa72d6f8037f253f700d953833e6c9adbf42e371c3f7664a38",
+            "engine_epoch": 1,
+            "worker_generation": 3,
+            "source": "EXECUTION_WORKER",
+            "event_type": "PERMIT_ALLOWED",
+            "source_monotonic_ns": 6755123466422934,
+            "duration_ms": 25.437508,
+            "attributes": {
+              "decision": "ALLOW"
+            },
+            "observed_at": "2026-10-12T22:07:40.495649+00:00"
+          },
+          {
+            "event_key": "0a446136957d10f5424c6e1c23acf79cab1699611f3fe0990226dbb6ba6321fa",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_dd65978de1ef8cd2c6670619ac10a66ee7d4a8d40f86b95d6115a8352b5b07d2",
+            "engine_epoch": 1,
+            "worker_generation": 3,
+            "source": "EXECUTION_WORKER",
+            "event_type": "PERMIT_ALLOWED",
+            "source_monotonic_ns": 6755123471144136,
+            "duration_ms": 27.891337,
+            "attributes": {
+              "decision": "ALLOW"
+            },
+            "observed_at": "2026-10-12T22:07:40.500168+00:00"
+          },
+          {
+            "event_key": "7d79beadd030069602da6c835777f02e8b7a12c15a20edbb7d4f0af9c15f29d2",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_b01528c513413bf41aef3d594004f2ac7396a4cb40578329b667bbff30202394",
+            "engine_epoch": 1,
+            "worker_generation": 3,
+            "source": "EXECUTION_WORKER",
+            "event_type": "PERMIT_REQUESTED",
+            "source_monotonic_ns": 6755123472206693,
+            "duration_ms": null,
+            "attributes": {
+              "phase": "CREATED"
+            },
+            "observed_at": "2026-10-12T22:07:40.502152+00:00"
+          },
+          {
+            "event_key": "216884da3115dc3c471badf93e778e2ec215c4c5d887489bd88251854557c266",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_aca57e8698df8f6dae2aff53cd4c469711d53d35c566b2748c0d97d26eafe928",
+            "engine_epoch": 1,
+            "worker_generation": 3,
+            "source": "EXECUTION_WORKER",
+            "event_type": "PERMIT_REQUESTED",
+            "source_monotonic_ns": 6755123499766697,
+            "duration_ms": null,
+            "attributes": {
+              "phase": "CREATED"
+            },
+            "observed_at": "2026-10-12T22:07:40.528578+00:00"
+          },
+          {
+            "event_key": "68b31abe198260e03d848ae893a0e5e926c697ae23418d7f9f3c0ff8a45dcdf4",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_b01528c513413bf41aef3d594004f2ac7396a4cb40578329b667bbff30202394",
+            "engine_epoch": 1,
+            "worker_generation": 3,
+            "source": "EXECUTION_WORKER",
+            "event_type": "PERMIT_ALLOWED",
+            "source_monotonic_ns": 6755123509401390,
+            "duration_ms": 37.201371,
+            "attributes": {
+              "decision": "ALLOW"
+            },
+            "observed_at": "2026-10-12T22:07:40.537927+00:00"
+          },
+          {
+            "event_key": "16014d02470380da08f039fcd5c53b46533de2f28b1ec3bd8a40ea4efdc607eb",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_aca57e8698df8f6dae2aff53cd4c469711d53d35c566b2748c0d97d26eafe928",
+            "engine_epoch": 1,
+            "worker_generation": 3,
+            "source": "EXECUTION_WORKER",
+            "event_type": "PERMIT_ALLOWED",
+            "source_monotonic_ns": 6755123521079726,
+            "duration_ms": 21.311291,
+            "attributes": {
+              "decision": "ALLOW"
+            },
+            "observed_at": "2026-10-12T22:07:40.550460+00:00"
+          },
+          {
+            "event_key": "0f3e73c46de7e390acad874292e50b9dc24dad6925032152b80f56e060e17943",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_dd65978de1ef8cd2c6670619ac10a66ee7d4a8d40f86b95d6115a8352b5b07d2",
+            "engine_epoch": 1,
+            "worker_generation": 3,
+            "source": "EXECUTION_WORKER",
+            "event_type": "CONTAINER_STARTED",
+            "source_monotonic_ns": 6755123636482007,
+            "duration_ms": null,
+            "attributes": {
+              "container_id": "8e7ad5c27d2ef189a08bc98af1903664ef1a9eb51a5fa3f22f2da2536a1a00e9"
+            },
+            "observed_at": "2026-10-12T22:07:40.665680+00:00"
+          },
+          {
+            "event_key": "7247b932b7f48b042aebbddb696a9e75d87e3709cd4664cba48993e04b2b6a55",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_efa9a23876de3faa72d6f8037f253f700d953833e6c9adbf42e371c3f7664a38",
+            "engine_epoch": 1,
+            "worker_generation": 3,
+            "source": "EXECUTION_WORKER",
+            "event_type": "CONTAINER_STARTED",
+            "source_monotonic_ns": 6755123638192455,
+            "duration_ms": null,
+            "attributes": {
+              "container_id": "1942abdbf4534fb690833610236d2ba19e09e5675280a62176586c8bd5f9a745"
+            },
+            "observed_at": "2026-10-12T22:07:40.667520+00:00"
+          },
+          {
+            "event_key": "747b0b368c6014754274fbf0fb53ef4a6ead07fdbdf97787c759b56d66e9202d",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_aca57e8698df8f6dae2aff53cd4c469711d53d35c566b2748c0d97d26eafe928",
+            "engine_epoch": 1,
+            "worker_generation": 3,
+            "source": "EXECUTION_WORKER",
+            "event_type": "CONTAINER_STARTED",
+            "source_monotonic_ns": 6755123686756512,
+            "duration_ms": null,
+            "attributes": {
+              "container_id": "ea59984888e6d0c294196e2c8008b02dcca9a0e84de8c6bd55bb0f044c804beb"
+            },
+            "observed_at": "2026-10-12T22:07:40.716118+00:00"
+          },
+          {
+            "event_key": "7731877c4a5f2498761de6cb75c9241a49c606212bd9e1678edfc95528647383",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_b01528c513413bf41aef3d594004f2ac7396a4cb40578329b667bbff30202394",
+            "engine_epoch": 1,
+            "worker_generation": 3,
+            "source": "EXECUTION_WORKER",
+            "event_type": "CONTAINER_STARTED",
+            "source_monotonic_ns": 6755123689571536,
+            "duration_ms": null,
+            "attributes": {
+              "container_id": "9ab42b988b6dd6ed86bc626efdac894257447ae438f30539f9dd5391c8be9a45"
+            },
+            "observed_at": "2026-10-12T22:07:40.719114+00:00"
+          },
+          {
+            "event_key": "fd643ef33b268ec8944f49a1950eaf41f96ddc49d5c1e0c410d8ee600aabac12",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_dd65978de1ef8cd2c6670619ac10a66ee7d4a8d40f86b95d6115a8352b5b07d2",
+            "engine_epoch": 1,
+            "worker_generation": 4,
+            "source": "EXECUTION_WORKER",
+            "event_type": "NODE_OBSERVATION_REPORTED",
+            "source_monotonic_ns": 6755123878849916,
+            "duration_ms": null,
+            "attributes": {
+              "state": "RUNNING",
+              "revision": 2
+            },
+            "observed_at": "2026-10-12T22:07:40.907929+00:00"
+          },
+          {
+            "event_key": "707d1c10e67a713778e6b9b4f07bd846e903a1e1619284e76393ff52a3e5996d",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_efa9a23876de3faa72d6f8037f253f700d953833e6c9adbf42e371c3f7664a38",
+            "engine_epoch": 1,
+            "worker_generation": 4,
+            "source": "EXECUTION_WORKER",
+            "event_type": "NODE_OBSERVATION_REPORTED",
+            "source_monotonic_ns": 6755123898159383,
+            "duration_ms": null,
+            "attributes": {
+              "state": "RUNNING",
+              "revision": 2
+            },
+            "observed_at": "2026-10-12T22:07:40.927498+00:00"
+          },
+          {
+            "event_key": "eabbc599a5555474fc4a33c47eb3d52a6bcccdd126af737d3fac0aab1fe37a8b",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_aca57e8698df8f6dae2aff53cd4c469711d53d35c566b2748c0d97d26eafe928",
+            "engine_epoch": 1,
+            "worker_generation": 4,
+            "source": "EXECUTION_WORKER",
+            "event_type": "NODE_OBSERVATION_REPORTED",
+            "source_monotonic_ns": 6755123937035026,
+            "duration_ms": null,
+            "attributes": {
+              "state": "RUNNING",
+              "revision": 2
+            },
+            "observed_at": "2026-10-12T22:07:40.967358+00:00"
+          },
+          {
+            "event_key": "6446b488c244da91bfa29bd6760973623007b5490d41cc7bf8aa4306b75d220e",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_b01528c513413bf41aef3d594004f2ac7396a4cb40578329b667bbff30202394",
+            "engine_epoch": 1,
+            "worker_generation": 4,
+            "source": "EXECUTION_WORKER",
+            "event_type": "NODE_OBSERVATION_REPORTED",
+            "source_monotonic_ns": 6755123941043030,
+            "duration_ms": null,
+            "attributes": {
+              "state": "RUNNING",
+              "revision": 2
+            },
+            "observed_at": "2026-10-12T22:07:40.969919+00:00"
+          },
+          {
+            "event_key": "b331145a53733341dc0646e31ef30d56e996891db03b27e6ca6b840958ddce34",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_b01528c513413bf41aef3d594004f2ac7396a4cb40578329b667bbff30202394",
+            "engine_epoch": 1,
+            "worker_generation": 129,
+            "source": "EXECUTION_WORKER",
+            "event_type": "CONTAINER_EXITED",
+            "source_monotonic_ns": 6755154273197336,
+            "duration_ms": null,
+            "attributes": {
+              "exit_code": 0,
+              "container_id": "9ab42b988b6dd6ed86bc626efdac894257447ae438f30539f9dd5391c8be9a45"
+            },
+            "observed_at": "2026-10-12T22:08:11.303215+00:00"
+          },
+          {
+            "event_key": "be7e52b0db81af8b7afc2449333b0f9e9b43a714607b7d013c63ba074d99c321",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_b01528c513413bf41aef3d594004f2ac7396a4cb40578329b667bbff30202394",
+            "engine_epoch": 1,
+            "worker_generation": 129,
+            "source": "EXECUTION_WORKER",
+            "event_type": "OUTPUT_VERIFIED",
+            "source_monotonic_ns": 6755154277971052,
+            "duration_ms": null,
+            "attributes": {
+              "file_count": 4
+            },
+            "observed_at": "2026-10-12T22:08:11.307240+00:00"
+          },
+          {
+            "event_key": "1901bec94f17c43115db2d2c21af97ad55b5920e53f3b166a14a163b40ca6e42",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_dd65978de1ef8cd2c6670619ac10a66ee7d4a8d40f86b95d6115a8352b5b07d2",
+            "engine_epoch": 1,
+            "worker_generation": 129,
+            "source": "EXECUTION_WORKER",
+            "event_type": "CONTAINER_EXITED",
+            "source_monotonic_ns": 6755154281833185,
+            "duration_ms": null,
+            "attributes": {
+              "exit_code": 0,
+              "container_id": "8e7ad5c27d2ef189a08bc98af1903664ef1a9eb51a5fa3f22f2da2536a1a00e9"
+            },
+            "observed_at": "2026-10-12T22:08:11.312153+00:00"
+          },
+          {
+            "event_key": "7e4e66e5d0a4eb7b4510999d2b65120a4ecc7002ac564e5a2d55e9b46fda3a63",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_aca57e8698df8f6dae2aff53cd4c469711d53d35c566b2748c0d97d26eafe928",
+            "engine_epoch": 1,
+            "worker_generation": 129,
+            "source": "EXECUTION_WORKER",
+            "event_type": "CONTAINER_EXITED",
+            "source_monotonic_ns": 6755154283285991,
+            "duration_ms": null,
+            "attributes": {
+              "exit_code": 0,
+              "container_id": "ea59984888e6d0c294196e2c8008b02dcca9a0e84de8c6bd55bb0f044c804beb"
+            },
+            "observed_at": "2026-10-12T22:08:11.313877+00:00"
+          },
+          {
+            "event_key": "66e4aa9ca69c121a4bff30a884cca64a1db462a7032112d7f8682ced0fa5fcf4",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_efa9a23876de3faa72d6f8037f253f700d953833e6c9adbf42e371c3f7664a38",
+            "engine_epoch": 1,
+            "worker_generation": 129,
+            "source": "EXECUTION_WORKER",
+            "event_type": "CONTAINER_EXITED",
+            "source_monotonic_ns": 6755154281811486,
+            "duration_ms": null,
+            "attributes": {
+              "exit_code": 0,
+              "container_id": "1942abdbf4534fb690833610236d2ba19e09e5675280a62176586c8bd5f9a745"
+            },
+            "observed_at": "2026-10-12T22:08:11.314513+00:00"
+          },
+          {
+            "event_key": "52c603868b5783a74c7e01d07330fbc161c6d31273ce6120cb1ddcfccd263b48",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_dd65978de1ef8cd2c6670619ac10a66ee7d4a8d40f86b95d6115a8352b5b07d2",
+            "engine_epoch": 1,
+            "worker_generation": 129,
+            "source": "EXECUTION_WORKER",
+            "event_type": "OUTPUT_VERIFIED",
+            "source_monotonic_ns": 6755154286705250,
+            "duration_ms": null,
+            "attributes": {
+              "file_count": 4
+            },
+            "observed_at": "2026-10-12T22:08:11.315902+00:00"
+          },
+          {
+            "event_key": "47aefaa0e0e38bec4da392566d835cb0e28f4a1670dddf81c67be376846734ce",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_aca57e8698df8f6dae2aff53cd4c469711d53d35c566b2748c0d97d26eafe928",
+            "engine_epoch": 1,
+            "worker_generation": 129,
+            "source": "EXECUTION_WORKER",
+            "event_type": "OUTPUT_VERIFIED",
+            "source_monotonic_ns": 6755154290740666,
+            "duration_ms": null,
+            "attributes": {
+              "file_count": 4
+            },
+            "observed_at": "2026-10-12T22:08:11.319556+00:00"
+          },
+          {
+            "event_key": "d349571294c4cf0146aa11f62a1b8685b8285d42094561aad6e8563286e2e41b",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_efa9a23876de3faa72d6f8037f253f700d953833e6c9adbf42e371c3f7664a38",
+            "engine_epoch": 1,
+            "worker_generation": 129,
+            "source": "EXECUTION_WORKER",
+            "event_type": "OUTPUT_VERIFIED",
+            "source_monotonic_ns": 6755154290957798,
+            "duration_ms": null,
+            "attributes": {
+              "file_count": 4
+            },
+            "observed_at": "2026-10-12T22:08:11.320100+00:00"
+          },
+          {
+            "event_key": "4d650a8749dd96470e0919664cecc2a87105ec4ea1fb3d9c4b5650a68213bb44",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_b01528c513413bf41aef3d594004f2ac7396a4cb40578329b667bbff30202394",
+            "engine_epoch": 1,
+            "worker_generation": 130,
+            "source": "EXECUTION_WORKER",
+            "event_type": "NODE_OBSERVATION_REPORTED",
+            "source_monotonic_ns": 6755154517657419,
+            "duration_ms": null,
+            "attributes": {
+              "state": "SUCCEEDED",
+              "revision": 3
+            },
+            "observed_at": "2026-10-12T22:08:11.546721+00:00"
+          },
+          {
+            "event_key": "933848186d0546783c486b2e0d2a2b2825c3899413a4b418c837675912e68fe4",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_dd65978de1ef8cd2c6670619ac10a66ee7d4a8d40f86b95d6115a8352b5b07d2",
+            "engine_epoch": 1,
+            "worker_generation": 130,
+            "source": "EXECUTION_WORKER",
+            "event_type": "NODE_OBSERVATION_REPORTED",
+            "source_monotonic_ns": 6755154527688166,
+            "duration_ms": null,
+            "attributes": {
+              "state": "SUCCEEDED",
+              "revision": 3
+            },
+            "observed_at": "2026-10-12T22:08:11.556981+00:00"
+          },
+          {
+            "event_key": "d7873296502be721cb228bba61dc3818c539821fada50bee6dd9282701bc0d57",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_aca57e8698df8f6dae2aff53cd4c469711d53d35c566b2748c0d97d26eafe928",
+            "engine_epoch": 1,
+            "worker_generation": 130,
+            "source": "EXECUTION_WORKER",
+            "event_type": "NODE_OBSERVATION_REPORTED",
+            "source_monotonic_ns": 6755154532791230,
+            "duration_ms": null,
+            "attributes": {
+              "state": "SUCCEEDED",
+              "revision": 3
+            },
+            "observed_at": "2026-10-12T22:08:11.561680+00:00"
+          },
+          {
+            "event_key": "6f8b36da94202ecb08f381d5322f86a408d26b56f664d1ace2655339c8eb3dfd",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_efa9a23876de3faa72d6f8037f253f700d953833e6c9adbf42e371c3f7664a38",
+            "engine_epoch": 1,
+            "worker_generation": 130,
+            "source": "EXECUTION_WORKER",
+            "event_type": "NODE_OBSERVATION_REPORTED",
+            "source_monotonic_ns": 6755154539679190,
+            "duration_ms": null,
+            "attributes": {
+              "state": "SUCCEEDED",
+              "revision": 3
+            },
+            "observed_at": "2026-10-12T22:08:11.568776+00:00"
+          },
+          {
+            "event_key": "256ac04b11f7cdefaa07cb8aa3337b525a8d0c1a49a7e0aac131cd2ef3804dd7",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_efa9a23876de3faa72d6f8037f253f700d953833e6c9adbf42e371c3f7664a38",
+            "engine_epoch": 1,
+            "worker_generation": null,
+            "source": "EXECUTION_API",
+            "event_type": "NODE_TERMINAL_OBSERVED",
+            "source_monotonic_ns": 6755154614258317,
+            "duration_ms": null,
+            "attributes": {
+              "state": "SUCCEEDED",
+              "revision": 3,
+              "bridge_instance_id": "bfe4627f7999779382a02cbce62bdb44"
+            },
+            "observed_at": "2026-10-12T22:08:11.644015+00:00"
+          },
+          {
+            "event_key": "6e96c7a7ac26fc69350c9a84b489de34670ec04deec9c7146a7b54eb3df40799",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_efa9a23876de3faa72d6f8037f253f700d953833e6c9adbf42e371c3f7664a38",
+            "engine_epoch": 1,
+            "worker_generation": null,
+            "source": "BRIDGE",
+            "event_type": "BRIDGE_RETURNED",
+            "source_monotonic_ns": 6755154648597106,
+            "duration_ms": null,
+            "attributes": {
+              "revision": 3,
+              "bridge_instance_id": "bfe4627f7999779382a02cbce62bdb44"
+            },
+            "observed_at": "2026-10-12T22:08:11.683294+00:00"
+          },
+          {
+            "event_key": "ff88dc06e66c444fb0268e0bab8c7b5b45e815137d52f74d63c9bede668eec0b",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_dd65978de1ef8cd2c6670619ac10a66ee7d4a8d40f86b95d6115a8352b5b07d2",
+            "engine_epoch": 1,
+            "worker_generation": null,
+            "source": "EXECUTION_API",
+            "event_type": "NODE_TERMINAL_OBSERVED",
+            "source_monotonic_ns": 6755154690478670,
+            "duration_ms": null,
+            "attributes": {
+              "state": "SUCCEEDED",
+              "revision": 3,
+              "bridge_instance_id": "fe2a6f6b7c40fdd989e96dd941a1cc52"
+            },
+            "observed_at": "2026-10-12T22:08:11.719251+00:00"
+          },
+          {
+            "event_key": "ce41f2f3a50955da58bc9af469fa1f9a5c4b05ac1b90c2297d8d68d41f2b0d2d",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_dd65978de1ef8cd2c6670619ac10a66ee7d4a8d40f86b95d6115a8352b5b07d2",
+            "engine_epoch": 1,
+            "worker_generation": null,
+            "source": "BRIDGE",
+            "event_type": "BRIDGE_RETURNED",
+            "source_monotonic_ns": 6755154716841980,
+            "duration_ms": null,
+            "attributes": {
+              "revision": 3,
+              "bridge_instance_id": "fe2a6f6b7c40fdd989e96dd941a1cc52"
+            },
+            "observed_at": "2026-10-12T22:08:11.751181+00:00"
+          },
+          {
+            "event_key": "3f66169c1883128468f58015e19f209fbcf47aa30c849b59d9d7546512c9709c",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_b01528c513413bf41aef3d594004f2ac7396a4cb40578329b667bbff30202394",
+            "engine_epoch": 1,
+            "worker_generation": null,
+            "source": "EXECUTION_API",
+            "event_type": "NODE_TERMINAL_OBSERVED",
+            "source_monotonic_ns": 6755154738010447,
+            "duration_ms": null,
+            "attributes": {
+              "state": "SUCCEEDED",
+              "revision": 3,
+              "bridge_instance_id": "7bbf2350eaaa80f422c0b61580658a82"
+            },
+            "observed_at": "2026-10-12T22:08:11.767503+00:00"
+          },
+          {
+            "event_key": "00ee94840f2165d61810d58970b0355bdd18fecb560c222b558eaa1ef27cac72",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_aca57e8698df8f6dae2aff53cd4c469711d53d35c566b2748c0d97d26eafe928",
+            "engine_epoch": 1,
+            "worker_generation": null,
+            "source": "EXECUTION_API",
+            "event_type": "NODE_TERMINAL_OBSERVED",
+            "source_monotonic_ns": 6755154743468566,
+            "duration_ms": null,
+            "attributes": {
+              "state": "SUCCEEDED",
+              "revision": 3,
+              "bridge_instance_id": "d438fc57cbd2111bed482ed6ee37374d"
+            },
+            "observed_at": "2026-10-12T22:08:11.774041+00:00"
+          },
+          {
+            "event_key": "90c2f160cebab0c18b1ab2da97830348130bfba277f16f96ddda62fbc0ce610c",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_b01528c513413bf41aef3d594004f2ac7396a4cb40578329b667bbff30202394",
+            "engine_epoch": 1,
+            "worker_generation": null,
+            "source": "BRIDGE",
+            "event_type": "BRIDGE_RETURNED",
+            "source_monotonic_ns": 6755154775577848,
+            "duration_ms": null,
+            "attributes": {
+              "revision": 3,
+              "bridge_instance_id": "7bbf2350eaaa80f422c0b61580658a82"
+            },
+            "observed_at": "2026-10-12T22:08:11.811092+00:00"
+          },
+          {
+            "event_key": "839107c5ace2155985e78ff6888e741ce2d47ba22d24bc998528bce0989c2f27",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": "node_aca57e8698df8f6dae2aff53cd4c469711d53d35c566b2748c0d97d26eafe928",
+            "engine_epoch": 1,
+            "worker_generation": null,
+            "source": "BRIDGE",
+            "event_type": "BRIDGE_RETURNED",
+            "source_monotonic_ns": 6755154781665086,
+            "duration_ms": null,
+            "attributes": {
+              "revision": 3,
+              "bridge_instance_id": "d438fc57cbd2111bed482ed6ee37374d"
+            },
+            "observed_at": "2026-10-12T22:08:11.817434+00:00"
+          },
+          {
+            "event_key": "139bc736003a6ba29e27c01f05270d2c54c73f341b002f59ba4dd79f1d6acbc8",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": null,
+            "engine_epoch": 1,
+            "worker_generation": 190,
+            "source": "ENGINE",
+            "event_type": "ENGINE_EXITED",
+            "source_monotonic_ns": 6755163580817056,
+            "duration_ms": null,
+            "attributes": {
+              "exit_code": 0,
+              "container_id": "cf7fbaa7173ac0d4e77ebb3955c8b09795c10be8b5e9d6508997ccc9bd12a2fe"
+            },
+            "observed_at": "2026-10-12T22:08:20.610382+00:00"
+          },
+          {
+            "event_key": "3f9bd20b4a8ca5eb7be424cfea6f757cad04a4199e0a91220385a2d12d79dc06",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": null,
+            "engine_epoch": 1,
+            "worker_generation": 190,
+            "source": "ENGINE",
+            "event_type": "GATHER_FINISHED",
+            "source_monotonic_ns": 6755163596170725,
+            "duration_ms": null,
+            "attributes": {
+              "member_count": 4
+            },
+            "observed_at": "2026-10-12T22:08:20.624870+00:00"
+          },
+          {
+            "event_key": "c267828669567608dd1313e677d255b4e87e7468694c6523ca9cb09a74d981f2",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": null,
+            "engine_epoch": 1,
+            "worker_generation": 191,
+            "source": "DATA_CLIENT",
+            "event_type": "PUBLICATION_PREPARED",
+            "source_monotonic_ns": 6755163895874179,
+            "duration_ms": null,
+            "attributes": {
+              "state": "PENDING"
+            },
+            "observed_at": "2026-10-12T22:08:20.925319+00:00"
+          },
+          {
+            "event_key": "8499d6dde45dad7b88977c7340150b209c68689c4af1bd752ab6596fdb22f4dd",
+            "workflow_execution_id": "e726d545979bb39cd015fabd305aaf414",
+            "node_action_id": null,
+            "engine_epoch": 1,
+            "worker_generation": 191,
+            "source": "DATA_CLIENT",
+            "event_type": "PUBLICATION_COMMITTED",
+            "source_monotonic_ns": 6755164010712732,
+            "duration_ms": null,
+            "attributes": {
+              "state": "COMMITTED"
+            },
+            "observed_at": "2026-10-12T22:08:21.040198+00:00"
+          }
+        ]
+      },
+      "process_rss_mib": {
+        "bridge": {
+          "count": 606,
+          "min": 1.308594,
+          "median": 22.476562,
+          "p95": 22.652344,
+          "p99": 22.652344,
+          "max": 22.652344
+        },
+        "tagger": {
+          "count": 824,
+          "min": 9.46875,
+          "median": 44.761719,
+          "p95": 56.050781,
+          "p99": 62.527344,
+          "max": 62.527344
+        },
+        "toil_worker": {
+          "count": 1304,
+          "min": 0.867188,
+          "median": 11.705078,
+          "p95": 62.046875,
+          "p99": 62.046875,
+          "max": 62.578125
+        }
+      },
+      "execution_database_connections": {
+        "total": {
+          "count": 226,
+          "min": 12,
+          "median": 14.0,
+          "p95": 14,
+          "p99": 14,
+          "max": 14
+        },
+        "active": {
+          "count": 226,
+          "min": 0,
+          "median": 0.0,
+          "p95": 1,
+          "p99": 1,
+          "max": 4
+        }
+      },
+      "engine_init_observed": true,
+      "engine": {
+        "epochs": 1,
+        "container_seconds_total": 46.804052,
+        "process_group_warnings": 0,
+        "failed_workers": 0,
+        "running_containers": 0,
+        "nonzero_container_pids": 0,
+        "processes_after_exit": 0
+      },
+      "status": "PASS",
+      "node_http": {
+        "post_requests": 4,
+        "long_poll_get_requests": 28,
+        "http_requests": 32,
+        "node_state_db_reads": 192
+      },
+      "node_submit_posts": 4,
+      "repeated_node_submit_posts": 0,
+      "sequence": 2
+    }
+  ],
+  "total_seconds": 117.616372,
+  "assessment": {
+    "summaries": {
+      "CHAINING_OFF": {
+        "runs": 1,
+        "workflow_seconds": {
+          "count": 1,
+          "min": 49.030227,
+          "median": 49.030227,
+          "p95": 49.030227,
+          "p99": 49.030227,
+          "max": 49.030227
+        },
+        "compute_window_seconds": {
+          "count": 1,
+          "min": 30.632833,
+          "median": 30.632833,
+          "p95": 30.632833,
+          "p99": 30.632833,
+          "max": 30.632833
+        },
+        "effective_parallelism": {
+          "count": 1,
+          "min": 3.986494,
+          "median": 3.986494,
+          "p95": 3.986494,
+          "p99": 3.986494,
+          "max": 3.986494
+        },
+        "slot_utilization_percent": {
+          "count": 1,
+          "min": 99.66235,
+          "median": 99.66235,
+          "p95": 99.66235,
+          "p99": 99.66235,
+          "max": 99.66235
+        },
+        "overlap_peak": {
+          "count": 1,
+          "min": 4,
+          "median": 4,
+          "p95": 4,
+          "p99": 4,
+          "max": 4
+        },
+        "container_start_interval_p95_ms": {
+          "count": 1,
+          "min": 40.895555,
+          "median": 40.895555,
+          "p95": 40.895555,
+          "p99": 40.895555,
+          "max": 40.895555
+        },
+        "eligible_container_start_delay_ms": {
+          "count": 4,
+          "min": 0.0,
+          "median": 48.9915,
+          "p95": 69.637,
+          "p99": 69.637,
+          "max": 69.637
+        },
+        "execution_queue_p95_ms": {
+          "count": 1,
+          "min": 103.866268,
+          "median": 103.866268,
+          "p95": 103.866268,
+          "p99": 103.866268,
+          "max": 103.866268
+        },
+        "post_requests": {
+          "count": 1,
+          "min": 4,
+          "median": 4,
+          "p95": 4,
+          "p99": 4,
+          "max": 4
+        },
+        "long_poll_get_requests": {
+          "count": 1,
+          "min": 30,
+          "median": 30,
+          "p95": 30,
+          "p99": 30,
+          "max": 30
+        },
+        "http_requests": {
+          "count": 1,
+          "min": 34,
+          "median": 34,
+          "p95": 34,
+          "p99": 34,
+          "max": 34
+        },
+        "node_state_db_reads": {
+          "count": 1,
+          "min": 196,
+          "median": 196,
+          "p95": 196,
+          "p99": 196,
+          "max": 196
+        },
+        "execution_database_connection_peak": {
+          "count": 1,
+          "min": 13,
+          "median": 13,
+          "p95": 13,
+          "p99": 13,
+          "max": 13
+        },
+        "execution_database_active_peak": {
+          "count": 1,
+          "min": 1,
+          "median": 1,
+          "p95": 1,
+          "p99": 1,
+          "max": 1
+        },
+        "process_group_warnings": {
+          "count": 1,
+          "min": 0,
+          "median": 0,
+          "p95": 0,
+          "p99": 0,
+          "max": 0
+        }
+      },
+      "CHAINING_ON": {
+        "runs": 1,
+        "workflow_seconds": {
+          "count": 1,
+          "min": 48.704484,
+          "median": 48.704484,
+          "p95": 48.704484,
+          "p99": 48.704484,
+          "max": 48.704484
+        },
+        "compute_window_seconds": {
+          "count": 1,
+          "min": 30.688437,
+          "median": 30.688437,
+          "p95": 30.688437,
+          "p99": 30.688437,
+          "max": 30.688437
+        },
+        "effective_parallelism": {
+          "count": 1,
+          "min": 3.987595,
+          "median": 3.987595,
+          "p95": 3.987595,
+          "p99": 3.987595,
+          "max": 3.987595
+        },
+        "slot_utilization_percent": {
+          "count": 1,
+          "min": 99.689875,
+          "median": 99.689875,
+          "p95": 99.689875,
+          "p99": 99.689875,
+          "max": 99.689875
+        },
+        "overlap_peak": {
+          "count": 1,
+          "min": 4,
+          "median": 4,
+          "p95": 4,
+          "p99": 4,
+          "max": 4
+        },
+        "container_start_interval_p95_ms": {
+          "count": 1,
+          "min": 48.564057,
+          "median": 48.564057,
+          "p95": 48.564057,
+          "p99": 48.564057,
+          "max": 48.564057
+        },
+        "eligible_container_start_delay_ms": {
+          "count": 4,
+          "min": 0.0,
+          "median": 19.6925,
+          "p95": 47.677,
+          "p99": 47.677,
+          "max": 47.677
+        },
+        "execution_queue_p95_ms": {
+          "count": 1,
+          "min": 84.183641,
+          "median": 84.183641,
+          "p95": 84.183641,
+          "p99": 84.183641,
+          "max": 84.183641
+        },
+        "post_requests": {
+          "count": 1,
+          "min": 4,
+          "median": 4,
+          "p95": 4,
+          "p99": 4,
+          "max": 4
+        },
+        "long_poll_get_requests": {
+          "count": 1,
+          "min": 28,
+          "median": 28,
+          "p95": 28,
+          "p99": 28,
+          "max": 28
+        },
+        "http_requests": {
+          "count": 1,
+          "min": 32,
+          "median": 32,
+          "p95": 32,
+          "p99": 32,
+          "max": 32
+        },
+        "node_state_db_reads": {
+          "count": 1,
+          "min": 192,
+          "median": 192,
+          "p95": 192,
+          "p99": 192,
+          "max": 192
+        },
+        "execution_database_connection_peak": {
+          "count": 1,
+          "min": 14,
+          "median": 14,
+          "p95": 14,
+          "p99": 14,
+          "max": 14
+        },
+        "execution_database_active_peak": {
+          "count": 1,
+          "min": 4,
+          "median": 4,
+          "p95": 4,
+          "p99": 4,
+          "max": 4
+        },
+        "process_group_warnings": {
+          "count": 1,
+          "min": 0,
+          "median": 0,
+          "p95": 0,
+          "p99": 0,
+          "max": 0
+        }
+      }
+    },
+    "integrity_failures": [],
+    "absolute_gates": {
+      "CHAINING_OFF": {},
+      "CHAINING_ON": {}
+    },
+    "gain_percent": {
+      "workflow_seconds": 0.664372,
+      "compute_window_seconds": -0.181518
+    },
+    "no_more_than_five_percent_regression": {
+      "workflow_seconds": true,
+      "compute_window_seconds": true,
+      "effective_parallelism": true,
+      "slot_utilization": true,
+      "eligible_start_delay": true,
+      "execution_queue": true
+    },
+    "decision": "KEEP_CHAINING_OFF"
+  },
+  "gates": {
+    "status": "PASS",
+    "failures": []
+  }
+}
