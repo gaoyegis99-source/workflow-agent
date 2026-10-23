@@ -9,6 +9,8 @@ import xml.etree.ElementTree as ET
 from datetime import UTC, datetime
 from pathlib import Path
 
+from runtime_layout import P3_RUNTIME_ROOT
+
 from release_source_manifest import manifest
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -106,7 +108,7 @@ def main():
     if frozen_manifest != current_manifest:
         raise RuntimeError("Source changed after release artifacts or images were built")
     source_digest = current_manifest["source_digest"]
-    image_record = json.loads((ROOT / ".p3-runtime/images.json").read_text())
+    image_record = json.loads((P3_RUNTIME_ROOT / "images.json").read_text())
     inspected = json.loads(
         subprocess.check_output(
             ["docker", "image", "inspect", "groundwater-v7-checker:0.6.3"], text=True

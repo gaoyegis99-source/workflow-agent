@@ -6,10 +6,12 @@ import secrets
 import shlex
 from pathlib import Path
 
+from runtime_layout import P3_RUNTIME_ROOT
+
 root = Path(__file__).resolve().parents[1]
-runtime = root / ".p3-runtime/local"
+runtime = P3_RUNTIME_ROOT / "local"
 runtime.mkdir(parents=True, exist_ok=True)
-images = json.loads((root / ".p3-runtime/images.json").read_text())
+images = json.loads((P3_RUNTIME_ROOT / "images.json").read_text())
 config = {
     name: secrets.token_hex(32)
     for name in [
@@ -42,4 +44,4 @@ path = runtime / "p3.env"
 fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
 with os.fdopen(fd, "w") as stream:
     stream.write("".join(key + "=" + shlex.quote(value) + "\n" for key, value in config.items()))
-print("Created .p3-runtime/local/p3.env (0600); no service was started and no migration was run.")
+print(f"Created {path} (0600); no service was started and no migration was run.")

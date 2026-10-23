@@ -4,7 +4,8 @@ cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.."
 version="$(python -c 'import tomllib; print(tomllib.load(open("pyproject.toml", "rb"))["project"]["version"])')"
 mkdir -p .p5-runtime/images
 rm -f .p5-runtime/images/groundwater_checker_pack-*.whl
-cp ".p3-runtime/images/wheels/groundwater_checker_pack-${version}-py3-none-any.whl" .p5-runtime/images/
+p3_runtime="${V7_P3_RUNTIME_ROOT:-.p3-runtime}"
+cp "$p3_runtime/images/wheels/groundwater_checker_pack-${version}-py3-none-any.whl" .p5-runtime/images/
 cp deploy/p5/gdal-checker.Dockerfile .p5-runtime/images/
 source_digest="$(uv run --locked python scripts/release_source_manifest.py --digest-only)"
 docker build --build-arg "V7_RELEASE_SOURCE_DIGEST=$source_digest" --build-arg "V7_VERSION=$version" \

@@ -3,7 +3,8 @@ set -euo pipefail
 cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.."
 
 command="${1:-}"
-env_file="${2:-.p8-runtime/instances/local/p8.env}"
+runtime_root="${V7_P8_RUNTIME_ROOT:-.p8-runtime}"
+env_file="${2:-${runtime_root}/instances/local/p8.env}"
 if [[ -z "$command" || ! -f "$env_file" ]]; then
   echo "usage: bash scripts/p8.sh up|status|maintenance-on|backup|verify|restore|resume|down ENV_FILE [PATH]" >&2
   exit 2

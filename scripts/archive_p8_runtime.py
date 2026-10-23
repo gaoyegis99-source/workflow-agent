@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import shutil
 from datetime import date
 from pathlib import Path
@@ -13,7 +14,9 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 WORKSPACE_ROOT = ROOT.parent
-DEFAULT_RUNTIME_ROOT = ROOT / ".p8-runtime"
+DEFAULT_RUNTIME_ROOT = Path(
+    os.environ.get("V7_P8_RUNTIME_ROOT", str(ROOT / ".p8-runtime"))
+).expanduser().resolve()
 DEFAULT_POINTER = ROOT / "docs/verification/p82-current-release.json"
 DEFAULT_ARCHIVE_ROOT = (
     WORKSPACE_ROOT / "maintenance" / "v7-runtime-archive" / date.today().isoformat()

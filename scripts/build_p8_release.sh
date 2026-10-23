@@ -9,14 +9,26 @@ from pathlib import Path
 print(tomllib.loads(Path("pyproject.toml").read_text())["project"]["version"])
 PY
 )"
-releases="$(pwd)/.p8-runtime/releases"
+runtime_root="${V7_P8_RUNTIME_ROOT:-$(pwd)/.p8-runtime}"
+releases="${runtime_root}/releases"
 current_release="$(python - <<'PY'
 import json
+import os
 from pathlib import Path
 
 root = Path.cwd()
+runtime = Path(os.environ.get("V7_P8_RUNTIME_ROOT", root / ".p8-runtime"))
 pointer = json.loads((root / "docs/verification/p82-current-release.json").read_text())
-print((root / pointer["release_directory"]).resolve())
+value = Path(pointer["release_directory"])
+if value.is_absolute():
+    resolved = value
+elif value.parts and value.parts[0] == ".p8-runtime":
+    resolved = runtime.joinpath(*value.parts[1:])
+elif value.parts and value.parts[0] == "releases":
+    resolved = runtime / value
+else:
+    resolved = root / value
+print(resolved.resolve())
 PY
 )"
 source_release="${P8_SOURCE_RELEASE_DIR:-$current_release}"

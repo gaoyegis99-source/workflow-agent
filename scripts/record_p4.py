@@ -10,6 +10,8 @@ from collections import Counter
 from datetime import UTC, datetime
 from pathlib import Path
 
+from runtime_layout import P3_RUNTIME_ROOT
+
 from platform_contracts.engine_runtime import OFF_PROFILE_ID, SELECTED_PROFILE_ID
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -231,7 +233,7 @@ def main():
         },
         "images": {
             "cwl": (ROOT / ".p4-runtime/cwl-image.txt").read_text().strip(),
-            **json.loads((ROOT / ".p3-runtime/images.json").read_text()),
+            **json.loads((P3_RUNTIME_ROOT / "images.json").read_text()),
         },
         "toil": "9.5.0",
         "cwl": "1.2 / v7-cwl-p4-v1 bounded profile",

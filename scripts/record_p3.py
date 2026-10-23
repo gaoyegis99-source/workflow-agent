@@ -10,11 +10,13 @@ from collections import Counter
 from datetime import UTC, datetime
 from pathlib import Path
 
+from runtime_layout import P3_RUNTIME_ROOT
+
 ROOT = Path(__file__).resolve().parents[1]
 
 
 def main():
-    verification = ROOT / ".p3-runtime/verification"
+    verification = P3_RUNTIME_ROOT / "verification"
     tree = ET.parse(verification / "tests.xml")
     cases = tree.findall(".//testcase")
     counts = {
@@ -65,7 +67,7 @@ def main():
             "data": "0001_data",
             "execution": "0001_execution",
         },
-        "images": json.loads((ROOT / ".p3-runtime/images.json").read_text()),
+        "images": json.loads((P3_RUNTIME_ROOT / "images.json").read_text()),
         "docker": subprocess.check_output(
             ["docker", "version", "--format", "{{.Server.Version}}"], text=True
         ).strip(),

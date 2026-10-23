@@ -18,6 +18,8 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
+from runtime_layout import P3_RUNTIME_ROOT
+
 from p2_environment import PostgreSQL
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -489,7 +491,7 @@ def main() -> None:
             shutil.copy2(ROOT / relative, directory / relative)
         shutil.copy2(ROOT / "tests/p3/installed_driver.py", directory / "installed_driver.py")
         (directory / ".p3-runtime").mkdir()
-        shutil.copy2(ROOT / ".p3-runtime/images.json", directory / ".p3-runtime/images.json")
+        shutil.copy2(P3_RUNTIME_ROOT / "images.json", directory / ".p3-runtime/images.json")
         with PostgreSQL() as postgres:
             configured = env | {"V7_DATABASE_URL": postgres.url}
             run([python, directory / "installed_driver.py"], cwd=directory, env=configured)

@@ -8,6 +8,7 @@ V7 or V6 database.
 import argparse
 import hashlib
 import json
+import os
 import math
 import os
 import platform
@@ -20,6 +21,9 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+P3_RUNTIME_ROOT = Path(
+    os.environ.get("V7_P3_RUNTIME_ROOT", str(ROOT / ".p3-runtime"))
+).expanduser().resolve()
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -657,7 +661,7 @@ def environment(profile_name):
             "performance_operator": (ROOT / ".p4-runtime/performance-operator-image.txt")
             .read_text()
             .strip(),
-            **json.loads((ROOT / ".p3-runtime/images.json").read_text()),
+            **json.loads((P3_RUNTIME_ROOT / "images.json").read_text()),
         },
         "long_node_cpu_seconds": LONG_NODE_CPU_SECONDS,
         "minimum_observed_node_seconds": MIN_LONG_NODE_SECONDS,

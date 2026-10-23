@@ -15,6 +15,9 @@ from pathlib import Path
 from platform_contracts.release import load_release_lock
 
 ROOT = Path(__file__).resolve().parents[1]
+P8_RUNTIME_ROOT = Path(
+    os.environ.get("V7_P8_RUNTIME_ROOT", str(ROOT / ".p8-runtime"))
+).expanduser().resolve()
 IDENTIFIER = re.compile(r"[a-z][a-z0-9-]{0,31}")
 POSTGRES_IMAGE = "sha256:3645570cccdfa447589da9f57dd740faa29b30938e861289a5574b6ca6b03826"
 
@@ -29,6 +32,7 @@ def ipv4_address(value: str) -> str:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--instance", default="local")
+    parser.add_argument("--runtime-root", type=Path, default=P8_RUNTIME_ROOT)
     parser.add_argument("--release-dir", type=Path, required=True)
     parser.add_argument("--app-image")
     parser.add_argument("--gateway-bind", type=ipv4_address, default="127.0.0.1")
@@ -87,7 +91,7 @@ def main() -> None:
     ):
         raise SystemExit("Release configuration is incomplete: embedding-catalog.json")
 
-    runtime = (ROOT / ".p8-runtime" / "instances" / args.instance).resolve()
+    runtime = (args.runtime_root / "instances" / args.instance).resolve()
     env_path = runtime / "p8.env"
     if env_path.exists():
         raise SystemExit(f"Refusing to overwrite {env_path}")
