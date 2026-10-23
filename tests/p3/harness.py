@@ -1,6 +1,7 @@
 """Owned processes and containers for real HTTP/container acceptance, never V6 services."""
 
 import json
+import os
 import re
 import secrets
 import socket
@@ -109,7 +110,8 @@ def cleanup_test_containers(test_run_id):
 class Cluster(Processes):
     def __init__(self, directory, database, service_databases):
         super().__init__(directory, database.engine.url.render_as_string(hide_password=False))
-        images = json.loads(Path(".p3-runtime/images.json").read_text())
+        runtime_root = Path(os.environ.get("V7_P3_RUNTIME_ROOT", ".p3-runtime"))
+        images = json.loads((runtime_root / "images.json").read_text())
         data, execution = service_databases
         self.database, self.service_databases = database, service_databases
         self.test_run_id = secrets.token_hex(16)
