@@ -11,7 +11,11 @@ if [[ -z "$command" || ! -f "$env_file" ]]; then
 fi
 env_file="$(realpath "$env_file")"
 compose=(docker compose --env-file "$env_file" -f deploy/p8.compose.yaml)
-backup_command=("${compose[@]}" --profile ops run --rm --no-deps backup platform-cold-backup)
+backup_run_options=(--rm --no-deps)
+if [[ "${V7_BACKUP_IGNORE_PARK_MANIFEST:-false}" == "true" ]]; then
+  backup_run_options+=(-e V7_PARK_MANIFEST=)
+fi
+backup_command=("${compose[@]}" --profile ops run "${backup_run_options[@]}" backup platform-cold-backup)
 producer_services=(agent-worker authoring-worker)
 settlement_services=(platform-worker data-worker data-document-worker data-spatial-worker execution-supervisor execution-node-1 execution-node-2 execution-publication knowledge-worker)
 api_services=(gateway platform-api data-api execution-api knowledge-api)
@@ -52,7 +56,7 @@ case "$command" in
     "${compose[@]}" exec -T gateway /bin/sh -ec 'umask 077; : > "$V7_MAINTENANCE_FILE"'
     "${backup_command[@]}" wait --timeout 600
     "${compose[@]}" stop "${producer_services[@]}"
-    "${compose[@]}" --profile ops run --rm backup platform-cold-backup wait --timeout 600
+    "${backup_command[@]}" wait --timeout 600
     "${compose[@]}" stop "${settlement_services[@]}" "${api_services[@]}"
     "${backup_command[@]}" backup "$destination"
     echo "Backup complete; deployment remains stopped in maintenance mode. Run resume after verification."
