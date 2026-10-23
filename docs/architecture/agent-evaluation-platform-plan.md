@@ -46,7 +46,7 @@ Agent 可见任务要求、允许的领域说明、输入文件和规定输出�
 
 ### 2.3 BFCL
 
-使用 Gorilla 仓库中的 BFCL 数据及对应 runner。首期选择工具相关性、单步参数、多工具选择、多轮调用类别；实时网页和复杂记忆任务后续单独启用。数据与代码按照选定 commit 一起冻结，不混用不同代数据和评分器。[数据说明](https://github.com/ShishirPatil/gorilla/blob/main/berkeley-function-call-leaderboard/bfcl_eval/data/README.md)。
+使用 Gorilla 仓库中的 BFCL 数据及对应 runner。首期选择工具相关性、单步参数、多工具选择、多轮调用类别；实时网页和复杂记忆任务后续单独启用。数据与代码按照选定 commit 一起冻结，不混用不同代数据和评分器。[数据说明](https://github.com/ShishirPatil/gorilla/blob/main/berkeley-function-call-leaderboard/bfcl_eval/data/groundwater/README.md)。
 
 BFCL 包含结构匹配和可执行评测，不把合法 JSON 视为任务成功。先跑官方模型 handler，确认 Provider 的工具协议；V7 的额外循环实验另设结果系列。该项目当前依赖包含固定 NumPy 等版本，使用独立镜像，不与 τ-bench 或科学任务共用 Python 环境。[依赖定义](https://github.com/ShishirPatil/gorilla/blob/main/berkeley-function-call-leaderboard/pyproject.toml)。
 
@@ -119,10 +119,10 @@ V7 Data 和 Knowledge 测试实例从评测阶段 E4 才启动，与评测元数
 
 ## 5 目录和存储组织
 
-实现代码放在 `/home/mtd/liweigis/workflow/groundwater-platform_v7/evaluation/`；大型数据和运行结果放在独立目录 `/home/mtd/liweigis/workflow/agent-eval-data/`。两个路径均为拟建目录。
+实现代码放在 `/home/mtd/liweigis/workflow/projects/platform/groundwater/v7/evaluation/`；大型数据和运行结果放在独立目录 `/home/mtd/liweigis/workflow/agent-eval-data/`。两个路径均为拟建目录。
 
 ```text
-groundwater-platform_v7/
+projects/platform/groundwater/v7/
   evaluation/
     pyproject.toml
     src/eval_control/

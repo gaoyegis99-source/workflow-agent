@@ -29,9 +29,9 @@
 | 多 Agent、记忆和 Shell 的框架默认能力 | 按需采用 | 每项独立评测，不靠增加角色数证明架构先进 |
 | 仅依靠最终回复和成功状态评分 | 补强 | 增加方法适用性、数值、证据支持和失败记录检查 |
 
-这是结构性评审，不是已测得的性能结论。V6 中有可以保留的基础：独立于 SDK 的 [ContextPolicy](../../../groundwater-platform_v6/kernel/src/platform_kernel/agent_runtime/context_policy.py)、有用户来源的 [Task 声明](../../../groundwater-platform_v6/kernel/src/platform_kernel/tasks/models.py)。这些链接指向 V7 仓库之外的并列 V6 工作区。
+这是结构性评审，不是已测得的性能结论。V6 中有可以保留的基础：独立于 SDK 的 [ContextPolicy](../../../projects/platform/groundwater/v6/kernel/src/platform_kernel/agent_runtime/context_policy.py)、有用户来源的 [Task 声明](../../../projects/platform/groundwater/v6/kernel/src/platform_kernel/tasks/models.py)。这些链接指向 V7 仓库之外的并列 V6 工作区。
 
-具体耦合点也很明确：当时的 [证据收集](../../../groundwater-platform_v6/kernel/src/platform_kernel/agent_runtime/evidence.py) 从 SDK 消息和固定工具名推导证据；[草稿验证](../../../groundwater-platform_v6/kernel/src/platform_kernel/agent_runtime/workflow_draft.py) 直接调用 SDK 结果转换；结果类验收绑定旧 `model_id`。V7 应在这些边界解耦，复用已存在的纯策略和可靠性逻辑。V6 路径属于历史对照，不是 V7 运行依赖。
+具体耦合点也很明确：当时的 [证据收集](../../../projects/platform/groundwater/v6/kernel/src/platform_kernel/agent_runtime/evidence.py) 从 SDK 消息和固定工具名推导证据；[草稿验证](../../../projects/platform/groundwater/v6/kernel/src/platform_kernel/agent_runtime/workflow_draft.py) 直接调用 SDK 结果转换；结果类验收绑定旧 `model_id`。V7 应在这些边界解耦，复用已存在的纯策略和可靠性逻辑。V6 路径属于历史对照，不是 V7 运行依赖。
 
 ## 2 内核的责任和不变量
 

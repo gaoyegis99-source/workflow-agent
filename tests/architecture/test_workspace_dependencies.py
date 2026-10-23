@@ -23,12 +23,12 @@ def test_runtime_configuration_cannot_reference_a_sibling_workspace(tmp_path: Pa
     config = tmp_path / "apps" / "runtime.yaml"
     config.parent.mkdir(parents=True)
     config.write_text(
-        "source: /home/mtd/liweigis/workflow/groundwater-platform_v6/value\n",
+        "source: /home/mtd/liweigis/workflow/projects/platform/groundwater/v6/value\n",
         encoding="utf-8",
     )
 
     assert MODULE.check(tmp_path) == [
-        "apps/runtime.yaml: WORKSPACE_SIBLING_DEPENDENCY:groundwater-platform_v6"
+        "apps/runtime.yaml: WORKSPACE_SIBLING_DEPENDENCY:projects/platform/groundwater/v6"
     ]
 
 
@@ -38,7 +38,7 @@ def test_historical_verification_references_are_not_runtime_dependencies(
     evidence = tmp_path / "docs" / "verification" / "prior-run.json"
     evidence.parent.mkdir(parents=True)
     evidence.write_text(
-        '{"source": "/home/mtd/liweigis/workflow/groundwater-platform_v6"}',
+        '{"source": "/home/mtd/liweigis/workflow/projects/platform/groundwater/v6"}',
         encoding="utf-8",
     )
 

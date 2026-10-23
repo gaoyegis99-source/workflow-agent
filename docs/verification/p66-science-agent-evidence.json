@@ -12,7 +12,7 @@
     "policy_decision_reuse"
   ],
   "tests": {
-    "stage": "/home/mtd/liweigis/workflow/groundwater-platform_v7/.p6-runtime/verification/p66-tests.xml",
-    "http": "/home/mtd/liweigis/workflow/groundwater-platform_v7/.p6-runtime/verification/p66-api-tests.xml"
+    "stage": "/home/mtd/liweigis/workflow/projects/platform/groundwater/v7/.p6-runtime/verification/p66-tests.xml",
+    "http": "/home/mtd/liweigis/workflow/projects/platform/groundwater/v7/.p6-runtime/verification/p66-api-tests.xml"
   }
 }

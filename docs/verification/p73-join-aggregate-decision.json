@@ -86,7 +86,7 @@
   ],
   "v6_reference_evidence": [
     {
-      "path": "/home/mtd/liweigis/workflow/groundwater-platform_v6/packages/operator-pack/src/moperators/operators/table_join.py",
+      "path": "/home/mtd/liweigis/workflow/projects/platform/groundwater/v6/packages/operator-pack/src/moperators/operators/table_join.py",
       "sha256": "b82f0cec557985370b2bc94cac8737882134271ccb4c4b9556d64a55706b837b",
       "reused_lessons": [
         "CARDINALITY_ASSERTION",
@@ -101,7 +101,7 @@
       ]
     },
     {
-      "path": "/home/mtd/liweigis/workflow/groundwater-platform_v6/packages/operator-pack/src/moperators/operators/timeseries_aggregate.py",
+      "path": "/home/mtd/liweigis/workflow/projects/platform/groundwater/v6/packages/operator-pack/src/moperators/operators/timeseries_aggregate.py",
       "sha256": "e7997eb80971519fb998d7403240edad9dd294ce3698bb330d7dbeacbb12ca41",
       "conclusion": "DOMAIN_TIMESERIES_OPERATOR_NOT_A_GENERIC_TABLE_AGGREGATE_CONTRACT"
     }

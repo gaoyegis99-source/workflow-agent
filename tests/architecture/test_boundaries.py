@@ -292,7 +292,7 @@ def test_no_legacy_runtime_paths_or_environment_loading():
     for path in files:
         content = path.read_text().lower()
         for forbidden in [
-            "groundwater-platform_v6",
+            "projects/platform/groundwater/v6",
             "groundwater_platform_v6",
             "sys.path",
             "dotenv",

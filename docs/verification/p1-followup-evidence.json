@@ -45,7 +45,7 @@
               "start_ticks": "668046793",
               "boot_id": "26532028-f800-4d2d-b393-121d5c63bc29"
             },
-            "job_store": "/home/mtd/liweigis/workflow/groundwater-platform_v7/.p1-runtime/verification-99317a753c47/toil/identity/job-store"
+            "job_store": "/home/mtd/liweigis/workflow/projects/platform/groundwater/v7/.p1-runtime/verification-99317a753c47/toil/identity/job-store"
           },
           "records": [
             {

@@ -53,7 +53,7 @@ Agent 内核的分层、行动接口、科学分析协议和上下文复用细�
 
 两个现有差异必须进入适配：Data 规范化表格使用 `f0/f1/...`，统计算子按参数中的物理列名取数；旧 CLI 捕获部分业务错误后写 JSON 并正常退出，新 CLI 必须统一退出码和错误封套。
 
-依据（V6 历史工作区，需与 V7 并列检出）：[算子入口](../../../groundwater-platform_v6/packages/operator-pack/src/moperators/runtime/task.py)、[表格规范化](../../../groundwater-platform_v6/services/data/src/platform_data_service/adapters/readers.py)、[Data](../../../groundwater-platform_v6/services/data/README.md)、[Knowledge Next](../../../groundwater-platform_v6/services/knowledge-next/README.md)。
+依据（V6 历史工作区，需与 V7 并列检出）：[算子入口](../../../projects/platform/groundwater/v6/packages/operator-pack/src/moperators/runtime/task.py)、[表格规范化](../../../projects/platform/groundwater/v6/services/data/src/platform_data_service/adapters/readers.py)、[Data](../../../projects/platform/groundwater/v6/services/data/groundwater/README.md)、[Knowledge Next](../../../projects/platform/groundwater/v6/services/knowledge-next/README.md)。
 
 ## 3 开源组件的采用边界
 
@@ -653,7 +653,7 @@ P1 使用最小契约，不先冻结所有 Schema。P2 的授权和预算必须�
 
 边界包括重复时间戳、样本不足、空过滤结果、缺字段、单位不明、Agent 重启、提交响应丢失及发布前取消。样本不足保持不可评估，不能生成虚假有效趋势。
 
-随后扩展 QGIS、远程和代码场景。V6 迁移学习工作流有 58 节点，需单独验证资源、环境、输出和恢复，不能由短流程通过推导其通过。相关历史发布资料见 [V6 发布基线](../../../groundwater-platform_v6/docs/v11-release-baseline.md)；V6 工作区不属于本仓库，检出缺失时该对照文件不可用。
+随后扩展 QGIS、远程和代码场景。V6 迁移学习工作流有 58 节点，需单独验证资源、环境、输出和恢复，不能由短流程通过推导其通过。相关历史发布资料见 [V6 发布基线](../../../projects/platform/groundwater/v6/docs/v11-release-baseline.md)；V6 工作区不属于本仓库，检出缺失时该对照文件不可用。
 
 ## 22 最终交付与决策记录
 

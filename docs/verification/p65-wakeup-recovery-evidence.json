@@ -10,8 +10,8 @@
     "intermediate_state_model_suppression"
   ],
   "tests": {
-    "stage": "/home/mtd/liweigis/workflow/groundwater-platform_v7/.p6-runtime/verification/p65-tests.xml",
-    "http": "/home/mtd/liweigis/workflow/groundwater-platform_v7/.p6-runtime/verification/p65-api-tests.xml"
+    "stage": "/home/mtd/liweigis/workflow/projects/platform/groundwater/v7/.p6-runtime/verification/p65-tests.xml",
+    "http": "/home/mtd/liweigis/workflow/projects/platform/groundwater/v7/.p6-runtime/verification/p65-api-tests.xml"
   },
   "excluded": [
     "P4 performance matrices",

@@ -21,7 +21,7 @@
     "direct-database-update"
   ],
   "tests": {
-    "stage": "/home/mtd/liweigis/workflow/groundwater-platform_v7/.p6-runtime/verification/p68-tests.xml",
-    "http": "/home/mtd/liweigis/workflow/groundwater-platform_v7/.p6-runtime/verification/p68-api-tests.xml"
+    "stage": "/home/mtd/liweigis/workflow/projects/platform/groundwater/v7/.p6-runtime/verification/p68-tests.xml",
+    "http": "/home/mtd/liweigis/workflow/projects/platform/groundwater/v7/.p6-runtime/verification/p68-api-tests.xml"
   }
 }

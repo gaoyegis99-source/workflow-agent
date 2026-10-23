@@ -9,7 +9,7 @@
     "hidden_checker_answers_exposed": false
   },
   "tests": {
-    "stage": "/home/mtd/liweigis/workflow/groundwater-platform_v7/.p6-runtime/verification/p67-tests.xml",
-    "http": "/home/mtd/liweigis/workflow/groundwater-platform_v7/.p6-runtime/verification/p67-api-tests.xml"
+    "stage": "/home/mtd/liweigis/workflow/projects/platform/groundwater/v7/.p6-runtime/verification/p67-tests.xml",
+    "http": "/home/mtd/liweigis/workflow/projects/platform/groundwater/v7/.p6-runtime/verification/p67-api-tests.xml"
   }
 }

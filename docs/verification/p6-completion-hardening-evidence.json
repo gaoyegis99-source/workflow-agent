@@ -11,7 +11,7 @@
       "errors": 0,
       "skipped": 0,
       "seconds": 215.895,
-      "junit": "/home/mtd/liweigis/workflow/groundwater-platform_v7/.p6-runtime/verification/p69-tests.xml"
+      "junit": "/home/mtd/liweigis/workflow/projects/platform/groundwater/v7/.p6-runtime/verification/p69-tests.xml"
     },
     "http_api": {
       "tests": 11,
@@ -19,7 +19,7 @@
       "errors": 0,
       "skipped": 0,
       "seconds": 3.0,
-      "junit": "/home/mtd/liweigis/workflow/groundwater-platform_v7/.p6-runtime/verification/p69-api-tests.xml"
+      "junit": "/home/mtd/liweigis/workflow/projects/platform/groundwater/v7/.p6-runtime/verification/p69-api-tests.xml"
     },
     "real_browser": {
       "tests": 2,
@@ -27,7 +27,7 @@
       "errors": 0,
       "skipped": 0,
       "seconds": 44.203,
-      "junit": "/home/mtd/liweigis/workflow/groundwater-platform_v7/.p6-runtime/verification/p68-browser-tests.xml"
+      "junit": "/home/mtd/liweigis/workflow/projects/platform/groundwater/v7/.p6-runtime/verification/p68-browser-tests.xml"
     },
     "deterministic_golden": {
       "profile": "deterministic",
@@ -1095,11 +1095,11 @@
       "errors": 0,
       "skipped": 0,
       "seconds": 70.027,
-      "junit": "/home/mtd/liweigis/workflow/groundwater-platform_v7/.p6-runtime/verification/p69-focused-tests.xml"
+      "junit": "/home/mtd/liweigis/workflow/projects/platform/groundwater/v7/.p6-runtime/verification/p69-focused-tests.xml"
     },
     "deterministic_repeat_junits": [
-      "/home/mtd/liweigis/workflow/groundwater-platform_v7/.p6-runtime/verification/p69-golden-tests-r1.xml",
-      "/home/mtd/liweigis/workflow/groundwater-platform_v7/.p6-runtime/verification/p69-golden-tests-r2.xml"
+      "/home/mtd/liweigis/workflow/projects/platform/groundwater/v7/.p6-runtime/verification/p69-golden-tests-r1.xml",
+      "/home/mtd/liweigis/workflow/projects/platform/groundwater/v7/.p6-runtime/verification/p69-golden-tests-r2.xml"
     ]
   },
   "closed_gaps": [
