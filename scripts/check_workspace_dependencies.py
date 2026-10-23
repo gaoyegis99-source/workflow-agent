@@ -9,7 +9,9 @@ import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-WORKSPACE_PATH = re.compile(r"/home/mtd/liweigis/workflow/([A-Za-z0-9][A-Za-z0-9_.-]*)")
+WORKSPACE_PATH = re.compile(
+    r"/home/mtd/liweigis/workflow/((?:projects/(?:platform/groundwater/(?:worktrees/)?|research/)|archive/(?:platform/groundwater/|services/data-asset/|workflows/))[A-Za-z0-9][A-Za-z0-9_.-]*)"
+)
 IGNORED_DIRECTORIES = {
     ".git",
     ".generated",
@@ -38,9 +40,17 @@ def _is_within(root: Path, path: Path) -> bool:
     return True
 
 
+def _registered_project(root: Path) -> str | None:
+    for candidate in (root, *root.parents):
+        if (candidate / "workspace-layout.json").is_file():
+            return root.relative_to(candidate).as_posix()
+    return None
+
+
 def check(root: Path = ROOT) -> list[str]:
     """Return deterministic violations without following excluded directories."""
     root = root.resolve()
+    current_project = _registered_project(root)
     violations: list[str] = []
     for directory, names, files in os.walk(root, followlinks=False):
         current = Path(directory)
@@ -72,7 +82,7 @@ def check(root: Path = ROOT) -> list[str]:
                 continue
             content = path.read_text(encoding="utf-8", errors="replace")
             for sibling in sorted(set(WORKSPACE_PATH.findall(content))):
-                if sibling != root.name:
+                if sibling != current_project:
                     violations.append(
                         f"{relative.as_posix()}: WORKSPACE_SIBLING_DEPENDENCY:{sibling}"
                     )
