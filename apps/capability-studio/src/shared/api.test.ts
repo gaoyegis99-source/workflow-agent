@@ -1,11 +1,26 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { ApiError, mutate, newKey, releaseExecutionBody, request } from "./api";
+import {
+  ApiError,
+  TRUSTED_PROXY_SESSION,
+  authenticatedHeaders,
+  mutate,
+  newKey,
+  releaseExecutionBody,
+  request,
+} from "./api";
 
 afterEach(() => vi.unstubAllGlobals());
 
 describe("newKey", () => {
   it("creates an API-safe request key", () => {
     expect(newKey()).toMatch(/^[a-f0-9]{32}$/);
+  });
+});
+
+describe("trusted-proxy session", () => {
+  it("does not turn the in-memory proxy marker into a Bearer credential", () => {
+    expect(authenticatedHeaders(TRUSTED_PROXY_SESSION).has("Authorization")).toBe(false);
+    expect(authenticatedHeaders("user-token").get("Authorization")).toBe("Bearer user-token");
   });
 });
 

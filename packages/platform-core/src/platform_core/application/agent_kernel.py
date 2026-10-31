@@ -4,12 +4,12 @@ from __future__ import annotations
 
 from dataclasses import asdict
 
+from platform_core.application.agent_views import AgentViews
 from platform_core.application.agent_waiting import (
     dependency_fact,
     persist_wait_dependencies,
     wake_run,
 )
-from platform_core.application.control import digest
 from platform_core.application.ports import Record, Store, UnitOfWork
 from platform_core.domain.agent_kernel import (
     AgentLeaseClaim,
@@ -17,188 +17,8 @@ from platform_core.domain.agent_kernel import (
     require_agent_task_active,
 )
 from platform_core.domain.agent_runtime import DecisionFrame, DecisionProposal, canonical_digest
+from platform_core.domain.canonical import digest_hex as digest
 from platform_core.domain.control import Identity, require, valid_identifier
-
-
-def create_agent_run(
-    uow: UnitOfWork,
-    task,
-    actor: Identity,
-    runtime_profile: Record,
-    *,
-    model_profile: Record | None = None,
-    model_budget: Record | None = None,
-    tool_catalog: Record | None = None,
-    operator_catalog: Record | None = None,
-) -> Record:
-    """Create the business ledger entry in the same transaction as the Task."""
-    profile_digest = runtime_profile.get("profile_digest")
-    require(
-        valid_identifier(runtime_profile.get("profile_id"))
-        and isinstance(profile_digest, str)
-        and len(profile_digest) == 71
-        and profile_digest.startswith("sha256:"),
-        "INVALID_BINDING",
-        "The Agent runtime profile is not frozen",
-        422,
-    )
-    canonical_digest(runtime_profile)
-    if tool_catalog is not None or operator_catalog is not None:
-        require(
-            isinstance(tool_catalog, dict)
-            and tool_catalog.get("catalog_id") in {"p7-action-tools-v2", "p7-science-tools-v2"}
-            and isinstance(tool_catalog.get("catalog_digest"), str)
-            and isinstance(operator_catalog, dict)
-            and isinstance(operator_catalog.get("catalog_digest"), str),
-            "INVALID_BINDING",
-            "New Agent runs require the P7 tool and operator catalogues",
-            422,
-        )
-        unsigned = dict(runtime_profile) | {
-            "tool_catalog_id": tool_catalog["catalog_id"],
-            "tool_catalog_digest": tool_catalog["catalog_digest"],
-            "operator_catalog_digest": operator_catalog["catalog_digest"],
-        }
-        runtime_profile = unsigned | {"deployment_profile_digest": canonical_digest(unsigned)}
-        profile_digest = runtime_profile["deployment_profile_digest"]
-    now = uow.now()
-    agent_run_id = uow.new_id()
-    record = {
-        "agent_run_id": agent_run_id,
-        "project_id": task.project_id,
-        "task_id": task.task_id,
-        "status": "READY",
-        "epoch": 1,
-        "generation": 1,
-        "runtime_ref": f"{agent_run_id}-e1",
-        "runtime_profile": runtime_profile,
-        "runtime_profile_digest": profile_digest,
-        "task_spec_revision": task.spec_revision,
-        "control_version": task.control_version,
-        "plan_revision": 0,
-        "frame_sequence": 0,
-        "accepted_proposals": 0,
-        "wake_revision": 0,
-        "blocked_reason": None,
-        "created_by": actor.principal_id,
-        "created_at": now,
-        "updated_at": now,
-    }
-    uow.agents.add_run(record)
-    require(
-        (model_profile is None) == (model_budget is None),
-        "INVALID_BINDING",
-        "Model profile and budget must be configured together",
-        422,
-    )
-    if model_profile is not None:
-        from platform_core.domain.model_gateway import ModelBudgetLimits
-
-        limits = ModelBudgetLimits.from_record(model_budget)
-        uow.agents.add_model_budget(
-            {
-                "agent_run_id": agent_run_id,
-                "task_id": task.task_id,
-                "profile_id": model_profile["profile_id"],
-                "profile_digest": model_profile["profile_digest"],
-                **limits.as_record(),
-                "used_calls": 0,
-                "reserved_calls": 0,
-                "used_input_tokens": 0,
-                "reserved_input_tokens": 0,
-                "used_output_tokens": 0,
-                "reserved_output_tokens": 0,
-                "used_reasoning_tokens": 0,
-                "reserved_reasoning_tokens": 0,
-                "used_cost_microunits": 0,
-                "reserved_cost_microunits": 0,
-                "created_at": now,
-            }
-        )
-    uow.agents.add_outbox(
-        {
-            "event_id": uow.new_id(),
-            "agent_run_id": agent_run_id,
-            "kind": "AGENT_RUN_CREATED",
-            "payload": {
-                "agent_run_id": agent_run_id,
-                "task_id": task.task_id,
-                "task_spec_revision": task.spec_revision,
-            },
-            "done": False,
-            "available_at": now,
-            "owner": None,
-            "lease_until": None,
-            "generation": 0,
-        }
-    )
-    return record
-
-
-def task_execution_mode(uow: UnitOfWork, task_id: str) -> str:
-    return "AGENT" if uow.agents.run_by_task(task_id) is not None else "DIRECT"
-
-
-def apply_task_change(uow: UnitOfWork, task, kind: str) -> None:
-    """Fence any in-flight Agent decision when authoritative Task state changes."""
-    run = uow.agents.run_by_task(task.task_id, lock=True)
-    if run is None:
-        return
-    now = uow.now()
-    uow.agents.stale_pending_frames(run["agent_run_id"])
-    uow.agents.revoke_lease(run["agent_run_id"])
-    generation = run["generation"] + 1
-    changes = {
-        "generation": generation,
-        "task_spec_revision": task.spec_revision,
-        "control_version": task.control_version,
-        "updated_at": now,
-        "blocked_reason": None,
-    }
-    if task.lifecycle == "CANCELLED":
-        changes["status"] = "STOPPED"
-        changes["blocked_reason"] = "TASK_CANCELLED"
-        uow.agents.cancel_questions(run["agent_run_id"])
-        uow.agents.cancel_wakeups(run["agent_run_id"])
-        uow.agents.cancel_wait_dependencies(run["agent_run_id"], now)
-        uow.agents.clear_reconciliation(run["agent_run_id"])
-    elif task.control == "PAUSED":
-        changes["status"] = "WAITING"
-        changes["blocked_reason"] = "TASK_PAUSED"
-    else:
-        revision = run["wake_revision"] + 1
-        event_id = uow.new_id()
-        uow.agents.add_wakeup(
-            {
-                "wake_id": uow.new_id(),
-                "agent_run_id": run["agent_run_id"],
-                "revision": revision,
-                "reason": "TASK",
-                "event_ids": [event_id],
-                "state": "PENDING",
-                "created_at": now,
-                "consumed_at": None,
-            }
-        )
-        changes.update(status="READY", wake_revision=revision)
-        uow.agents.add_outbox(
-            {
-                "event_id": event_id,
-                "agent_run_id": run["agent_run_id"],
-                "kind": kind,
-                "payload": {
-                    "task_id": task.task_id,
-                    "spec_revision": task.spec_revision,
-                    "control_version": task.control_version,
-                },
-                "done": False,
-                "available_at": now,
-                "owner": None,
-                "lease_until": None,
-                "generation": 0,
-            }
-        )
-    uow.agents.update_run(run["agent_run_id"], **changes)
 
 
 class AgentCoordinator:
@@ -207,12 +27,13 @@ class AgentCoordinator:
     def __init__(self, store: Store, context_compiler=None):
         self.store = store
         self.context_compiler = context_compiler
+        self._views = AgentViews(store)
 
     def claim(self, owner: str, lease_seconds: float = 30) -> AgentLeaseClaim | None:
         require(valid_identifier(owner), "INVALID_BINDING", "Invalid Agent worker identity", 422)
         require(lease_seconds > 0, "MALFORMED_REQUEST", "Lease duration must be positive", 400)
         with self.store.transaction() as uow:
-            record = uow.agents.claim(owner, lease_seconds)
+            record = uow.agent_runs.claim(owner, lease_seconds)
             if record is None:
                 return None
             return AgentLeaseClaim(
@@ -230,15 +51,15 @@ class AgentCoordinator:
 
     def renew(self, claim: AgentLeaseClaim, lease_seconds: float = 30) -> bool:
         with self.store.transaction() as uow:
-            return uow.agents.renew_lease(
+            return uow.agent_runs.renew_lease(
                 claim.agent_run_id, claim.owner, claim.generation, lease_seconds
             )
 
     @staticmethod
     def _require_owned(uow: UnitOfWork, claim: AgentLeaseClaim) -> Record:
-        run = uow.agents.run(claim.project_id, claim.agent_run_id, lock=True)
+        run = uow.agent_runs.run(claim.project_id, claim.agent_run_id, lock=True)
         require(
-            uow.agents.lease_owned(claim.agent_run_id, claim.owner, claim.generation),
+            uow.agent_runs.lease_owned(claim.agent_run_id, claim.owner, claim.generation),
             "REVISION_CONFLICT",
             "Agent lease is no longer owned",
         )
@@ -250,7 +71,7 @@ class AgentCoordinator:
         with self.store.transaction() as uow:
             owned = self._require_owned(uow, claim)
             run, task = owned["run"], owned["task"]
-            pending = uow.agents.pending_model_frame(run["agent_run_id"])
+            pending = uow.agent_budgets.pending_model_frame(run["agent_run_id"])
             if pending is not None:
                 require(
                     pending["task_spec_revision"] == task.spec_revision
@@ -268,11 +89,11 @@ class AgentCoordinator:
                     context_manifest_digest=pending["context_manifest_digest"],
                     payload=pending["payload"],
                 )
-            uow.agents.stale_pending_frames(run["agent_run_id"])
-            plan = uow.agents.plan(run["agent_run_id"])
-            events = uow.agents.events(run["agent_run_id"])
-            answers = uow.agents.answers(run["agent_run_id"])
-            wakeups = uow.agents.pending_wakeups(run["agent_run_id"], lock=True)
+            uow.agent_conversations.stale_pending_frames(run["agent_run_id"])
+            plan = uow.agent_runs.plan(run["agent_run_id"])
+            events = uow.agent_conversations.events(run["agent_run_id"])
+            answers = uow.agent_conversations.answers(run["agent_run_id"])
+            wakeups = uow.agent_conversations.pending_wakeups(run["agent_run_id"], lock=True)
             task_spec = uow.tasks.spec(task.task_id, task.spec_revision)
             if self.context_compiler is not None:
                 budget = uow.budgets.get(task.task_id)
@@ -290,7 +111,7 @@ class AgentCoordinator:
                     plan=plan["plan"] if plan else None,
                     events=events,
                     answers=[value["answer"] for value in answers],
-                    tool_observations=uow.agents.tool_observations(run["agent_run_id"]),
+                    tool_observations=uow.agent_tools.tool_observations(run["agent_run_id"]),
                     pending_wake_ids=[value["wake_id"] for value in wakeups],
                 )
                 manifest, payload = compiled.manifest, compiled.payload
@@ -333,7 +154,7 @@ class AgentCoordinator:
                     "pending_wake_ids": [value["wake_id"] for value in wakeups],
                 }
             manifest_digest = canonical_digest(manifest)
-            context = uow.agents.add_context(
+            context = uow.agent_conversations.add_context(
                 {
                     "manifest_id": uow.new_id(),
                     "agent_run_id": run["agent_run_id"],
@@ -354,7 +175,7 @@ class AgentCoordinator:
                 context_manifest_digest=manifest_digest,
                 payload=payload,
             )
-            uow.agents.add_frame(
+            uow.agent_conversations.add_frame(
                 {
                     "frame_id": frame.frame_id,
                     "agent_run_id": run["agent_run_id"],
@@ -371,7 +192,7 @@ class AgentCoordinator:
                     "created_at": uow.now(),
                 }
             )
-            uow.agents.update_run(
+            uow.agent_runs.update_run(
                 run["agent_run_id"], frame_sequence=sequence, updated_at=uow.now()
             )
             return frame
@@ -385,8 +206,8 @@ class AgentCoordinator:
         model_call_id: str | None = None,
     ) -> Record:
         with self.store.transaction() as uow:
-            saved_frame = uow.agents.frame(frame.frame_id, lock=True)
-            existing = uow.agents.proposal(frame.frame_id)
+            saved_frame = uow.agent_conversations.frame(frame.frame_id, lock=True)
+            existing = uow.agent_conversations.proposal(frame.frame_id)
             if existing is not None:
                 require(
                     saved_frame["agent_run_id"] == claim.agent_run_id
@@ -403,7 +224,7 @@ class AgentCoordinator:
             run, task = owned["run"], owned["task"]
             reconciled_model = False
             if model_call_id is not None:
-                call = uow.agents.model_call(model_call_id, lock=True)
+                call = uow.agent_budgets.model_call(model_call_id, lock=True)
                 require(
                     call["agent_run_id"] == run["agent_run_id"]
                     and call["frame_id"] == frame.frame_id
@@ -450,12 +271,12 @@ class AgentCoordinator:
                 "proposal_digest": proposal.digest,
                 "accepted_at": now,
             }
-            uow.agents.add_proposal(record)
+            uow.agent_conversations.add_proposal(record)
             plan_revision = run["plan_revision"]
             wait_satisfied = False
             if proposal.kind == "PLAN_REVISION":
                 plan_revision += 1
-                uow.agents.add_plan(
+                uow.agent_runs.add_plan(
                     {
                         "agent_run_id": run["agent_run_id"],
                         "revision": plan_revision,
@@ -470,7 +291,7 @@ class AgentCoordinator:
             elif proposal.kind == "CLARIFICATION_REQUEST":
                 gap_id = proposal.body.get("gap_id")
                 require(valid_identifier(gap_id), "INVALID_BINDING", "Invalid question gap", 422)
-                uow.agents.add_question(
+                uow.agent_conversations.add_question(
                     {
                         "question_id": uow.new_id(),
                         "agent_run_id": run["agent_run_id"],
@@ -489,13 +310,13 @@ class AgentCoordinator:
                     list(proposal.body.get("dependencies", [])),
                 )
             wake_ids = list(saved_frame["payload"].get("pending_wake_ids", []))
-            uow.agents.consume_wakeups(wake_ids, now)
-            uow.agents.update_frame(frame.frame_id, state="ACCEPTED")
+            uow.agent_conversations.consume_wakeups(wake_ids, now)
+            uow.agent_conversations.update_frame(frame.frame_id, state="ACCEPTED")
             status, blocked_reason = outcome_state(proposal.kind)
             wake_revision = run["wake_revision"]
             if wait_satisfied:
                 wake_revision += 1
-                uow.agents.add_wakeup(
+                uow.agent_conversations.add_wakeup(
                     {
                         "wake_id": uow.new_id(),
                         "agent_run_id": run["agent_run_id"],
@@ -508,7 +329,7 @@ class AgentCoordinator:
                     }
                 )
                 status = "READY"
-            uow.agents.update_run(
+            uow.agent_runs.update_run(
                 run["agent_run_id"],
                 status=status,
                 plan_revision=plan_revision,
@@ -517,8 +338,8 @@ class AgentCoordinator:
                 blocked_reason=blocked_reason,
                 updated_at=now,
             )
-            uow.agents.release_lease(run["agent_run_id"], claim.owner, claim.generation)
-            uow.agents.add_outbox(
+            uow.agent_runs.release_lease(run["agent_run_id"], claim.owner, claim.generation)
+            uow.agent_conversations.add_outbox(
                 {
                     "event_id": uow.new_id(),
                     "agent_run_id": run["agent_run_id"],
@@ -572,9 +393,9 @@ class AgentCoordinator:
         event_digest = canonical_digest(frozen)
         with self.store.transaction() as uow:
             task = uow.tasks.get(project_id, task_id, lock=True)
-            run = uow.agents.run_by_task(task_id, lock=True, required=True)
+            run = uow.agent_runs.run_by_task(task_id, lock=True, required=True)
             now = uow.now()
-            accepted = uow.agents.register_event(
+            accepted = uow.agent_conversations.register_event(
                 frozen
                 | {
                     "agent_run_id": run["agent_run_id"],
@@ -584,7 +405,7 @@ class AgentCoordinator:
             )
             if not accepted:
                 return False
-            uow.agents.update_watermark(
+            uow.agent_recovery.update_watermark(
                 {
                     "agent_run_id": run["agent_run_id"],
                     "source": source,
@@ -594,7 +415,7 @@ class AgentCoordinator:
                     "updated_at": now,
                 }
             )
-            dependencies = uow.agents.wait_dependencies(
+            dependencies = uow.agent_recovery.wait_dependencies(
                 run["agent_run_id"], active_only=True, lock=True
             )
             for dependency in dependencies:
@@ -606,17 +427,17 @@ class AgentCoordinator:
                     if fact["satisfied"]
                     else ("UNKNOWN" if fact["unknown"] else "WAITING")
                 )
-                uow.agents.update_wait_dependency(
+                uow.agent_recovery.update_wait_dependency(
                     dependency["dependency_id"],
                     observed_revision=fact["revision"],
                     state=state,
                     state_digest=canonical_digest(fact),
                     updated_at=now,
                 )
-            remaining = uow.agents.wait_dependencies(run["agent_run_id"], active_only=True)
+            remaining = uow.agent_recovery.wait_dependencies(run["agent_run_id"], active_only=True)
             if not dependencies or not remaining:
                 if task.lifecycle != "OPEN":
-                    uow.agents.update_run(run["agent_run_id"], status="STOPPED", updated_at=now)
+                    uow.agent_runs.update_run(run["agent_run_id"], status="STOPPED", updated_at=now)
                 elif task.control == "ACTIVE":
                     wake_run(uow, run, [event_id], source)
             return True
@@ -645,7 +466,7 @@ class AgentCoordinator:
             )
             if replay is not None:
                 return replay
-            run = uow.agents.run(project_id, agent_run_id, lock=True)
+            run = uow.agent_runs.run(project_id, agent_run_id, lock=True)
             task = uow.tasks.get(project_id, run["task_id"], lock=True)
             task.admissible(expected_spec_revision)
             require(
@@ -653,7 +474,7 @@ class AgentCoordinator:
                 "REVISION_CONFLICT",
                 "AgentRun is based on another Task revision",
             )
-            question = uow.agents.question(agent_run_id, question_id, lock=True)
+            question = uow.agent_conversations.question(agent_run_id, question_id, lock=True)
             require(question["status"] == "OPEN", "PRECONDITION_UNRESOLVED", "Question is closed")
             now = uow.now()
             database_record = {
@@ -666,9 +487,9 @@ class AgentCoordinator:
                 "answered_by": actor.principal_id,
                 "answered_at": now,
             }
-            uow.agents.add_answer(database_record)
+            uow.agent_conversations.add_answer(database_record)
             revision = run["wake_revision"] + 1
-            uow.agents.add_wakeup(
+            uow.agent_conversations.add_wakeup(
                 {
                     "wake_id": uow.new_id(),
                     "agent_run_id": agent_run_id,
@@ -680,7 +501,7 @@ class AgentCoordinator:
                     "consumed_at": None,
                 }
             )
-            uow.agents.update_run(
+            uow.agent_runs.update_run(
                 agent_run_id,
                 status="READY",
                 generation=run["generation"] + 1,
@@ -713,7 +534,7 @@ class AgentCoordinator:
                 "control_version": run["control_version"],
             }
             recovery_id = uow.new_id()
-            uow.agents.add_runtime_recovery(
+            uow.agent_recovery.add_runtime_recovery(
                 {
                     "recovery_id": recovery_id,
                     "agent_run_id": run["agent_run_id"],
@@ -725,10 +546,10 @@ class AgentCoordinator:
                     "created_at": uow.now(),
                 }
             )
-            if uow.agents.pending_model_frame(run["agent_run_id"]) is None:
-                uow.agents.stale_pending_frames(run["agent_run_id"])
-            uow.agents.revoke_lease(run["agent_run_id"])
-            uow.agents.update_run(
+            if uow.agent_budgets.pending_model_frame(run["agent_run_id"]) is None:
+                uow.agent_conversations.stale_pending_frames(run["agent_run_id"])
+            uow.agent_runs.revoke_lease(run["agent_run_id"])
+            uow.agent_runs.update_run(
                 run["agent_run_id"],
                 status="READY",
                 epoch=epoch,
@@ -761,14 +582,14 @@ class AgentCoordinator:
             422,
         )
         with self.store.transaction() as uow:
-            run = uow.agents.run_by_id(agent_run_id, lock=True)
+            run = uow.agent_runs.run_by_id(agent_run_id, lock=True)
             require(
                 run["status"] in {"READY", "WAITING", "QUESTION"},
                 "REVISION_CONFLICT",
                 "Checkpoint rebuild requires an idle resumable Agent run",
             )
             require(
-                uow.agents.active_lease(agent_run_id) is None,
+                uow.agent_runs.active_lease(agent_run_id) is None,
                 "REVISION_CONFLICT",
                 "Checkpoint rebuild cannot race an active Agent worker",
             )
@@ -784,7 +605,7 @@ class AgentCoordinator:
                 "control_version": run["control_version"],
             }
             recovery_id = uow.new_id()
-            uow.agents.add_runtime_recovery(
+            uow.agent_recovery.add_runtime_recovery(
                 {
                     "recovery_id": recovery_id,
                     "agent_run_id": agent_run_id,
@@ -796,7 +617,7 @@ class AgentCoordinator:
                     "created_at": uow.now(),
                 }
             )
-            uow.agents.update_run(
+            uow.agent_runs.update_run(
                 agent_run_id,
                 epoch=epoch,
                 generation=generation,
@@ -816,144 +637,22 @@ class AgentCoordinator:
 
     def release_transient(self, claim: AgentLeaseClaim) -> None:
         with self.store.transaction() as uow:
-            run = uow.agents.run(claim.project_id, claim.agent_run_id, lock=True)
-            if not uow.agents.lease_owned(claim.agent_run_id, claim.owner, claim.generation):
+            run = uow.agent_runs.run(claim.project_id, claim.agent_run_id, lock=True)
+            if not uow.agent_runs.lease_owned(claim.agent_run_id, claim.owner, claim.generation):
                 return
-            uow.agents.release_lease(claim.agent_run_id, claim.owner, claim.generation)
-            uow.agents.update_run(run["agent_run_id"], status="READY", updated_at=uow.now())
+            uow.agent_runs.release_lease(claim.agent_run_id, claim.owner, claim.generation)
+            uow.agent_runs.update_run(run["agent_run_id"], status="READY", updated_at=uow.now())
 
     def runtime_revision(self, claim: AgentLeaseClaim) -> int:
         with self.store.transaction() as uow:
             self._require_owned(uow, claim)
             return sum(
-                value["epoch"] == claim.epoch for value in uow.agents.proposals(claim.agent_run_id)
+                value["epoch"] == claim.epoch
+                for value in uow.agent_conversations.proposals(claim.agent_run_id)
             )
 
     def view(self, actor: Identity, project_id: str, agent_run_id: str) -> Record:
-        with self.store.transaction() as uow:
-            uow.access.authorize(actor, project_id)
-            run = uow.agents.run(project_id, agent_run_id)
-            return {
-                **run,
-                "plan": uow.agents.plan(agent_run_id),
-                "frames": uow.agents.frames(agent_run_id),
-                "proposals": uow.agents.proposals(agent_run_id),
-                "questions": uow.agents.questions(agent_run_id),
-                "wakeups": uow.agents.wakeups(agent_run_id),
-                "events": uow.agents.events(agent_run_id),
-                "wait_dependencies": uow.agents.wait_dependencies(agent_run_id),
-                "runtime_recoveries": uow.agents.runtime_recoveries(agent_run_id),
-            }
+        return self._views.view(actor, project_id, agent_run_id)
 
     def task_view(self, actor: Identity, project_id: str, task_id: str) -> Record:
-        """Return a user-visible projection without model context or checkpoints."""
-        with self.store.transaction() as uow:
-            uow.access.authorize(actor, project_id)
-            task = uow.tasks.get(project_id, task_id)
-            run = uow.agents.run_by_task(task_id, required=True)
-            plan = uow.agents.plan(run["agent_run_id"])
-            questions = uow.agents.questions(run["agent_run_id"])
-            proposals = uow.agents.proposals(run["agent_run_id"])[-20:]
-            observations = uow.agents.tool_observations(run["agent_run_id"])[-50:]
-            action_links = uow.agents.action_links(run["agent_run_id"])[-50:]
-            wait_dependencies = uow.agents.wait_dependencies(run["agent_run_id"])[-64:]
-            recoveries = uow.agents.runtime_recoveries(run["agent_run_id"])[-20:]
-            delivery_attempts = uow.agents.delivery_attempts(run["agent_run_id"])[-50:]
-            usage = (
-                uow.agents.model_usage(run["agent_run_id"])
-                if uow.agents.model_budget(run["agent_run_id"], required=False)
-                else None
-            )
-            return {
-                "agent_run_id": run["agent_run_id"],
-                "task_ref": {"task_id": task.task_id, "spec_revision": task.spec_revision},
-                "status": run["status"],
-                "epoch": run["epoch"],
-                "generation": run["generation"],
-                "wake_revision": run["wake_revision"],
-                "runtime_profile_id": run["runtime_profile"]["profile_id"],
-                "runtime_profile_digest": run["runtime_profile_digest"],
-                "plan_revision": run["plan_revision"],
-                "plan": plan["plan"] if plan else None,
-                "blocked_reason": run["blocked_reason"],
-                "questions": [
-                    {
-                        "question_id": value["question_id"],
-                        "gap_id": value["gap_id"],
-                        "question": value["question"],
-                        "status": value["status"],
-                        "created_at": value["created_at"].isoformat(),
-                    }
-                    for value in questions
-                ],
-                "recent_decisions": [
-                    {
-                        "proposal_id": value["proposal_id"],
-                        "frame_id": value["frame_id"],
-                        "kind": value["kind"],
-                        "message": value["proposal"].get("body", {}).get("message"),
-                        "accepted_at": value["accepted_at"].isoformat(),
-                    }
-                    for value in proposals
-                ],
-                "read_observations": [
-                    {
-                        "observation_id": value["observation_id"],
-                        "tool_request_id": value["tool_request_id"],
-                        "tool_id": value["tool_id"],
-                        "status": value["status"],
-                        "result_digest": value["result_digest"],
-                        "refs": value["refs"],
-                        "error_category": value["error_category"],
-                        "observed_at": value["observed_at"].isoformat(),
-                    }
-                    for value in observations
-                ],
-                "action_links": [
-                    {
-                        "link_id": value["link_id"],
-                        "tool_request_id": value["tool_request_id"],
-                        "operation": value["operation"],
-                        "business_id": value["business_id"],
-                        "action_id": value["action_id"],
-                        "command_id": value["command_id"],
-                        "created_at": value["created_at"].isoformat(),
-                    }
-                    for value in action_links
-                ],
-                "wait_dependencies": [
-                    {
-                        "dependency_id": value["dependency_id"],
-                        "owner": value["owner"],
-                        "object_id": value["object_id"],
-                        "minimum_revision": value["minimum_revision"],
-                        "observed_revision": value["observed_revision"],
-                        "state": value["state"],
-                    }
-                    for value in wait_dependencies
-                ],
-                "runtime_recoveries": [
-                    {
-                        "recovery_id": value["recovery_id"],
-                        "from_epoch": value["from_epoch"],
-                        "to_epoch": value["to_epoch"],
-                        "reason": value["reason"],
-                        "ledger_digest": value["ledger_digest"],
-                        "created_at": value["created_at"].isoformat(),
-                    }
-                    for value in recoveries
-                ],
-                "delivery_attempts": [
-                    {
-                        "attempt_id": value["attempt_id"],
-                        "tool_id": value["tool_id"],
-                        "ordinal": value["ordinal"],
-                        "outcome": value["outcome"],
-                        "failure_category": value["failure_category"],
-                        "retry_of_attempt_id": value["retry_of_attempt_id"],
-                        "stop_reason": value["stop_reason"],
-                    }
-                    for value in delivery_attempts
-                ],
-                "model_usage": usage,
-            }
+        return self._views.task_view(actor, project_id, task_id)

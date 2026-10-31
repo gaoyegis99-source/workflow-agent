@@ -21,6 +21,12 @@ class Dispatcher:
                 claim["event_id"], claim["owner"], claim["generation"], lease_seconds
             )
 
+    def owned(self, claim: Record) -> bool:
+        """Synchronously fence an action claim before an external effect."""
+
+        with self.store.transaction() as uow:
+            return uow.delivery.owned(claim["event_id"], claim["owner"], claim["generation"])
+
     @staticmethod
     def _owned(uow: UnitOfWork, claim: Record) -> bool:
         return uow.delivery.owned(claim["event_id"], claim["owner"], claim["generation"])

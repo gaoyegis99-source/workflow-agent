@@ -42,7 +42,7 @@ def create_workspace(page, origin, token, name, section="overview"):
     return project_id
 
 
-def upload_asset(page, path, columns=None):
+def upload_asset(page, path, columns=None, *, ready_timeout_ms=40_000):
     page.get_by_role("button", name="上传数据").click()
     page.locator('input[type="file"]').set_input_files(path)
     page.get_by_role("button", name="上传并继续").click()
@@ -54,7 +54,9 @@ def upload_asset(page, path, columns=None):
     page.get_by_role("button", name="检查并导入").click()
     expect(page.get_by_text("导入请求已确认")).to_be_visible(timeout=20_000)
     page.get_by_role("button", name="完成").click()
-    expect(page.locator(".ui-table tbody tr.clickable").first).to_be_visible(timeout=40_000)
+    expect(page.locator(".ui-table tbody tr.clickable").first).to_be_visible(
+        timeout=ready_timeout_ms
+    )
 
 
 def connect_task(page, origin, token, project_id, task_id):

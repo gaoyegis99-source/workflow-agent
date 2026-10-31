@@ -13,8 +13,6 @@ from platform_core.application.model_catalog import load_catalog, selected_profi
 from platform_core.application.tool_catalog import build_tool_catalog, tool_spec
 from platform_core.domain.agent_runtime import canonical_digest
 
-from platform_agent_runtime.model_providers import provider_from_environment
-
 TERMINAL = {"COMPLETED", "REJECTED", "CANCELLED", "ERROR"}
 ALWAYS_SEVERE = {
     "WRONG_FRAME_IDENTITY",
@@ -176,7 +174,7 @@ def evaluate_real(
     cases_path: str | Path,
     *,
     repeats: int = 3,
-    provider=None,
+    provider,
     max_concurrency: int = 1,
 ) -> dict:
     if not 1 <= max_concurrency <= 32:
@@ -184,7 +182,6 @@ def evaluate_real(
     models = load_catalog(model_catalog_path)
     profile = selected_profile(models)
     catalog = build_tool_catalog("science")
-    provider = provider or provider_from_environment(profile)
     suite = json.loads(Path(cases_path).read_text(encoding="utf-8"))
     cases = suite["cases"]
 

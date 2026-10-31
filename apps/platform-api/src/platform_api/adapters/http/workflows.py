@@ -1,9 +1,5 @@
 """Public workflow package endpoints."""
 
-import hmac
-import os
-from pathlib import Path
-
 from fastapi import APIRouter, Request
 from platform_contracts.workflows import (
     WorkflowPackageCreate,
@@ -84,11 +80,7 @@ internal = APIRouter(include_in_schema=False)
 
 
 def require_execution(request):
-    token = os.environ.get("V7_EXECUTION_PLATFORM_TOKEN", "")
-    if len(token) < 32 or not hmac.compare_digest(
-        request.headers.get("authorization", ""), "Bearer " + token
-    ):
-        raise RuleViolation("AUTHENTICATION_REQUIRED", "Service credential required", 401)
+    request.app.state.internal_execution_policy.authorize(request.headers.get("authorization"))
 
 
 @internal.post("/internal/workflows/{action_id}/{execution_id}/nodes/{node_id}/permit")
@@ -96,8 +88,7 @@ def node_permit(
     action_id: PathId, execution_id: PathId, node_id: PathId, body: dict, request: Request
 ):
     require_execution(request)
-    marker = os.environ.get("V7_MAINTENANCE_FILE")
-    if marker and Path(marker).is_file():
+    if request.app.state.internal_execution_policy.maintenance_active():
         return {"decision": "WAIT", "reason": "DEPLOYMENT_PARKING"}
     return service(request).permit_node(action_id, execution_id, node_id, body)
 

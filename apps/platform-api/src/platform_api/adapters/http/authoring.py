@@ -137,7 +137,7 @@ def proposal_service(request: Request) -> OperatorProposalService:
     return OperatorProposalService(
         request.app.state.database,
         operator_catalog=request.app.state.operator_catalog,
-        release_lock=request.app.state.release_lock,
+        release_lock=request.app.state.deployment_evidence,
     )
 
 

@@ -27,7 +27,8 @@ from platform_infrastructure.database import Database  # noqa: E402
 
 from benchmarks.p4.scheduler_diagnostics import run_once  # noqa: E402
 from benchmarks.p4.scheduler_r2 import summarize  # noqa: E402
-from scripts.p2_environment import PostgreSQL  # noqa: E402
+from scripts.configure.p2_environment import PostgreSQL  # noqa: E402
+from scripts.lib.runtime_layout import P4_RUNTIME_ROOT  # noqa: E402
 
 PROFILES = {
     "quick": {"rows": 20_000, "groups": 200, "nodes": 4, "concurrency": 4, "repeats": 1},
@@ -60,12 +61,12 @@ SOURCES = (
     "runtimes/cwl/engine.py",
     "benchmarks/p4/scheduler_diagnostics.py",
     "benchmarks/p4/scheduler_r5.py",
-    "tests/p4/test_chaining_profiles_e2e.py",
+    "tests/execution/workflows/test_chaining_profiles_e2e.py",
     "tests/performance/test_scheduler_r5.py",
     "tests/performance/profile_execution_service.py",
-    "scripts/check_p4_scheduler_r5.sh",
+    "scripts/checks/check_p4_scheduler_r5.sh",
 )
-SAFETY_REPORT = ROOT / ".p4-runtime/verification/r5-chaining-safety.xml"
+SAFETY_REPORT = P4_RUNTIME_ROOT / "verification/r5-chaining-safety.xml"
 SAFETY_TESTS = {
     "test_chaining_on_publishes_once_with_frozen_profile",
     "test_chaining_on_survives_api_and_worker_restart_without_profile_change",
@@ -83,7 +84,7 @@ def configuration(profile_id):
         "roles": ROLES,
         "init": True,
         "baseline_resources": False,
-        "cwl_image": (ROOT / ".p4-runtime/cwl-image.txt").read_text().strip(),
+        "cwl_image": (P4_RUNTIME_ROOT / "cwl-image.txt").read_text().strip(),
         "engine_profile_id": profile_id,
     }
 
@@ -280,15 +281,15 @@ def environment():
         "docker": subprocess.check_output(
             ["docker", "version", "--format", "{{.Server.Version}}"], text=True
         ).strip(),
-        "cwl_image": (ROOT / ".p4-runtime/cwl-image.txt").read_text().strip(),
-        "performance_operator_image": (ROOT / ".p4-runtime/performance-operator-image.txt")
+        "cwl_image": (P4_RUNTIME_ROOT / "cwl-image.txt").read_text().strip(),
+        "performance_operator_image": (P4_RUNTIME_ROOT / "performance-operator-image.txt")
         .read_text()
         .strip(),
     }
 
 
 def safety_qualification(profile_name):
-    command = "uv run --locked pytest -q tests/p4/test_chaining_profiles_e2e.py"
+    command = "uv run --locked pytest -q tests/execution/workflows/test_chaining_profiles_e2e.py"
     if profile_name == "quick":
         return {"status": "NOT_REQUIRED", "command": command}
     if not SAFETY_REPORT.is_file():
@@ -317,8 +318,10 @@ def main():
     parser.add_argument("--report", type=Path)
     args = parser.parse_args()
     suffix = "-quick" if args.profile == "quick" else ""
-    args.output = args.output or ROOT / f"docs/verification/p4-r5-chaining{suffix}-evidence.json"
-    args.report = args.report or ROOT / f"docs/verification/p4-r5-chaining{suffix}-report.md"
+    args.output = (
+        args.output or P4_RUNTIME_ROOT / f"verification/p4-r5-chaining{suffix}-evidence.json"
+    )
+    args.report = args.report or P4_RUNTIME_ROOT / f"verification/p4-r5-chaining{suffix}-report.md"
     profile_config = PROFILES[args.profile]
     counters = {OFF_PROFILE_ID: 0, ON_PROFILE_ID: 0}
     runs = []

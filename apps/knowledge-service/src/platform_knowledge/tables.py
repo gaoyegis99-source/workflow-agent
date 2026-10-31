@@ -108,6 +108,42 @@ outbox = sa.Table(
     sa.Column("lease_until", sa.DateTime(timezone=True)),
     sa.Column("attempts", sa.Integer, nullable=False, server_default="0"),
 )
+semantic_indexes = sa.Table(
+    "knowledge_semantic_indexes",
+    metadata,
+    sa.Column("index_id", ID, primary_key=True),
+    sa.Column("project_id", ID, nullable=False),
+    sa.Column("profile", JSONB, nullable=False),
+    sa.Column("profile_digest", DIGEST, nullable=False),
+    sa.Column("status", sa.String(24), nullable=False),
+    # A category only: upstream messages or model inputs must never be saved
+    # into durable index metadata.
+    sa.Column("failure_category", sa.String(64)),
+    sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
+    sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False),
+    sa.UniqueConstraint("project_id", "profile_digest", name="uq_knowledge_semantic_profile"),
+)
+semantic_vectors = sa.Table(
+    "knowledge_semantic_vectors",
+    metadata,
+    sa.Column("index_id", ID, primary_key=True),
+    sa.Column("unit_id", ID, primary_key=True),
+    sa.Column("project_id", ID, nullable=False),
+    sa.Column("document_id", ID, nullable=False),
+    sa.Column("version_id", ID, nullable=False),
+    sa.Column("content_digest", DIGEST, nullable=False),
+    sa.Column("lifecycle_revision", sa.Integer, nullable=False),
+    # JSONB keeps the first release independent of a PostgreSQL vector
+    # extension.  The application ranks candidates after explicit validation;
+    # exact reads remain the only evidence path.
+    sa.Column("vector", JSONB, nullable=False),
+    sa.Column("valid", sa.Boolean, nullable=False, server_default=sa.true()),
+    sa.Column("invalidated_at", sa.DateTime(timezone=True)),
+    sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
+    sa.ForeignKeyConstraint(
+        ["index_id"], ["knowledge_semantic_indexes.index_id"], ondelete="CASCADE"
+    ),
+)
 requests = sa.Table(
     "knowledge_idempotency",
     metadata,

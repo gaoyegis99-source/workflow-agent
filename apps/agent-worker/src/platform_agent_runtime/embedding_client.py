@@ -242,10 +242,9 @@ class HttpEmbeddingClient:
             ) from error
 
 
-def embedding_client_from_environment() -> HttpEmbeddingClient:
-    path = os.environ.get("V7_EMBEDDING_CATALOG")
-    if not path:
-        raise ValueError("V7_EMBEDDING_CATALOG is not configured")
+def embedding_client_from_catalog_path(path: str | Path) -> HttpEmbeddingClient:
+    """Build from an explicit catalogue path supplied by composition code."""
+
     catalog = load_embedding_catalog(path)
     if catalog["state"] != "ENABLED":
         raise ValueError("Embedding is disabled by the frozen catalog")

@@ -44,8 +44,8 @@ def test_maintainer_cli_uses_pinned_catalog_and_release_lock(
     )
     monkeypatch.setenv("V7_DATABASE_URL", database.engine.url.render_as_string(hide_password=False))
     monkeypatch.setenv("V7_OPERATOR_CATALOG", str(catalog_path))
-    monkeypatch.setenv("V7_RELEASE_LOCK", str(release_path))
-    monkeypatch.setenv("V7_RELEASE_DIGEST", release["release_digest"])
+    monkeypatch.setenv("V7_DEPLOYMENT_REVISION", release["release_digest"])
+    monkeypatch.setenv("V7_DEPLOYMENT_SOURCE_DIGEST", materials["source"]["source_digest"])
     monkeypatch.setattr(
         sys,
         "argv",

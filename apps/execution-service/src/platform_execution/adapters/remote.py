@@ -1,7 +1,6 @@
 """Authenticated, redirect-free client for the frozen P4.3 remote protocol."""
 
 import hashlib
-import json
 import os
 import ssl
 import stat
@@ -9,20 +8,35 @@ from pathlib import Path
 from urllib.parse import urljoin, urlsplit
 
 import httpx
+from platform_contracts.runtime_context import ExecutionRuntimeConfig
 from platform_contracts.service import ServiceFault, ensure
 
 
 class CredentialProvider:
-    def __init__(self, values=None, credential_dir=None, ca_dir=None):
-        self.values = (
-            values
-            if values is not None
-            else json.loads(os.environ.get("V7_REMOTE_CREDENTIALS_JSON", "{}"))
-        )
-        self.credential_dir = Path(
-            credential_dir or os.environ.get("V7_REMOTE_CREDENTIAL_DIR", "/run/secrets/v7-remote")
-        )
-        self.ca_dir = Path(ca_dir or os.environ.get("V7_REMOTE_CA_DIR", "/etc/v7/remote-ca"))
+    def __init__(
+        self,
+        values=None,
+        credential_dir=None,
+        ca_dir=None,
+        *,
+        runtime: ExecutionRuntimeConfig | None = None,
+    ):
+        """Read only explicitly composed credential locations or values.
+
+        ``values`` remains a useful test adapter, but the production worker
+        supplies one immutable :class:`ExecutionRuntimeConfig`; this adapter
+        never consults process environment itself.
+        """
+
+        if runtime is not None:
+            if values is not None or credential_dir is not None or ca_dir is not None:
+                raise ValueError("REMOTE_CREDENTIAL_CONFIGURATION_AMBIGUOUS")
+            values = runtime.remote_credentials
+            credential_dir = runtime.remote_credential_dir
+            ca_dir = runtime.remote_ca_dir
+        self.values = values if values is not None else {}
+        self.credential_dir = Path(credential_dir or "/run/secrets/v7-remote")
+        self.ca_dir = Path(ca_dir or "/etc/v7/remote-ca")
 
     @staticmethod
     def file(root, reference, *, secret):
@@ -175,8 +189,8 @@ class RemoteClient:
                     for chunk in response.iter_bytes(1024 * 1024):
                         total += len(chunk)
                         ensure(total <= maximum, "INVALID_BINDING", "Remote output exceeds limit")
-                        stream.write(chunk)
-                        hasher.update(chunk)
+                    stream.write(chunk)
+                    hasher.update(chunk)
                     stream.flush()
                     os.fsync(stream.fileno())
                 ensure(

@@ -1,20 +1,16 @@
-import { createAjv } from "@jsonforms/core";
 import { JsonForms } from "@jsonforms/react";
 import { vanillaCells, vanillaRenderers } from "@jsonforms/vanilla-renderers";
 import {
   addEdge,
   Background,
   Controls,
-  Handle,
   MiniMap,
-  Position,
   ReactFlow,
   type Connection,
   type Edge,
   type EdgeChange,
   type Node,
   type NodeChange,
-  type NodeProps,
   useEdgesState,
   useNodesState,
 } from "@xyflow/react";
@@ -50,109 +46,15 @@ import {
   type CanvasNodeData,
   type CanvasProjection,
   type JsonValue,
-  type OperatorTarget,
 } from "./source";
+import { emptyMetadata, descriptorMap, trustedTarget } from "./workflowStudioAdapter";
+import { workflowStudioAjv } from "./workflowStudioValidation";
+import { groupWorkflowReleases } from "./workflowStudioReleaseGroups";
+import { IssueList, workflowNodeTypes } from "./WorkflowStudioViews";
 import { ConfirmDialog } from "../../../shared/ui";
 import "../../../styles/workflow.css";
 
-const emptyMetadata: WorkflowMetadata = {
-  title: "",
-  description: "",
-  labels: [],
-};
-const nodeTypes = { capability: CapabilityNode };
-const ajv = createAjv({
-  useDefaults: false,
-  coerceTypes: false,
-  removeAdditional: false,
-});
 const SourceEditor = lazy(() => import("./SourceEditor"));
-
-function CapabilityNode({ data, selected }: NodeProps<Node<CanvasNodeData>>) {
-  const inputs =
-    data.nodeKind === "OUTPUT" ? ["value"] : (data.inputPorts ?? []);
-  const outputs =
-    data.nodeKind === "INPUT" ? [data.label] : (data.outputPorts ?? []);
-  return (
-    <div
-      className={`flow-node ${selected ? "selected" : ""} ${data.nodeKind.toLowerCase()}`}
-    >
-      <strong>{data.label}</strong>
-      <small>
-        {data.nodeKind === "OPERATOR"
-          ? `${data.operatorId}@${data.versionId}`
-          : data.nodeKind}{" "}
-        · {data.documentId}
-      </small>
-      {data.when && <small>条件 {data.when}</small>}
-      {!!data.scatter?.length && (
-        <small>
-          {data.scatterMethod ?? "dotproduct"} · {data.scatter.join(", ")}
-        </small>
-      )}
-      {inputs.map((port, index) => (
-        <div className="node-port input-port" key={`in:${port}`}>
-          <Handle
-            type="target"
-            position={Position.Left}
-            id={`in:${port}`}
-            style={{ top: 48 + index * 24 }}
-          />
-          {port}
-        </div>
-      ))}
-      {outputs.map((port, index) => (
-        <div className="node-port output-port" key={`out:${port}`}>
-          {port}
-          <Handle
-            type="source"
-            position={Position.Right}
-            id={`out:${port}`}
-            style={{ top: 48 + index * 24 }}
-          />
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function trustedTarget(operator: OperatorDescriptor): OperatorTarget | null {
-  const implementation = operator.implementations.find(
-    (item) => item.binding_kind === "LOCAL",
-  );
-  if (!implementation || typeof implementation.implementation_id !== "string")
-    return null;
-  return {
-    kind: "OPERATOR",
-    operator_id: operator.operator_id,
-    version_id: operator.version_id,
-    execution_binding: {
-      kind: "LOCAL",
-      implementation_id: implementation.implementation_id,
-    },
-  };
-}
-
-function descriptorMap(operators: OperatorDescriptor[]) {
-  return Object.fromEntries(
-    operators.flatMap((operator) => {
-      const target = trustedTarget(operator);
-      return target
-        ? [
-            [
-              `${operator.operator_id}@${operator.version_id}`,
-              {
-                input_ports: operator.input_ports,
-                output_ports: operator.output_ports,
-                parameter_schema: operator.parameter_schema,
-                target,
-              },
-            ],
-          ]
-        : [];
-    }),
-  );
-}
 
 export function WorkflowStudio({
   token,
@@ -267,16 +169,7 @@ export function WorkflowStudio({
       ? compareOperatorVersions(activeDescriptor, selectedVersionDescriptor)
       : null;
   const releaseGroups = useMemo(
-    () =>
-      Object.entries(
-        releaseLibrary.reduce<Record<string, WorkflowRelease[]>>(
-          (groups, item) => {
-            (groups[item.stable_key] ??= []).push(item);
-            return groups;
-          },
-          {},
-        ),
-      ).sort(([left], [right]) => left.localeCompare(right)),
+    () => groupWorkflowReleases(releaseLibrary),
     [releaseLibrary],
   );
 
@@ -1306,7 +1199,7 @@ export function WorkflowStudio({
                     <ReactFlow
                       nodes={nodes}
                       edges={edges}
-                      nodeTypes={nodeTypes}
+                      nodeTypes={workflowNodeTypes}
                       onNodesChange={canEdit ? changeNodes : undefined}
                       onEdgesChange={canEdit ? changeEdges : undefined}
                       onConnect={canEdit ? connect : undefined}
@@ -1333,7 +1226,7 @@ export function WorkflowStudio({
                         data={activeNode.data.parameters ?? {}}
                         renderers={vanillaRenderers}
                         cells={vanillaCells}
-                        ajv={ajv}
+                        ajv={workflowStudioAjv}
                         validationMode="ValidateAndShow"
                         onChange={({ data }) => {
                           if (canEdit) updateParameters(data as JsonValue);
@@ -2002,39 +1895,6 @@ export function WorkflowStudio({
           if (pendingLifecycle) void changeReleaseLifecycle(pendingLifecycle);
         }}
       />
-    </div>
-  );
-}
-
-function IssueList({
-  title,
-  issues,
-}: {
-  title: string;
-  issues: PreviewResult["issues"];
-}) {
-  return (
-    <div className="issues">
-      <h3>{title}</h3>
-      {issues.length === 0 ? (
-        <p>没有问题。</p>
-      ) : (
-        <ul>
-          {issues.map((issue, index) => (
-            <li key={`${issue.code}:${index}`}>
-              <strong>
-                {issue.severity} · {issue.code}
-              </strong>
-              <span>
-                {issue.location.step_key ?? "workflow"}
-                {issue.location.port ? ` / ${issue.location.port}` : ""}
-                {issue.location.pointer ?? ""}
-              </span>
-              <p>{issue.message}</p>
-            </li>
-          ))}
-        </ul>
-      )}
     </div>
   );
 }

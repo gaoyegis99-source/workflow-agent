@@ -2,19 +2,17 @@
 
 import argparse
 import json
-import os
 
 from platform_agent_runtime.checkpoint import SCHEMA_VERSION, CheckpointDatabase
+from platform_agent_runtime.composition import AgentCheckpointComposition
 
 
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("command", choices=["migrate", "check-schema"])
     args = parser.parse_args()
-    url = os.environ.get("V7_AGENT_CHECKPOINT_DATABASE_URL")
-    if not url:
-        raise SystemExit("V7_AGENT_CHECKPOINT_DATABASE_URL is required")
-    database = CheckpointDatabase(url)
+    composition = AgentCheckpointComposition.from_environment()
+    database = CheckpointDatabase(composition.checkpoint_database_url)
     if args.command == "migrate":
         database.migrate()
     else:

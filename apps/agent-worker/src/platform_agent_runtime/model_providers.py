@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import json
-import os
 import time
 import urllib.error
 import urllib.request
@@ -418,10 +417,15 @@ class RecordReplayModelProvider:
         return self.delegate.cancel(call)
 
 
-def provider_from_environment(profile, *, opener=None):
-    """Construct only the provider frozen by the deployment catalogue."""
+def provider_from_secret(profile, secret: str | None, *, opener=None):
+    """Construct the frozen provider from a composition-supplied secret.
+
+    Provider adapters do not inspect process configuration.  The executable
+    composition root resolves the credential named by the frozen profile and
+    injects its value here without persisting it in a catalogue or receipt.
+    """
+
     if profile["provider"] == "OPENAI_RESPONSES":
-        secret = os.environ.get(profile["credential_env"])
         if not secret:
             raise ValueError("The model provider credential is not configured")
         return OpenAIResponsesProvider(profile, secret, opener=opener)

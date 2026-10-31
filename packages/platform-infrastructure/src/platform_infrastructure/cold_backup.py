@@ -1,4 +1,9 @@
-"""Release-pinned cold backup and restore for all V7 service-owned state."""
+"""Direct-deployment cold backup and restore for all V7 service-owned state.
+
+The backup format preserves the historic ``release_digest`` field for older
+restore readers, but new deployments populate it from the non-authorizing
+``V7_DEPLOYMENT_REVISION`` value.  No Release Lock is read or trusted here.
+"""
 
 from __future__ import annotations
 
@@ -14,15 +19,15 @@ from pathlib import Path
 from uuid import uuid4
 
 import psycopg
-from platform_contracts.release import file_digest, load_release_lock
+from platform_contracts.digests import file_digest
 from psycopg import sql
 
-BACKUP_SCHEMA = 2
+BACKUP_SCHEMA = 3
 EXPECTED_SCHEMAS = {
-    "platform": {"alembic": "0023_workflow_release_lifecycle"},
+    "platform": {"alembic": "0026_worker_lane_leases"},
     "data": {"alembic": "0004_document_assets"},
     "execution": {"alembic": "0006_remote_reliability"},
-    "knowledge": {"alembic": "0002_lifecycle_outbox"},
+    "knowledge": {"alembic": "0003_semantic_discovery"},
 }
 DATABASE_ENV = {
     "platform": "V7_DATABASE_URL",
@@ -37,10 +42,11 @@ TREE_ENV = {
     "spatial": "V7_DATA_SPATIAL_WORK_ROOT",
 }
 CONFIG_ENV = {
-    "release-lock.json": "V7_RELEASE_LOCK",
     "operator-catalog.json": "V7_OPERATOR_CATALOG",
     "checker-catalog.json": "V7_CHECKER_CATALOG",
     "tool-catalog.json": "V7_AGENT_TOOL_CATALOG",
+    "model-catalog.json": "V7_MODEL_CATALOG",
+    "agent-runtime-profile.json": "V7_AGENT_RUNTIME_PROFILE",
 }
 MARKER_TABLES = {"alembic_version", "v7_agent_checkpoint_schema"}
 QUIESCENCE_QUERIES = {
@@ -90,11 +96,20 @@ class BackupConfiguration:
     databases: dict[str, str]
     trees: dict[str, Path]
     files: dict[str, Path]
+    # Kept as a manifest compatibility field.  New direct deployments set it
+    # from V7_DEPLOYMENT_REVISION; it is never loaded from a Release Lock.
     release_digest: str
     maintenance_file: Path
     park_manifest: Path | None = None
     state_uid: int = 65532
     state_gid: int = 65532
+    deployment_id: str = "unspecified"
+
+    @property
+    def deployment_revision(self) -> str:
+        """The direct-deployment name for the historic manifest field."""
+
+        return self.release_digest
 
 
 def canonical_digest(value: object) -> str:
@@ -118,16 +133,17 @@ def configuration_from_environment() -> BackupConfiguration:
             raise ValueError(f"{name} is required")
         return value
 
-    release_digest = required("V7_RELEASE_DIGEST")
+    deployment_id = required("V7_DEPLOYMENT_ID")
+    deployment_revision = required("V7_DEPLOYMENT_REVISION")
     files = {name: Path(required(variable)) for name, variable in CONFIG_ENV.items()}
-    release = load_release_lock(files["release-lock.json"], release_digest)
-    if release["release_digest"] != release_digest:
-        raise ValueError("Release identity changed")
+    for name, path in files.items():
+        if path.is_symlink() or not path.is_file():
+            raise ValueError(f"Deployment configuration is unavailable: {name}")
     return BackupConfiguration(
         databases={name: required(variable) for name, variable in DATABASE_ENV.items()},
         trees={name: Path(required(variable)) for name, variable in TREE_ENV.items()},
         files=files,
-        release_digest=release_digest,
+        release_digest=deployment_revision,
         maintenance_file=Path(
             os.environ.get("V7_MAINTENANCE_FILE", "/var/lib/v7-control/maintenance")
         ),
@@ -136,6 +152,7 @@ def configuration_from_environment() -> BackupConfiguration:
         ),
         state_uid=int(os.environ.get("V7_STATE_UID", "65532")),
         state_gid=int(os.environ.get("V7_STATE_GID", "65532")),
+        deployment_id=deployment_id,
     )
 
 
@@ -313,7 +330,8 @@ def _verified_park(configuration: BackupConfiguration) -> dict | None:
     value["manifest_digest"] = supplied
     if (
         value.get("schema_version") != 1
-        or value.get("source_release_digest") != configuration.release_digest
+        or value.get("source_deployment_revision", value.get("source_release_digest"))
+        != configuration.deployment_revision
         or value.get("state") != "PARKED"
     ):
         raise RuntimeError("Park manifest does not describe this parked release")
@@ -385,7 +403,13 @@ def create_backup(configuration: BackupConfiguration, destination: str | Path) -
             config_records.append({"name": name, "digest": file_digest(target_file)})
         manifest = {
             "schema_version": BACKUP_SCHEMA,
-            "release_digest": configuration.release_digest,
+            # ``release_digest`` remains for historic backup readers.  It is a
+            # deployment revision in schema v3, not a lock authorization.
+            "release_digest": configuration.deployment_revision,
+            "deployment": {
+                "id": configuration.deployment_id,
+                "revision": configuration.deployment_revision,
+            },
             "created_at_unix_ns": time.time_ns(),
             "quiescence": current,
             "databases": databases,
@@ -422,17 +446,27 @@ def create_backup(configuration: BackupConfiguration, destination: str | Path) -
         raise
 
 
-def verified_manifest(source: str | Path, expected_release_digest: str | None = None) -> dict:
+def verified_manifest(source: str | Path, expected_deployment_revision: str | None = None) -> dict:
     root = Path(source)
     manifest = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
-    if manifest.get("schema_version") not in {1, 2}:
+    if manifest.get("schema_version") not in {1, 2, 3}:
         raise RuntimeError("Unsupported backup manifest")
     supplied = manifest.pop("manifest_digest", None)
     if supplied != canonical_digest(manifest):
         raise RuntimeError("Backup manifest digest differs")
     manifest["manifest_digest"] = supplied
-    if expected_release_digest and manifest["release_digest"] != expected_release_digest:
-        raise RuntimeError("Backup release differs from the selected deployment")
+    if manifest["schema_version"] == 3:
+        deployment = manifest.get("deployment")
+        if not (
+            isinstance(deployment, dict)
+            and isinstance(deployment.get("id"), str)
+            and deployment["id"]
+            and isinstance(deployment.get("revision"), str)
+            and deployment["revision"] == manifest.get("release_digest")
+        ):
+            raise RuntimeError("Backup deployment metadata differs")
+    if expected_deployment_revision and manifest["release_digest"] != expected_deployment_revision:
+        raise RuntimeError("Backup deployment differs from the selected deployment")
     for service in manifest["databases"].values():
         for record in service["tables"]:
             path = root / "databases" / service["kind"] / record["filename"]

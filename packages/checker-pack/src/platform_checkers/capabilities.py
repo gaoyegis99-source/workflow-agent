@@ -88,11 +88,8 @@ def runtime_integrity(request, _root, _index):
                 manifest
                 and representation
                 and representation.get("digest") == output_ref.get("representation_digest")
-                and (
-                    representation.get("schema_id") == output_ref.get("schema_id")
-                    or representation.get("schema_id") is None
-                    and output_ref.get("schema_source") == "COMPATIBILITY_CATALOG"
-                )
+                and representation.get("schema_id") == output_ref.get("schema_id")
+                and output_ref.get("schema_source") == "MANIFEST"
             )
         results.append(
             _result(

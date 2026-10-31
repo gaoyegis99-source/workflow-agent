@@ -22,7 +22,20 @@ import uuid
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
+ROOT = HERE.parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from scripts.lib.runtime_layout import P1_RUNTIME_ROOT  # noqa: E402
+from scripts.maintenance.project_environment import docker_executable  # noqa: E402
+
 PINS = json.loads((HERE / "pins.json").read_text())
+
+
+def docker_command(*args: str) -> list[str]:
+    """Route every host-side P1 container action through the V7 launcher."""
+
+    return [docker_executable(), *args]
 
 
 def run(args: list[str], *, timeout: float = 60, check: bool = True) -> subprocess.CompletedProcess:
@@ -64,7 +77,7 @@ def prepare_bundle(directory: Path, runsc: Path, script: str) -> Path:
     try:
         run(
             [
-                "docker",
+                *docker_command(),
                 "create",
                 "--name",
                 container,
@@ -75,12 +88,12 @@ def prepare_bundle(directory: Path, runsc: Path, script: str) -> Path:
             ]
         )
         archive = directory / "rootfs.tar"
-        run(["docker", "export", "-o", str(archive), container])
+        run(docker_command("export", "-o", str(archive), container))
         with tarfile.open(archive) as tar:
             tar.extractall(rootfs, filter=container_filter)
         archive.unlink()
     finally:
-        run(["docker", "rm", "-f", container], check=False)
+        run(docker_command("rm", "-f", container), check=False)
     (rootfs / "input.txt").write_text("immutable-input\n")
     (rootfs / "input.txt").chmod(0o666)
     (rootfs / "tmp").mkdir(exist_ok=True)
@@ -108,7 +121,7 @@ def prepare_bundle(directory: Path, runsc: Path, script: str) -> Path:
 
 def command(name: str, bundle: Path, tools: Path) -> list[str]:
     return [
-        "docker",
+        *docker_command(),
         "run",
         "--name",
         name,
@@ -273,7 +286,7 @@ echo FILE_NETWORK_DISK_PASS
                 }
             )
         finally:
-            run(["docker", "rm", "-f", name], check=False)
+            run(docker_command("rm", "-f", name), check=False)
 
     bundle = prepare_bundle(root / "cancel", runsc, "echo READY; sleep 60; echo LATE_OUTPUT")
     name = "v7-p1-sandbox-" + uuid.uuid4().hex[:12]
@@ -285,15 +298,21 @@ echo FILE_NETWORK_DISK_PASS
     )
     try:
         deadline = time.monotonic() + 20
-        while "READY" not in run(["docker", "logs", name], check=False).stdout:
+        while "READY" not in run(docker_command("logs", name), check=False).stdout:
             assert process.poll() is None, process.communicate()
             assert time.monotonic() < deadline
             time.sleep(0.2)
-        container_id = run(["docker", "inspect", "--format", "{{.Id}}", name]).stdout.strip()
-        run(["docker", "exec", name, "/tools/runsc", "--root=/tmp/runsc", "kill", "guest", "KILL"])
+        container_id = run(docker_command("inspect", "--format", "{{.Id}}", name)).stdout.strip()
+        run(
+            docker_command(
+                "exec", name, "/tools/runsc", "--root=/tmp/runsc", "kill", "guest", "KILL"
+            )
+        )
         stdout, stderr = process.communicate(timeout=15)
         assert "LATE_OUTPUT" not in stdout
-        state = json.loads(run(["docker", "inspect", "--format", "{{json .State}}", name]).stdout)
+        state = json.loads(
+            run(docker_command("inspect", "--format", "{{json .State}}", name)).stdout
+        )
         assert not state["Running"] and state["ExitCode"] != 0
         checks.append(
             {
@@ -306,7 +325,7 @@ echo FILE_NETWORK_DISK_PASS
             }
         )
     finally:
-        run(["docker", "rm", "-f", name], check=False)
+        run(docker_command("rm", "-f", name), check=False)
         process.communicate(timeout=10)
     return {
         "runtime": "gVisor",
@@ -327,7 +346,7 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("directory", type=Path)
     args = parser.parse_args()
-    cache = HERE.parents[1] / ".p1-runtime/gvisor"
+    cache = P1_RUNTIME_ROOT / "gvisor"
     result = suite(args.directory.resolve(), cache)
     (args.directory / "report.json").write_text(json.dumps(result, indent=2))
     print(json.dumps(result, indent=2))

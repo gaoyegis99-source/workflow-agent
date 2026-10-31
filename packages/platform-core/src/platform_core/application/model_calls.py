@@ -111,7 +111,7 @@ class AgentModelCoordinator:
         with self.store.transaction() as uow:
             owned = self.agents._require_owned(uow, claim)
             run, task = owned["run"], owned["task"]
-            saved_frame = uow.agents.frame(frame.frame_id, lock=True)
+            saved_frame = uow.agent_conversations.frame(frame.frame_id, lock=True)
             require(
                 saved_frame["agent_run_id"] == run["agent_run_id"]
                 and saved_frame["state"] == "PENDING"
@@ -120,7 +120,7 @@ class AgentModelCoordinator:
                 "REVISION_CONFLICT",
                 "Model call frame is stale",
             )
-            budget = uow.agents.model_budget(run["agent_run_id"], lock=True)
+            budget = uow.agent_budgets.model_budget(run["agent_run_id"], lock=True)
             require(
                 budget["profile_id"] == profile["profile_id"]
                 and budget["profile_digest"] == profile["profile_digest"],
@@ -139,7 +139,7 @@ class AgentModelCoordinator:
                 "BUDGET_BLOCKED",
                 "Agent wall-clock budget is exhausted",
             )
-            existing = uow.agents.model_call_for_frame(frame.frame_id, attempt, lock=True)
+            existing = uow.agent_budgets.model_call_for_frame(frame.frame_id, attempt, lock=True)
             if existing is not None:
                 require(
                     existing["request_digest"] == request_digest
@@ -150,7 +150,7 @@ class AgentModelCoordinator:
                 )
                 return existing
             if attempt == 2:
-                original = uow.agents.model_call(repair_of, lock=True)
+                original = uow.agent_budgets.model_call(repair_of, lock=True)
                 require(
                     original["frame_id"] == frame.frame_id
                     and original["attempt"] == 1
@@ -193,13 +193,13 @@ class AgentModelCoordinator:
                 "first_byte_at": None,
                 "completed_at": None,
             }
-            uow.agents.reserve_model_call(call, estimate.as_record())
+            uow.agent_budgets.reserve_model_call(call, estimate.as_record())
             return call
 
     def mark_sending(self, claim: AgentLeaseClaim, model_call_id: str) -> Record:
         with self.store.transaction() as uow:
             self.agents._require_owned(uow, claim)
-            call = uow.agents.model_call(model_call_id, lock=True)
+            call = uow.agent_budgets.model_call(model_call_id, lock=True)
             require(
                 call["agent_run_id"] == claim.agent_run_id,
                 "INVALID_BINDING",
@@ -207,7 +207,7 @@ class AgentModelCoordinator:
                 422,
             )
             if call["status"] == "RESERVED":
-                uow.agents.update_model_call(
+                uow.agent_budgets.update_model_call(
                     model_call_id, status="SUBMITTING", sending_at=uow.now()
                 )
                 call = call | {"status": "SUBMITTING"}
@@ -220,7 +220,7 @@ class AgentModelCoordinator:
     ) -> Record:
         with self.store.transaction() as uow:
             self.agents._require_owned(uow, claim)
-            call = uow.agents.model_call(observation.model_call_id, lock=True)
+            call = uow.agent_budgets.model_call(observation.model_call_id, lock=True)
             require(
                 call["agent_run_id"] == claim.agent_run_id,
                 "INVALID_BINDING",
@@ -237,7 +237,7 @@ class AgentModelCoordinator:
             if observation.provider_revision < call["provider_revision"]:
                 return call
             now = uow.now()
-            inserted = uow.agents.add_model_observation(
+            inserted = uow.agent_budgets.add_model_observation(
                 {
                     "source_event_id": observation.source_event_id,
                     "model_call_id": observation.model_call_id,
@@ -252,7 +252,7 @@ class AgentModelCoordinator:
                 }
             )
             if not inserted:
-                return uow.agents.model_call(observation.model_call_id)
+                return uow.agent_budgets.model_call(observation.model_call_id)
             usage = (
                 ModelUsage.from_record(observation.usage).as_record()
                 if observation.usage is not None
@@ -281,8 +281,8 @@ class AgentModelCoordinator:
                 )
             if observation.status in {"COMPLETED", "REJECTED", "ERROR", "CANCELLED"}:
                 changes["completed_at"] = now
-            uow.agents.update_model_call(observation.model_call_id, **changes)
-            uow.agents.settle_model_reservation(
+            uow.agent_budgets.update_model_call(observation.model_call_id, **changes)
+            uow.agent_budgets.settle_model_reservation(
                 observation.model_call_id,
                 executed=observation.executed,
                 status=observation.status,
@@ -295,7 +295,7 @@ class AgentModelCoordinator:
                 "UNKNOWN",
                 "ERROR",
             } or (observation.status == "COMPLETED" and usage is None)
-            uow.agents.update_model_reconciliation(
+            uow.agent_budgets.update_model_reconciliation(
                 observation.model_call_id,
                 required=needs_reconciliation,
                 next_attempt_at=now + timedelta(seconds=1),
@@ -319,7 +319,7 @@ class AgentModelCoordinator:
         )
         with self.store.transaction() as uow:
             self.agents._require_owned(uow, claim)
-            call = uow.agents.model_call(model_call_id, lock=True)
+            call = uow.agent_budgets.model_call(model_call_id, lock=True)
             require(
                 call["agent_run_id"] == claim.agent_run_id
                 and call["status"] == "COMPLETED"
@@ -341,12 +341,12 @@ class AgentModelCoordinator:
                 if proposal is not None
                 else {"parse_errors": errors}
             )
-            uow.agents.update_model_call(model_call_id, **changes)
+            uow.agent_budgets.update_model_call(model_call_id, **changes)
             return call | changes
 
     def call_for_frame(self, frame_id: str) -> Record | None:
         with self.store.transaction() as uow:
-            return uow.agents.model_call_for_frame(frame_id)
+            return uow.agent_budgets.model_call_for_frame(frame_id)
 
     def block(self, claim: AgentLeaseClaim, frame: DecisionFrame, reason: str) -> None:
         require(
@@ -357,19 +357,19 @@ class AgentModelCoordinator:
         )
         with self.store.transaction() as uow:
             owned = self.agents._require_owned(uow, claim)
-            uow.agents.update_frame(frame.frame_id, state="STALE")
-            uow.agents.update_run(
+            uow.agent_conversations.update_frame(frame.frame_id, state="STALE")
+            uow.agent_runs.update_run(
                 claim.agent_run_id,
                 status="BLOCKED",
                 blocked_reason=reason,
                 updated_at=uow.now(),
             )
-            uow.agents.release_lease(claim.agent_run_id, claim.owner, claim.generation)
+            uow.agent_runs.release_lease(claim.agent_run_id, claim.owner, claim.generation)
             require(owned["task"].lifecycle == "OPEN", "REVISION_CONFLICT", "Task closed")
 
     def usage(self, actor: Identity, project_id: str, task_id: str) -> Record:
         with self.store.transaction() as uow:
             uow.access.authorize(actor, project_id, "VIEWER")
             uow.tasks.get(project_id, task_id)
-            run = uow.agents.run_by_task(task_id, required=True)
-            return uow.agents.model_usage(run["agent_run_id"])
+            run = uow.agent_runs.run_by_task(task_id, required=True)
+            return uow.agent_budgets.model_usage(run["agent_run_id"])

@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import hashlib
 import json
-import os
 import re
 from copy import deepcopy
 from pathlib import Path
@@ -47,6 +46,12 @@ MAX_CONTRACT_DEPTH = 16
 MAX_CONTRACT_ITEMS = 4096
 IDENTIFIER = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$")
 VERSION = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$")
+SOURCE_IMAGES = {
+    "OPERATOR": SHA256 + "1" * 64,
+    "QGIS": SHA256 + "2" * 64,
+    "SPATIAL_NATIVE": SHA256 + "3" * 64,
+    "TABULAR": SHA256 + "4" * 64,
+}
 
 
 def _digest(value: object) -> str:
@@ -54,10 +59,6 @@ def _digest(value: object) -> str:
         value, ensure_ascii=False, sort_keys=True, separators=(",", ":"), allow_nan=False
     ).encode()
     return SHA256 + hashlib.sha256(encoded).hexdigest()
-
-
-def _image(value: str | None, fallback: str) -> str:
-    return value or SHA256 + fallback * 64
 
 
 def _implementation(
@@ -111,18 +112,10 @@ def _operator(
 def build_catalog(images: dict | None = None) -> dict:
     """Build the ten-operator P7.2c source catalogue using immutable image IDs."""
 
-    images = dict(
-        images
-        or {
-            "OPERATOR": _image(os.environ.get("V7_OPERATOR_IMAGE"), "1"),
-            "QGIS": _image(os.environ.get("V7_SPATIAL_QGIS_IMAGE_ID"), "2"),
-            "SPATIAL_NATIVE": _image(os.environ.get("V7_SPATIAL_NATIVE_IMAGE_ID"), "3"),
-            "TABULAR": _image(os.environ.get("V7_TABULAR_OPERATOR_IMAGE"), "4"),
-        }
-    )
-    # Source-catalog compatibility callers from 0.10.x supplied the original
-    # three roles. Production generation still requires TABULAR in the script.
-    images.setdefault("TABULAR", _image(os.environ.get("V7_TABULAR_OPERATOR_IMAGE"), "4"))
+    images = dict(images or SOURCE_IMAGES)
+    # Source definitions are deterministic.  A deployment composition root
+    # supplies the image map when it builds or loads a production catalog.
+    images.setdefault("TABULAR", SOURCE_IMAGES["TABULAR"])
     analysis_parameters = {
         "type": "record",
         "name": "AnalysisParameters",
@@ -619,16 +612,6 @@ def write_catalog(path: str | Path, images: dict | None = None) -> dict:
     return value
 
 
-def configured_catalog() -> dict:
-    path = os.environ.get("V7_OPERATOR_CATALOG")
-    mode = os.environ.get("V7_DEPLOYMENT_MODE", "development")
-    if mode not in {"development", "production"}:
-        raise ValueError("V7_DEPLOYMENT_MODE must be development or production")
-    if mode == "production" and not path:
-        raise ValueError("Production requires V7_OPERATOR_CATALOG")
-    return load_catalog(path) if path else build_catalog()
-
-
 def _find(catalog: dict, operator_id: str, version_id: str) -> dict | None:
     return next(
         (
@@ -649,8 +632,8 @@ def public_operator(value: dict, *, implementations: list | None = None) -> dict
     return item
 
 
-def operators(catalog: dict | None = None, *, include_inactive: bool = False) -> list[dict]:
-    catalog = validate_catalog(catalog or configured_catalog())
+def operators(catalog: dict, *, include_inactive: bool = False) -> list[dict]:
+    catalog = validate_catalog(catalog)
     return [
         public_operator(item)
         for item in catalog["operators"]
@@ -669,8 +652,8 @@ def target(operator_value: dict) -> dict:
     }
 
 
-def resolve(value: dict, catalog: dict | None = None, *, admission: bool = True) -> dict:
-    catalog = validate_catalog(catalog or configured_catalog())
+def resolve(value: dict, catalog: dict, *, admission: bool = True) -> dict:
+    catalog = validate_catalog(catalog)
     found = _find(catalog, value.get("operator_id"), value.get("version_id"))
     require(found is not None, "UNSUPPORTED_TARGET", "Operator version is not registered", 422)
     if admission:
@@ -707,16 +690,16 @@ def resolve(value: dict, catalog: dict | None = None, *, admission: bool = True)
     return found
 
 
-def registered(value: dict, catalog: dict | None = None) -> None:
+def registered(value: dict, catalog: dict) -> None:
     resolve(value, catalog)
 
 
-def operator(value: dict, catalog: dict | None = None) -> dict:
+def operator(value: dict, catalog: dict) -> dict:
     return public_operator(resolve(value, catalog))
 
 
-def snapshot(value: dict, catalog: dict | None = None, *, admission: bool = True) -> dict:
-    catalog = validate_catalog(catalog or configured_catalog())
+def snapshot(value: dict, catalog: dict, *, admission: bool = True) -> dict:
+    catalog = validate_catalog(catalog)
     found = resolve(value, catalog, admission=admission)
     binding = value["execution_binding"]
     implementation = (
@@ -742,7 +725,7 @@ def snapshot(value: dict, catalog: dict | None = None, *, admission: bool = True
     }
 
 
-def ports(value: dict, catalog: dict | None = None):
+def ports(value: dict, catalog: dict):
     found = resolve(value, catalog)
     return found["inputs"] | {"parameters": found["parameters"]}, found["outputs"]
 

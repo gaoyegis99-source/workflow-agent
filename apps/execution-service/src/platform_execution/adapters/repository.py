@@ -327,6 +327,63 @@ class Repository:
                 == 1
             )
 
+    def claim_is_current(self, claim):
+        """Synchronously verify a claim before an external side effect."""
+
+        with self.db.engine.connect() as c:
+            return bool(
+                c.scalar(
+                    sa.select(sa.literal(True)).where(
+                        t.c.action_id == claim["action_id"],
+                        t.c.owner == claim["owner"],
+                        t.c.generation == claim["generation"],
+                        t.c.lease_until > sa.func.clock_timestamp(),
+                        t.c.state.not_in(TERMINAL),
+                    )
+                )
+            )
+
+    def transition(self, claim, *, source_phase, runtime, **changes):
+        """Persist one lifecycle transition under the claim and source-phase fence.
+
+        The current row is locked first, so a stale worker cannot turn an old
+        in-memory phase into a new durable phase after another generation has
+        recovered the same execution.
+        """
+
+        if "phase" in changes or "runtime" in changes:
+            raise ValueError("EXECUTION_TRANSITION_INVALID")
+        with self.db.engine.begin() as c:
+            row = (
+                c.execute(sa.select(t).where(t.c.action_id == claim["action_id"]).with_for_update())
+                .mappings()
+                .one()
+            )
+            now = c.scalar(sa.select(sa.func.clock_timestamp()))
+            if (
+                (row["owner"], row["generation"]) != (claim["owner"], claim["generation"])
+                or row["lease_until"] <= now
+                or row["runtime"].get("phase") != source_phase
+            ):
+                return False
+            changes["runtime"] = runtime
+            validate_change(row, changes)
+            ensure(
+                not row["executed"] or changes.get("executed", True),
+                "INVALID_BINDING",
+                "Execution fact cannot be retracted",
+            )
+            if changes.get("state") in TERMINAL:
+                changes["runtime"].pop("uncertain", None)
+                changes["runtime"].pop("failures", None)
+            if changes["runtime"].get("phase") == "PUBLISHING":
+                changes["work_class"] = "PUBLICATION_RECONCILE"
+            if any(changes.get(key, row[key]) != row[key] for key in ("state", "executed")):
+                changes["revision"] = row["revision"] + 1
+            c.execute(t.update().where(t.c.action_id == claim["action_id"]).values(**changes))
+            claim.update(changes)
+            return True
+
     def change(self, claim, **changes):
         with self.db.engine.begin() as c:
             row = (
@@ -339,6 +396,13 @@ class Repository:
                 "lease_until"
             ] <= now:
                 return False
+            runtime = changes.get("runtime")
+            if (
+                "state" in changes
+                or "executed" in changes
+                or (runtime is not None and runtime.get("phase") != row["runtime"].get("phase"))
+            ):
+                raise ValueError("EXECUTION_TRANSITION_REQUIRED")
             if not changes:
                 return True
             validate_change(row, changes)
@@ -385,15 +449,18 @@ class Repository:
 
     @staticmethod
     def view(row):
-        from platform_contracts.engine_runtime import diagnostic, profile
+        from platform_contracts.engine_runtime import diagnostic
 
         runtime = dict(row["runtime"])
         frozen_profile = runtime.pop("_engine_runtime_profile", None)
-        legacy = runtime.pop("_engine_profile_legacy_unlabeled", False) or frozen_profile is None
         if row["payload"].get("kind") == "WORKFLOW":
-            runtime["engine_profile"] = diagnostic(frozen_profile or profile())
-            if legacy:
-                runtime["engine_profile"]["compatibility"] = "0.3.7-unlabeled"
+            ensure(
+                frozen_profile is not None,
+                "INVALID_BINDING",
+                "Workflow engine profile is missing",
+                422,
+            )
+            runtime["engine_profile"] = diagnostic(frozen_profile)
         request = dict(row["payload"])
         request.pop("_remote_binding", None)
         request.pop("_remote_bindings", None)

@@ -21,7 +21,7 @@ def dependency_fact(uow, run: Record, dependency: Record) -> Record:
         link = next(
             (
                 value
-                for value in uow.agents.action_links(run["agent_run_id"])
+                for value in uow.agent_tools.action_links(run["agent_run_id"])
                 if value["operation"] in {"SUBMIT_OPERATOR", "SUBMIT_WORKFLOW"}
                 and object_id
                 in {
@@ -48,7 +48,7 @@ def dependency_fact(uow, run: Record, dependency: Record) -> Record:
         link = next(
             (
                 value
-                for value in uow.agents.action_links(run["agent_run_id"])
+                for value in uow.agent_tools.action_links(run["agent_run_id"])
                 if value["operation"] == "REQUEST_ACCEPTANCE" and value["business_id"] == object_id
             ),
             None,
@@ -84,7 +84,7 @@ def dependency_fact(uow, run: Record, dependency: Record) -> Record:
             "unknown": False,
         }
     if owner == "MODEL":
-        call = uow.agents.model_call(object_id, lock=False)
+        call = uow.agent_budgets.model_call(object_id, lock=False)
         require(
             call["agent_run_id"] == run["agent_run_id"],
             "INVALID_BINDING",
@@ -106,7 +106,7 @@ def dependency_fact(uow, run: Record, dependency: Record) -> Record:
     watermark = next(
         (
             value
-            for value in uow.agents.watermarks(run["agent_run_id"])
+            for value in uow.agent_recovery.watermarks(run["agent_run_id"])
             if value["source"] == owner and value["stream_id"] == object_id
         ),
         None,
@@ -152,7 +152,7 @@ def persist_wait_dependencies(
         )
         fact = dependency_fact(uow, run, value)
         state = "SATISFIED" if fact["satisfied"] else ("UNKNOWN" if fact["unknown"] else "WAITING")
-        uow.agents.add_wait_dependency(
+        uow.agent_recovery.add_wait_dependency(
             {
                 "dependency_id": uow.new_id(),
                 "agent_run_id": run["agent_run_id"],
@@ -168,9 +168,9 @@ def persist_wait_dependencies(
                 "updated_at": now,
             }
         )
-    active = uow.agents.wait_dependencies(run["agent_run_id"], active_only=True)
+    active = uow.agent_recovery.wait_dependencies(run["agent_run_id"], active_only=True)
     if active:
-        uow.agents.schedule_reconciliation(run["agent_run_id"], now + timedelta(seconds=5))
+        uow.agent_recovery.schedule_reconciliation(run["agent_run_id"], now + timedelta(seconds=5))
         return False
     return True
 
@@ -180,7 +180,7 @@ def wake_run(uow, run: Record, event_ids: list[str], reason: str = "DEPENDENCY")
         return
     now = uow.now()
     revision = run["wake_revision"] + 1
-    uow.agents.add_wakeup(
+    uow.agent_conversations.add_wakeup(
         {
             "wake_id": uow.new_id(),
             "agent_run_id": run["agent_run_id"],
@@ -192,10 +192,10 @@ def wake_run(uow, run: Record, event_ids: list[str], reason: str = "DEPENDENCY")
             "consumed_at": None,
         }
     )
-    uow.agents.stale_pending_frames(run["agent_run_id"])
-    uow.agents.revoke_lease(run["agent_run_id"])
-    uow.agents.clear_reconciliation(run["agent_run_id"])
-    uow.agents.update_run(
+    uow.agent_conversations.stale_pending_frames(run["agent_run_id"])
+    uow.agent_runs.revoke_lease(run["agent_run_id"])
+    uow.agent_recovery.clear_reconciliation(run["agent_run_id"])
+    uow.agent_runs.update_run(
         run["agent_run_id"],
         status="READY",
         generation=run["generation"] + 1,
@@ -215,15 +215,15 @@ class AgentWaitReconciler:
 
     def process(self) -> bool:
         with self.store.transaction() as uow:
-            due = uow.agents.due_reconciliations()
+            due = uow.agent_recovery.due_reconciliations()
         changed = False
         for timer in due:
             with self.store.transaction() as uow:
-                run = uow.agents.run_by_id(timer["agent_run_id"], lock=True)
+                run = uow.agent_runs.run_by_id(timer["agent_run_id"], lock=True)
                 if run["status"] != "WAITING":
-                    uow.agents.clear_reconciliation(run["agent_run_id"])
+                    uow.agent_recovery.clear_reconciliation(run["agent_run_id"])
                     continue
-                dependencies = uow.agents.wait_dependencies(
+                dependencies = uow.agent_recovery.wait_dependencies(
                     run["agent_run_id"], active_only=True, lock=True
                 )
                 event_ids = []
@@ -236,7 +236,7 @@ class AgentWaitReconciler:
                     )
                     digest = canonical_digest(fact)
                     if state != dependency["state"] or digest != dependency["state_digest"]:
-                        uow.agents.update_wait_dependency(
+                        uow.agent_recovery.update_wait_dependency(
                             dependency["dependency_id"],
                             observed_revision=fact["revision"],
                             state=state,
@@ -244,11 +244,11 @@ class AgentWaitReconciler:
                             updated_at=uow.now(),
                         )
                         event_ids.append(dependency["dependency_id"])
-                if not uow.agents.wait_dependencies(run["agent_run_id"], active_only=True):
+                if not uow.agent_recovery.wait_dependencies(run["agent_run_id"], active_only=True):
                     wake_run(uow, run, event_ids or [run["agent_run_id"]])
                     changed = True
                 else:
-                    uow.agents.schedule_reconciliation(
+                    uow.agent_recovery.schedule_reconciliation(
                         run["agent_run_id"], uow.now() + timedelta(seconds=5)
                     )
         return changed

@@ -1,49 +1,37 @@
 # V7 项目生命周期与工作树边界
 
-V7 是独立维护的 P8 企业平台工作树。`apps/`、`packages/`、`runtimes/`、`deploy/`、
-`scripts/`、`tests/`、`benchmarks/`、`evaluations/`、`examples/`、`experiments/`、锁文件和
-`docs/`（包括 `docs/verification/`）属于可审查 Git 基线。`experiments/p1/` 与
-`runtimes/cwl/` 是当前验收入口的依赖，不能按历史材料清理。卫生检查同时要求 P1、P4、P5、P7
-入口脚本、P1 源码和 CWL 运行时声明仍为项目内普通文件。
+V7 是独立维护的企业平台工作树。`apps/`、`packages/`、`runtimes/`、`deploy/`、
+`scripts/`、`tests/`、当前文档和锁文件属于可审查 Git 基线。`experiments/p1/` 与
+`runtimes/cwl/` 仍是现行验收入口的依赖。
 
-`.p8-runtime/` 是本机 P8 发布、实例、冷备与运行日志根目录，不进入 Git。`.venv/`、任何嵌套
-`.venv/`、缓存、浏览器产物、密钥配置和生成物同样不进入 Git，均可由锁文件或发布流程重建。
+以下内容不属于源码基线或检索上下文：
 
-当前活动发布只能通过
-[`docs/verification/p82-current-release.json`](../verification/p82-current-release.json) 识别；不得根据
-目录名称推断。当前指针声明的实例和发布目录不得移动或删除。
+- 历史验证报告、Release Lock、发布指针和迁移快照；
+- 候选发布包、生成的前端 bundle 与测试报告；
+- `.venv/`、依赖缓存、浏览器产物和任何密钥配置；
+- `runtime/` 下的本地工具链、构建输出、实例状态和 Docker 数据。
 
-运行态归档保存在工作区外层的 `maintenance/v7-runtime-archive/<日期>/`。归档先生成清单和哈希，
-复制后重新校验，且必须有独立恢复演练证据。归档工具只处理停止实例的可读元数据、发布物、备份清单和
-日志；它不复制 Docker 卷、密钥或活动实例。没有通过恢复预检的候选必须保留原位。
+这些路径由 `.gitignore` 和 `.ignore` 双重排除。需要长期保存的验收与审计结果必须上传到
+外部制品系统，并通过运行号或提交身份关联，不能回写源码目录。
 
-执行以下命令验证 Git 基线边界：
+## 运行态
+
+`runtime/p8/` 只存放本机 Direct Compose 状态。当前没有已配置实例。创建实例时必须使用
+`bin/configure-p8` 提供明确 artifact、不可变镜像身份和绑定地址；禁止扫描“最新”目录、
+复用旧清单或把候选制品当成当前部署输入。
+
+退役实例只能经 `bin/ops runtime retire-p8` 完成盘点、外部冷备、恢复演练、密钥托管确认、
+隔离校验和显式清除。该流程不使用宿主 Docker、不做全局 prune，也不会自动创建替代实例。
+
+## 门禁
+
+在项目根运行：
 
 ```bash
-uv run --locked python scripts/check_project_hygiene.py
-uv run --locked python scripts/check_workspace_dependencies.py
+runtime/toolchain/v7/bin/python source/scripts/maintenance/check_project_hygiene.py
+runtime/toolchain/v7/bin/python source/scripts/maintenance/check_workspace_dependencies.py
+runtime/toolchain/v7/bin/python source/scripts/maintenance/check_internal_layout.py --scope source
 ```
 
-运行态归档工具分为三个阶段，默认不修改任何文件：
-
-```bash
-uv run --locked python scripts/archive_p8_runtime.py plan
-uv run --locked python scripts/archive_p8_runtime.py preflight \
-  --rollback-instance <stopped-instance> \
-  --rollback-release <verified-release> \
-  --cold-backup backups/<cold-backup> \
-  --restore-evidence /absolute/path/to/restore-evidence.json
-uv run --locked python scripts/archive_p8_runtime.py archive --execute \
-  --rollback-instance <stopped-instance> \
-  --rollback-release <verified-release> \
-  --cold-backup backups/<cold-backup> \
-  --restore-evidence /absolute/path/to/restore-evidence.json
-uv run --locked python scripts/archive_p8_runtime.py purge --execute \
-  --archive-root ../maintenance/v7-runtime-archive/<日期>
-```
-
-恢复证据必须是独立生成的 JSON，且包含 schema
-`v7-runtime-restore-evidence.v1`、`status: PASSED`、选定的实例与发布名称。归档仅复制过期
-发布物、运行日志、指定冷备和已脱敏的实例元数据；源目录不会被自动删除。独立的 `purge` 会重新
-校验归档和源端哈希，且只会删除旧发布目录和运行日志。它拒绝删除所有实例目录、冷备、Docker 卷、
-密钥，以及活动或回滚发布；实例退役仍须遵循独立的 P8 运维流程。
+这些检查拒绝被跟踪的缓存、历史/候选材料、兄弟项目依赖、宿主 Docker socket、共享可写资源和
+越界软链接。

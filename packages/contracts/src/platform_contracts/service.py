@@ -3,7 +3,8 @@
 import hashlib
 import hmac
 import json
-import os
+
+from .runtime_context import DeploymentContext
 
 
 class ServiceFault(Exception):
@@ -35,71 +36,50 @@ def authenticate(header, credentials, allowed):
     raise ServiceFault("AUTHENTICATION_REQUIRED", "Valid service authentication required", 401)
 
 
-RELEASE_HEADER = b"x-v7-release-digest"
-LEGACY_WORKFLOW_BRIDGE_PREFIX = "/internal/workflows/"
+DEPLOYMENT_HEADER = b"x-v7-deployment-id"
+DEPLOYMENT_REVISION_HEADER = b"x-v7-deployment-revision"
 
 
-def release_headers(headers=None):
-    """Attach the pinned release identity to a local service request."""
+def deployment_headers(headers=None, *, deployment: DeploymentContext):
+    """Attach a non-authorizing direct-deployment identity to a request."""
 
+    if not isinstance(deployment, DeploymentContext):
+        raise TypeError("deployment must be an explicit DeploymentContext")
     result = dict(headers or {})
-    value = os.environ.get("V7_RELEASE_DIGEST")
-    if value:
-        result["X-V7-Release-Digest"] = value
+    if deployment.deployment_id:
+        result["X-V7-Deployment-ID"] = deployment.deployment_id
+    if deployment.deployment_revision:
+        result["X-V7-Deployment-Revision"] = deployment.deployment_revision
     return result
 
 
-class ReleaseIdentityMiddleware:
-    """Reject mixed production releases on authenticated internal routes.
+class DeploymentIdentityMiddleware:
+    """Expose the configured deployment identity without creating a gate.
 
-    This is deliberately a small ASGI middleware so the contracts package
-    keeps its standard-library-only transport boundary.
+    Direct Compose deployments intentionally do not use an imported lock as a
+    startup or request authorization condition.  Internal service credentials
+    remain the authorization boundary; these response headers are tracing
+    metadata only.
     """
 
-    def __init__(self, app):
+    def __init__(self, app, deployment: DeploymentContext):
+        if not isinstance(deployment, DeploymentContext):
+            raise TypeError("deployment must be an explicit DeploymentContext")
         self.app = app
+        self.deployment = deployment
 
     async def __call__(self, scope, receive, send):
-        expected = os.environ.get("V7_RELEASE_DIGEST")
-        production = os.environ.get("V7_DEPLOYMENT_MODE", "development") == "production"
-        path = scope.get("path", "")
-        if scope.get("type") == "http" and production and path.startswith("/internal/"):
-            headers = {key.lower(): value for key, value in scope.get("headers", [])}
-            supplied = headers.get(RELEASE_HEADER, b"").decode("ascii", "ignore")
-            # N-1 Toil leaders are intentionally resumed with their immutable
-            # original image.  The 0.15.0 bridge predates this transport
-            # header, so an absent value is accepted only on its dedicated
-            # workflow route.  That endpoint still requires the per-workflow
-            # high-entropy token and exact epoch/Action identity.  A supplied
-            # but wrong digest is always rejected, including on this route.
-            legacy_bridge = path.startswith(LEGACY_WORKFLOW_BRIDGE_PREFIX) and not supplied
-            if not expected or (not legacy_bridge and not hmac.compare_digest(supplied, expected)):
-                body = json.dumps(
-                    {
-                        "code": "RELEASE_MISMATCH",
-                        "message": "Internal service release identity differs",
-                    },
-                    separators=(",", ":"),
-                ).encode()
-                await send(
-                    {
-                        "type": "http.response.start",
-                        "status": 503,
-                        "headers": [
-                            (b"content-type", b"application/json"),
-                            (b"content-length", str(len(body)).encode()),
-                        ],
-                    }
-                )
-                await send({"type": "http.response.body", "body": body})
-                return
-
         async def identified(message):
-            if message.get("type") == "http.response.start" and expected:
+            if message.get("type") == "http.response.start":
                 message = dict(message)
-                message["headers"] = list(message.get("headers", [])) + [
-                    (b"x-v7-release-digest", expected.encode())
-                ]
+                headers = list(message.get("headers", []))
+                if self.deployment.deployment_id:
+                    headers.append((DEPLOYMENT_HEADER, self.deployment.deployment_id.encode()))
+                if self.deployment.deployment_revision:
+                    headers.append(
+                        (DEPLOYMENT_REVISION_HEADER, self.deployment.deployment_revision.encode())
+                    )
+                message["headers"] = headers
             await send(message)
 
         await self.app(scope, receive, identified)

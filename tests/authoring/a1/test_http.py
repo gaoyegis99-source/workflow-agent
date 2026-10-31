@@ -3,8 +3,11 @@ from datetime import UTC, datetime, timedelta
 
 from fastapi.testclient import TestClient
 from platform_api.app import create_app
+from platform_api.composition import PlatformComposition
 from platform_core.application.control import ControlService
 from platform_infrastructure import tables
+
+from scripts.lib.runtime_layout import WORK_ROOT
 
 
 def test_authoring_http_and_openapi(database, owner):
@@ -75,7 +78,8 @@ def test_authoring_http_and_openapi(database, owner):
 
 
 def test_unified_platform_is_same_origin_and_legacy_routes_are_removed(database):
-    with TestClient(create_app(database)) as client:
+    composition = PlatformComposition.for_test(studio_root=WORK_ROOT / "capability-studio")
+    with TestClient(create_app(database, composition=composition)) as client:
         platform = client.get("/")
         assert platform.status_code == 200
         assert "Groundwater V7" in platform.text

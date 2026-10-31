@@ -3,9 +3,9 @@ import sys
 import httpx
 import pytest
 
-from tests.p2.conftest import database, owner, postgres  # noqa: F401
-from tests.p2.processes import Processes, eventually
-from tests.p3.harness import free_port
+from tests.platform.database.conftest import database, owner, postgres  # noqa: F401
+from tests.platform.database.processes import Processes, eventually
+from tests.platform.services.harness import free_port
 
 
 @pytest.fixture

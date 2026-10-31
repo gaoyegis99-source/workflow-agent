@@ -1,7 +1,10 @@
+from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 
 from fastapi.testclient import TestClient
 from platform_api.app import create_app
+from platform_api.composition import PlatformComposition
+from platform_core.application.catalog import build_catalog
 from platform_core.application.control import ControlService
 from platform_core.application.workflows import PackageProcessor
 
@@ -9,12 +12,12 @@ from tests.authoring.a2.helpers import profile_source
 from tests.authoring.a3.test_candidate import Data, Validator, frozen_definition
 
 
-def test_candidate_trial_and_release_routes_are_exact(database, owner, monkeypatch):
+def test_candidate_trial_and_release_routes_are_exact(database, owner):
     actor, token = owner
     values = frozen_definition(database, owner)
     _, project, definition, revision, validation, *_ = values
-    monkeypatch.setenv("V7_CWL_IMAGE", Validator.image_id)
-    with TestClient(create_app(database)) as client:
+    composition = replace(PlatformComposition.for_test(), cwl_image=Validator.image_id)
+    with TestClient(create_app(database, composition=composition)) as client:
         prefix = f"/api/v1/projects/{project}/workflow-definitions/{definition}"
         headers = {
             "Authorization": "Bearer " + token,
@@ -31,7 +34,12 @@ def test_candidate_trial_and_release_routes_are_exact(database, owner, monkeypat
         )
         assert response.status_code == 202, response.text
         candidate_id = response.json()["candidate_id"]
-        assert PackageProcessor(database, Validator(), owner="http-package").process_one()
+        assert PackageProcessor(
+            database,
+            Validator(),
+            operator_catalog=build_catalog(),
+            owner="http-package",
+        ).process_one()
         view = client.get(
             prefix + "/candidates/" + candidate_id,
             headers={"Authorization": "Bearer " + token},

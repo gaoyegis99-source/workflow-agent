@@ -67,16 +67,16 @@ class ActionToolGateway:
 
     def execute_proposal(self, proposal_id: str) -> list[Record]:
         with self.store.transaction() as uow:
-            proposal = uow.agents.proposal_by_id(proposal_id)
+            proposal = uow.agent_conversations.proposal_by_id(proposal_id)
             require(
                 proposal["kind"] == "ACTION_REQUESTS",
                 "INVALID_BINDING",
                 "Proposal does not contain action tool requests",
                 422,
             )
-            run = uow.agents.run_by_id(proposal["agent_run_id"], lock=True)
+            run = uow.agent_runs.run_by_id(proposal["agent_run_id"], lock=True)
             task = uow.tasks.get(run["project_id"], run["task_id"], lock=True)
-            frame = uow.agents.frame(proposal["frame_id"])
+            frame = uow.agent_conversations.frame(proposal["frame_id"])
             uow.access.authorize_principal(run["created_by"], run["project_id"], "EDITOR")
             require(
                 task.lifecycle == "OPEN"
@@ -94,7 +94,7 @@ class ActionToolGateway:
                 "Action proposal requires one to eight requests",
                 422,
             )
-            call = uow.agents.model_call_for_frame(proposal["frame_id"])
+            call = uow.agent_budgets.model_call_for_frame(proposal["frame_id"])
             records = [
                 self._reserve(
                     uow,
@@ -148,7 +148,7 @@ class ActionToolGateway:
         }
         request_digest = canonical_digest(frozen)
         identity = _request_id(run["agent_run_id"], proposal["frame_id"], index, request_digest)
-        existing = uow.agents.tool_request_for_proposal(proposal["proposal_id"], index)
+        existing = uow.agent_tools.tool_request_for_proposal(proposal["proposal_id"], index)
         if existing is not None:
             require(
                 existing["tool_request_id"] == identity
@@ -159,7 +159,7 @@ class ActionToolGateway:
             )
             return existing
         branch_key = canonical_digest({"tool_id": value["tool_id"], "arguments": arguments})
-        attempts = uow.agents.delivery_attempts(run["agent_run_id"], branch_key, lock=True)
+        attempts = uow.agent_tools.delivery_attempts(run["agent_run_id"], branch_key, lock=True)
         if attempts:
             last = attempts[-1]
             require(
@@ -179,7 +179,7 @@ class ActionToolGateway:
                 "Autonomous repair branch reached its fixed retry limit",
             )
         now = uow.now()
-        saved = uow.agents.add_tool_request(
+        saved = uow.agent_tools.add_tool_request(
             {
                 "tool_request_id": identity,
                 "agent_run_id": run["agent_run_id"],
@@ -198,7 +198,7 @@ class ActionToolGateway:
                 "updated_at": now,
             }
         )
-        uow.agents.add_delivery_attempt(
+        uow.agent_tools.add_delivery_attempt(
             {
                 "attempt_id": uow.new_id(),
                 "agent_run_id": run["agent_run_id"],
@@ -219,13 +219,13 @@ class ActionToolGateway:
 
     def _execute(self, tool_request_id: str) -> Record:
         with self.store.transaction() as uow:
-            request = uow.agents.tool_request(tool_request_id, lock=True)
-            existing = uow.agents.tool_observation(tool_request_id)
+            request = uow.agent_tools.tool_request(tool_request_id, lock=True)
+            existing = uow.agent_tools.tool_observation(tool_request_id)
             if existing is not None:
                 return existing
-            run = uow.agents.run_by_id(request["agent_run_id"], lock=True)
+            run = uow.agent_runs.run_by_id(request["agent_run_id"], lock=True)
             task = uow.tasks.get(run["project_id"], run["task_id"], lock=True)
-            frame = uow.agents.frame(request["frame_id"])
+            frame = uow.agent_conversations.frame(request["frame_id"])
             uow.access.authorize_principal(run["created_by"], run["project_id"], "EDITOR")
             require(
                 task.lifecycle == "OPEN"
@@ -246,7 +246,9 @@ class ActionToolGateway:
                 "frame_id": request["frame_id"],
                 "tool_version": request["tool_version"],
             }
-            uow.agents.update_tool_request(tool_request_id, status="RUNNING", updated_at=uow.now())
+            uow.agent_tools.update_tool_request(
+                tool_request_id, status="RUNNING", updated_at=uow.now()
+            )
 
         result = None
         status, error_category = "SUCCEEDED", None
@@ -265,15 +267,15 @@ class ActionToolGateway:
         result_digest = canonical_digest({"status": status, "result": value, "refs": refs})
         observation_id = _observation_id(tool_request_id)
         with self.store.transaction() as uow:
-            request = uow.agents.tool_request(tool_request_id, lock=True)
-            existing = uow.agents.tool_observation(tool_request_id)
+            request = uow.agent_tools.tool_request(tool_request_id, lock=True)
+            existing = uow.agent_tools.tool_observation(tool_request_id)
             if existing is not None:
                 return existing
-            run = uow.agents.run_by_id(request["agent_run_id"], lock=True)
+            run = uow.agent_runs.run_by_id(request["agent_run_id"], lock=True)
             now = uow.now()
-            attempt = uow.agents.delivery_attempt_for_request(tool_request_id, lock=True)
+            attempt = uow.agent_tools.delivery_attempt_for_request(tool_request_id, lock=True)
             if result is not None:
-                uow.agents.add_action_link(
+                uow.agent_tools.add_action_link(
                     {
                         "link_id": "al" + hashlib.sha256(tool_request_id.encode()).hexdigest()[:62],
                         "tool_request_id": tool_request_id,
@@ -287,7 +289,7 @@ class ActionToolGateway:
                         "created_at": now,
                     }
                 )
-            saved = uow.agents.add_tool_observation(
+            saved = uow.agent_tools.add_tool_observation(
                 {
                     "observation_id": observation_id,
                     "tool_request_id": tool_request_id,
@@ -300,7 +302,7 @@ class ActionToolGateway:
                     "observed_at": now,
                 }
             )
-            uow.agents.update_tool_request(
+            uow.agent_tools.update_tool_request(
                 tool_request_id,
                 status="COMPLETED" if status == "SUCCEEDED" else "FAILED",
                 updated_at=now,
@@ -312,7 +314,9 @@ class ActionToolGateway:
                     if status == "SUCCEEDED"
                     else ("UNKNOWN" if status == "TEMPORARILY_UNAVAILABLE" else "FAILED")
                 )
-                prior = uow.agents.delivery_attempts(run["agent_run_id"], attempt["branch_key"])
+                prior = uow.agent_tools.delivery_attempts(
+                    run["agent_run_id"], attempt["branch_key"]
+                )
                 repeated = sum(
                     value["outcome"] == "FAILED" and value["failure_category"] == error_category
                     for value in prior
@@ -321,7 +325,7 @@ class ActionToolGateway:
                 stop_reason = (
                     "REPEATED_FAILURE_LIMIT" if outcome == "FAILED" and repeated >= 1 else None
                 )
-                uow.agents.finish_delivery_attempt(
+                uow.agent_tools.finish_delivery_attempt(
                     attempt["attempt_id"],
                     outcome="STOPPED" if stop_reason else outcome,
                     failure_category=error_category,
@@ -329,7 +333,7 @@ class ActionToolGateway:
                     finished_at=now,
                 )
                 if stop_reason and run["status"] not in {"STOPPED", "BLOCKED"}:
-                    uow.agents.update_run(
+                    uow.agent_runs.update_run(
                         run["agent_run_id"],
                         status="BLOCKED",
                         blocked_reason=stop_reason,
@@ -347,7 +351,7 @@ class ActionToolGateway:
                     "result_digest": result_digest,
                 },
             }
-            accepted = uow.agents.register_event(
+            accepted = uow.agent_conversations.register_event(
                 event
                 | {
                     "agent_run_id": run["agent_run_id"],
@@ -357,7 +361,7 @@ class ActionToolGateway:
             )
             if accepted and stop_reason is None:
                 revision = run["wake_revision"] + 1
-                uow.agents.add_wakeup(
+                uow.agent_conversations.add_wakeup(
                     {
                         "wake_id": uow.new_id(),
                         "agent_run_id": run["agent_run_id"],
@@ -370,7 +374,7 @@ class ActionToolGateway:
                     }
                 )
                 if run["status"] not in {"STOPPED", "BLOCKED", "QUESTION"}:
-                    uow.agents.update_run(
+                    uow.agent_runs.update_run(
                         run["agent_run_id"],
                         status="READY",
                         wake_revision=revision,

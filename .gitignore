@@ -6,6 +6,12 @@ __pycache__/
 *.egg-info/
 dist/
 build/
+# Maintained command sources, not generated build output.
+!scripts/build/
+!scripts/build/**
+# The source exception above must not re-include generated Python bytecode.
+__pycache__/
+*.py[cod]
 .env
 .env.*
 !.env.example
@@ -14,6 +20,14 @@ build/
 node_modules/
 test-results/
 playwright-report/
+/archive/
+/docs/verification/
+/evidence/
+/apps/platform-api/src/platform_api/studio_static/
 .p1-runtime/
 .p2-runtime/
 .p3-runtime/
+.p4-runtime/
+.p5-runtime/
+.p6-runtime/
+.p7-runtime/

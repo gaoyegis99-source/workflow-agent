@@ -1,24 +1,36 @@
-"""Closed compatibility catalogue for exact published output identities."""
+"""Exact published output identities derived from immutable manifests."""
 
 from platform_core.application.control import digest
 from platform_core.domain.control import require
 
-_SCHEMAS = {
-    ("timeseries-completeness", "1.0.0", "result"): "p3-result-v1",
-    ("statistics-linear-trend", "1.0.0", "result"): "p3-result-v1",
-    ("timeseries-completeness", "1.0.0", "table"): "p3-table-v1",
-    ("statistics-linear-trend", "1.0.0", "table"): "p3-table-v1",
-    ("timeseries-completeness", "1.0.0", "method"): "p3-method-v1",
-    ("statistics-linear-trend", "1.0.0", "method"): "p3-method-v1",
-    ("qgis-buffer", "1.0.0", "vector"): "spatial-vector-v1",
-    ("qgis-buffer", "1.0.0", "manifest"): "spatial-manifest-v1",
-    ("qgis-buffer", "1.0.0", "method"): "spatial-method-v1",
-    ("spatial-vector-summary", "1.0.0", "summary"): "spatial-summary-v1",
-    ("spatial-vector-summary", "1.0.0", "method"): "spatial-method-v1",
-    ("qgis-static-map", "1.0.0", "image"): "cartographic-png-v1",
-    ("qgis-static-map", "1.0.0", "manifest"): "cartographic-manifest-v1",
-    ("qgis-static-map", "1.0.0", "method"): "cartographic-method-v1",
-}
+
+def exact_output_requirements(spec):
+    """Return the exact role contract for every executable acceptance profile.
+
+    ``p3-timeseries-v1`` predates explicit role declarations, but its closed
+    template already freezes the complete output identity.  Deriving the role
+    contract here keeps P3 executable without accepting legacy execution-only
+    deliverables or inventing identities from a compatibility catalogue.
+    """
+
+    if spec.get("profile") == "open-science-v1":
+        return list(spec.get("required_outputs", []))
+    if spec.get("profile") == "p3-timeseries-v1":
+        return [
+            {
+                "role_id": operator_id,
+                "necessary": True,
+                "expected": {
+                    "result_kind": "OPERATOR_RESULT",
+                    "operator_id": operator_id,
+                    "operator_version": "1.0.0",
+                    "output_port": "result",
+                    "schema_id": "p3-result-v1",
+                },
+            }
+            for operator_id in spec.get("required_outputs", [])
+        ]
+    return []
 
 
 def output_facts(manifest, representation_id):
@@ -33,13 +45,12 @@ def output_facts(manifest, representation_id):
         None,
     )
     require(representation is not None, "INVALID_BINDING", "Output representation is absent")
-    key = (target.get("operator_id"), target.get("version_id"), representation_id)
     schema_id = representation.get("schema_id")
-    schema_source = "MANIFEST"
-    if schema_id is None:
-        schema_id = _SCHEMAS.get(key)
-        schema_source = "COMPATIBILITY_CATALOG"
-    require(schema_id is not None, "INVALID_BINDING", "Output schema is not trusted")
+    require(
+        isinstance(schema_id, str) and bool(schema_id),
+        "INVALID_BINDING",
+        "Output schema must be declared by the immutable manifest",
+    )
     result_kind = manifest.get("result_kind", manifest.get("kind"))
     require(
         result_kind
@@ -49,11 +60,11 @@ def output_facts(manifest, representation_id):
     )
     return {
         "result_kind": result_kind,
-        "operator_id": key[0],
-        "operator_version": key[1],
+        "operator_id": target.get("operator_id"),
+        "operator_version": target.get("version_id"),
         "output_port": representation_id,
         "schema_id": schema_id,
-        "schema_source": schema_source,
+        "schema_source": "MANIFEST",
         "representation": representation,
     }
 

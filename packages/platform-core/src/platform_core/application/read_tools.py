@@ -55,16 +55,16 @@ class ReadToolGateway:
     def execute_proposal(self, proposal_id: str) -> list[Record]:
         with self.store.transaction() as uow:
             # Proposal IDs are global immutable identities.
-            proposal = uow.agents.proposal_by_id(proposal_id)
+            proposal = uow.agent_conversations.proposal_by_id(proposal_id)
             require(
                 proposal["kind"] == "READ_TOOL_REQUESTS",
                 "INVALID_BINDING",
                 "Proposal does not contain read tool requests",
                 422,
             )
-            run = uow.agents.run_by_id(proposal["agent_run_id"], lock=True)
+            run = uow.agent_runs.run_by_id(proposal["agent_run_id"], lock=True)
             task = uow.tasks.get(run["project_id"], run["task_id"], lock=True)
-            frame = uow.agents.frame(proposal["frame_id"])
+            frame = uow.agent_conversations.frame(proposal["frame_id"])
             uow.access.authorize_principal(run["created_by"], run["project_id"], "VIEWER")
             require(
                 task.lifecycle == "OPEN"
@@ -82,7 +82,7 @@ class ReadToolGateway:
                 "Read proposal requires one to 32 requests",
                 422,
             )
-            call = uow.agents.model_call_for_frame(proposal["frame_id"])
+            call = uow.agent_budgets.model_call_for_frame(proposal["frame_id"])
             records = []
             for index, value in enumerate(requests):
                 records.append(
@@ -135,7 +135,7 @@ class ReadToolGateway:
         request_digest = canonical_digest(frozen)
         identity = _request_id(run["agent_run_id"], proposal["frame_id"], index, request_digest)
         now = uow.now()
-        return uow.agents.add_tool_request(
+        return uow.agent_tools.add_tool_request(
             {
                 "tool_request_id": identity,
                 "agent_run_id": run["agent_run_id"],
@@ -157,13 +157,13 @@ class ReadToolGateway:
 
     def _execute(self, tool_request_id: str) -> Record:
         with self.store.transaction() as uow:
-            request = uow.agents.tool_request(tool_request_id, lock=True)
-            existing = uow.agents.tool_observation(tool_request_id)
+            request = uow.agent_tools.tool_request(tool_request_id, lock=True)
+            existing = uow.agent_tools.tool_observation(tool_request_id)
             if existing is not None:
                 return existing
-            run = uow.agents.run_by_id(request["agent_run_id"], lock=True)
+            run = uow.agent_runs.run_by_id(request["agent_run_id"], lock=True)
             task = uow.tasks.get(run["project_id"], run["task_id"], lock=True)
-            frame = uow.agents.frame(request["frame_id"])
+            frame = uow.agent_conversations.frame(request["frame_id"])
             uow.access.authorize_principal(run["created_by"], run["project_id"], "VIEWER")
             require(
                 task.lifecycle == "OPEN"
@@ -181,7 +181,9 @@ class ReadToolGateway:
                 "principal_id": run["created_by"],
                 "agent_run_id": run["agent_run_id"],
             }
-            uow.agents.update_tool_request(tool_request_id, status="RUNNING", updated_at=uow.now())
+            uow.agent_tools.update_tool_request(
+                tool_request_id, status="RUNNING", updated_at=uow.now()
+            )
 
         status, error_category = "SUCCEEDED", None
         try:
@@ -199,13 +201,13 @@ class ReadToolGateway:
         result_digest = canonical_digest({"status": status, "result": value, "refs": refs})
         observation_id = "to" + hashlib.sha256(tool_request_id.encode()).hexdigest()[:62]
         with self.store.transaction() as uow:
-            request = uow.agents.tool_request(tool_request_id, lock=True)
-            existing = uow.agents.tool_observation(tool_request_id)
+            request = uow.agent_tools.tool_request(tool_request_id, lock=True)
+            existing = uow.agent_tools.tool_observation(tool_request_id)
             if existing is not None:
                 return existing
-            run = uow.agents.run_by_id(request["agent_run_id"], lock=True)
+            run = uow.agent_runs.run_by_id(request["agent_run_id"], lock=True)
             now = uow.now()
-            saved = uow.agents.add_tool_observation(
+            saved = uow.agent_tools.add_tool_observation(
                 {
                     "observation_id": observation_id,
                     "tool_request_id": tool_request_id,
@@ -218,7 +220,7 @@ class ReadToolGateway:
                     "observed_at": now,
                 }
             )
-            uow.agents.update_tool_request(
+            uow.agent_tools.update_tool_request(
                 tool_request_id,
                 status="COMPLETED" if status == "SUCCEEDED" else "FAILED",
                 updated_at=now,
@@ -236,7 +238,7 @@ class ReadToolGateway:
                 },
             }
             event_digest = canonical_digest(event)
-            accepted = uow.agents.register_event(
+            accepted = uow.agent_conversations.register_event(
                 event
                 | {
                     "agent_run_id": run["agent_run_id"],
@@ -246,7 +248,7 @@ class ReadToolGateway:
             )
             if accepted:
                 revision = run["wake_revision"] + 1
-                uow.agents.add_wakeup(
+                uow.agent_conversations.add_wakeup(
                     {
                         "wake_id": uow.new_id(),
                         "agent_run_id": run["agent_run_id"],
@@ -259,7 +261,7 @@ class ReadToolGateway:
                     }
                 )
                 if run["status"] not in {"STOPPED", "BLOCKED", "QUESTION"}:
-                    uow.agents.update_run(
+                    uow.agent_runs.update_run(
                         run["agent_run_id"],
                         status="READY",
                         wake_revision=revision,

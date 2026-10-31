@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 import argparse
-import os
+import hmac
+import re
 from contextlib import asynccontextmanager
 from pathlib import Path
 from uuid import uuid4
@@ -12,6 +13,8 @@ import httpx
 import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, Response
+
+from platform_api.composition import GatewayComposition
 
 MUTATING_METHODS = {"POST", "PUT", "PATCH", "DELETE"}
 HOP_BY_HOP = {
@@ -24,6 +27,54 @@ HOP_BY_HOP = {
     "transfer-encoding",
     "upgrade",
 }
+_PROXY_SUBJECT = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.:@/-]{0,127}")
+_IDENTITY_HEADERS = {
+    "authorization",
+    "x-v7-trusted-proxy",
+    "x-platform-subject",
+    "x-platform-display-name",
+    "x-platform-roles",
+}
+
+
+def _proxy_display_name(value: str) -> str:
+    """Decode the conventional ASGI representation before validating it."""
+    try:
+        value = value.encode("latin-1").decode("utf-8")
+    except (UnicodeEncodeError, UnicodeDecodeError):
+        pass
+    return value.strip()
+
+
+def trusted_proxy_headers(
+    request: Request, headers: dict[str, str], *, shared_secret: str
+) -> dict[str, str] | None:
+    """Normalize identity headers only after authenticating the edge proxy.
+
+    The public gateway does not forward caller-supplied identity headers.  A
+    trusted edge proxy proves its identity with a secret kept out of browsers;
+    the gateway then reconstructs the minimal internal identity envelope for
+    Platform API.  Project roles are deliberately not part of that envelope.
+    """
+    proof = request.headers.get("x-v7-trusted-proxy", "")
+    subject = request.headers.get("x-platform-subject", "")
+    display_name = _proxy_display_name(request.headers.get("x-platform-display-name", ""))
+    if (
+        len(shared_secret) < 32
+        or not hmac.compare_digest(proof, shared_secret)
+        or _PROXY_SUBJECT.fullmatch(subject) is None
+        or not display_name
+        or len(display_name.encode("utf-8")) > 200
+        or any(ord(character) < 32 or ord(character) == 127 for character in display_name)
+    ):
+        return None
+    forwarded = {
+        key: value for key, value in headers.items() if key.lower() not in _IDENTITY_HEADERS
+    }
+    forwarded["X-V7-Trusted-Proxy"] = shared_secret
+    forwarded["X-Platform-Subject"] = subject
+    forwarded["X-Platform-Display-Name"] = display_name
+    return forwarded
 
 
 def create_gateway(
@@ -31,13 +82,17 @@ def create_gateway(
     maintenance_file: str | Path | None = None,
     *,
     transport: httpx.AsyncBaseTransport | None = None,
+    composition: GatewayComposition | None = None,
 ) -> FastAPI:
-    target = (
-        upstream or os.environ.get("V7_PLATFORM_UPSTREAM", "http://platform-api:8007")
-    ).rstrip("/")
-    barrier = Path(
-        maintenance_file or os.environ.get("V7_MAINTENANCE_FILE", "/var/lib/v7-control/maintenance")
-    )
+    if composition is None:
+        composition = GatewayComposition.for_test(
+            upstream=upstream or "http://platform-api:8007",
+            maintenance_file=Path(maintenance_file or "/var/lib/v7-control/maintenance"),
+        )
+    elif upstream is not None or maintenance_file is not None:
+        raise ValueError("Gateway composition and direct overrides are mutually exclusive")
+    target = composition.upstream.rstrip("/")
+    barrier = composition.maintenance_file
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
@@ -63,9 +118,13 @@ def create_gateway(
         # a proxied response already carries one.
         response.headers.setdefault("X-Request-ID", uuid4().hex)
         response.headers.setdefault("Cache-Control", "no-store")
-        release_digest = os.environ.get("V7_RELEASE_DIGEST")
-        if release_digest:
-            response.headers.setdefault("X-V7-Release-Digest", release_digest)
+        if composition.deployment.deployment_id:
+            response.headers.setdefault("X-V7-Deployment-ID", composition.deployment.deployment_id)
+        if composition.deployment.deployment_revision:
+            response.headers.setdefault(
+                "X-V7-Deployment-Revision",
+                composition.deployment.deployment_revision,
+            )
         return response
 
     @app.get("/gateway/health")
@@ -92,6 +151,22 @@ def create_gateway(
             for key, value in request.headers.items()
             if key.lower() not in HOP_BY_HOP | {"host", "content-length"}
         }
+        # In trusted-proxy mode direct client identity headers are never
+        # forwarded.  The gateway first authenticates the edge proxy and then
+        # emits a fresh minimal envelope for the private Platform API.
+        if composition.identity_mode == "trusted-proxy":
+            headers = trusted_proxy_headers(
+                request, headers, shared_secret=composition.trusted_proxy_token
+            )
+            if headers is None:
+                return JSONResponse(
+                    status_code=401,
+                    content={
+                        "code": "AUTHENTICATION_REQUIRED",
+                        "message": "Valid trusted-proxy authentication is required",
+                        "retry_mode": "NONE",
+                    },
+                )
         try:
             response = await request.app.state.client.request(
                 request.method,
@@ -138,7 +213,8 @@ def main() -> None:
     parser.add_argument("--host", default="0.0.0.0")
     parser.add_argument("--port", type=port_number, default=8080)
     args = parser.parse_args()
-    uvicorn.run(create_gateway(), host=args.host, port=args.port)
+    composition = GatewayComposition.from_environment()
+    uvicorn.run(create_gateway(composition=composition), host=args.host, port=args.port)
 
 
 if __name__ == "__main__":

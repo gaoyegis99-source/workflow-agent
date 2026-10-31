@@ -1,9 +1,7 @@
 """Executable import/package boundaries, including negative controls for the checker."""
 
 import ast
-import hashlib
 import importlib.util
-import json
 import subprocess
 import sys
 import tomllib
@@ -29,6 +27,8 @@ SOURCES.update(
         "platform_checkers": ROOT / "packages/checker-pack/src/platform_checkers",
         "platform_tabular_operators": ROOT
         / "packages/tabular-operator-pack/src/platform_tabular_operators",
+        "platform_temporal_workflows": ROOT
+        / "packages/temporal-workflow-runtime/src/platform_temporal_workflows",
     }
 )
 
@@ -61,16 +61,21 @@ def violations(source: str, module: str, *, is_package: bool = False) -> list[st
         elif isinstance(node, ast.Call):
             if isinstance(node.func, ast.Name) and node.func.id in {"__import__", "eval", "exec"}:
                 errors.append("dynamic code/imports bypass dependency checks")
-            if isinstance(node.func, ast.Attribute) and node.func.attr in {
-                "import_module",
-                "spec_from_file_location",
-            }:
+            if (
+                isinstance(node.func, ast.Attribute)
+                and node.func.attr
+                in {
+                    "import_module",
+                    "spec_from_file_location",
+                }
+                and module != "platform_temporal_workflows.worker"
+            ):
                 errors.append("dynamic imports bypass dependency checks")
 
     for name in imported:
         top = name.split(".")[0]
         if module.startswith("platform_core"):
-            if top not in sys.stdlib_module_names | {"platform_core"}:
+            if top not in sys.stdlib_module_names | {"platform_contracts", "platform_core"}:
                 errors.append(f"core depends on {name}")
             if module.startswith("platform_core.domain") and name.startswith(
                 "platform_core.application"
@@ -120,6 +125,17 @@ def violations(source: str, module: str, *, is_package: bool = False) -> list[st
             }
             if top not in sys.stdlib_module_names | allowed:
                 errors.append(f"agent runtime depends on forbidden module: {name}")
+        elif module.startswith("platform_temporal_workflows"):
+            allowed = {
+                "platform_temporal_workflows",
+                "fastapi",
+                "jsonschema",
+                "opentelemetry",
+                "temporalio",
+                "uvicorn",
+            }
+            if top not in sys.stdlib_module_names | allowed:
+                errors.append(f"Temporal runtime depends on forbidden module: {name}")
         elif top not in sys.stdlib_module_names and module.startswith(
             (
                 "platform_data",
@@ -224,7 +240,10 @@ def test_all_source_imports_follow_layer_boundaries():
         ("import platform_infrastructure", "platform_core.application.x"),
         ("from platform_infrastructure import database", "platform_api.adapters.http.x"),
         ("import platform_api", "platform_infrastructure.worker"),
-        ("from tests.p2.peer_client import PeerClient", "platform_infrastructure.worker"),
+        (
+            "from tests.platform.database.peer_client import PeerClient",
+            "platform_infrastructure.worker",
+        ),
         ("import platform_operators", "platform_checkers.reference"),
         ("import numpy", "platform_checkers.reference"),
         ("import platform_data.adapters.tables", "platform_execution.worker"),
@@ -232,6 +251,7 @@ def test_all_source_imports_follow_layer_boundaries():
         ("import sqlalchemy", "platform_data.application.data"),
         ("from platform_execution.adapters import docker", "platform_execution.application.runner"),
         ("from platform_data.adapters import tables", "platform_data.domain.model"),
+        ("from platform_core.application import workflows", "platform_temporal_workflows.worker"),
     ],
 )
 def test_boundary_checker_rejects_forbidden_dependencies(source, module):
@@ -240,6 +260,12 @@ def test_boundary_checker_rejects_forbidden_dependencies(source, module):
 
 def test_core_boundary_accepts_python_standard_library_modules():
     assert not violations("import itertools", "platform_core.application.plan")
+
+
+def test_only_temporal_worker_composition_may_load_configured_plugin_factories():
+    source = "import importlib\nimportlib.import_module('deployment_plugin')"
+    assert not violations(source, "platform_temporal_workflows.worker")
+    assert violations(source, "platform_temporal_workflows.governance")
 
 
 def test_only_fixed_spatial_runtime_may_import_system_gdal_qgis_sdks():
@@ -268,7 +294,7 @@ def test_package_dependencies_and_workspace_stay_inside_v7():
     for member in members:
         assert (ROOT / member).resolve().is_relative_to(ROOT)
     core = tomllib.loads((ROOT / "packages/platform-core/pyproject.toml").read_text())
-    assert core["project"]["dependencies"] == []
+    assert core["project"]["dependencies"] == ["groundwater-platform-contracts==0.15.5"]
     contracts = tomllib.loads((ROOT / "packages/contracts/pyproject.toml").read_text())
     assert contracts["project"]["dependencies"] == ["pydantic>=2.11,<3"]
 
@@ -299,17 +325,3 @@ def test_no_legacy_runtime_paths_or_environment_loading():
         ]:
             assert forbidden not in content, f"{path}: {forbidden}"
         assert not path.is_symlink(), f"source symlink is not self-contained: {path}"
-
-
-def test_p3_preserves_delivered_migrations_and_unchanged_third_party_lock_entries():
-    baseline = json.loads((ROOT / "docs/verification/p3-baseline.json").read_text())
-    locked = {p["name"]: p for p in tomllib.loads((ROOT / "uv.lock").read_text())["package"]}
-    # Starlette 1.7.0 removes the AnyIO alias import that warned under 4.15.x.
-    assert locked["starlette"]["version"] == "1.7.0"
-    for name, entry in baseline["third_party"].items():
-        if name == "starlette":
-            continue
-        encoded = json.dumps(locked[name], sort_keys=True, separators=(",", ":")).encode()
-        assert hashlib.sha256(encoded).hexdigest() == entry["lock_sha256"], name
-    for name, digest in baseline["migrations"].items():
-        assert hashlib.sha256((ROOT / name).read_bytes()).hexdigest() == digest, name

@@ -22,8 +22,8 @@ import httpx
 from platform_core.application.control import ControlService
 from playwright.sync_api import expect, sync_playwright
 
-from tests.p2.conftest import database, owner, postgres  # noqa: F401
-from tests.p2.processes import Processes, eventually
+from tests.platform.database.conftest import database, owner, postgres  # noqa: F401
+from tests.platform.database.processes import Processes, eventually
 
 
 def _asset(index: int, project_id: str, *, detail: bool = False) -> dict:
@@ -48,12 +48,23 @@ def _asset(index: int, project_id: str, *, detail: bool = False) -> dict:
 
 class _ServiceHandler(BaseHTTPRequestHandler):
     project_id = ""
+    operator_catalog_digest = ""
     requests: list[str] = []
 
     def do_GET(self):  # noqa: N802
         parsed = urlparse(self.path)
         self.requests.append(parsed.path + ("?" + parsed.query if parsed.query else ""))
         path = parsed.path
+        if path == "/readyz":
+            self._json(
+                200,
+                {
+                    "status": "ready",
+                    "operator_catalog_digest": self.operator_catalog_digest,
+                    "release_digest": None,
+                },
+            )
+            return
         prefix = f"/internal/projects/{self.project_id}"
         if path == prefix + "/assets":
             after = parse_qs(parsed.query).get("after", [None])[0]
@@ -101,6 +112,9 @@ def test_browser_pagination_uses_real_http_gateway_and_service_fixture(database,
     thread.start()
     service_url = f"http://127.0.0.1:{server.server_port}"
     processes = Processes(tmp_path, database.engine.url.render_as_string(hide_password=False))
+    _ServiceHandler.operator_catalog_digest = json.loads(
+        (tmp_path / "operator-catalog.json").read_text(encoding="utf-8")
+    )["catalog_digest"]
     client = None
     try:
         with socket.socket() as listener:

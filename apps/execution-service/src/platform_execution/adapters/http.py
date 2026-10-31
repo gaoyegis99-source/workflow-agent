@@ -1,16 +1,17 @@
 """Fixed authenticated service endpoints; no service URL is accepted in an Action."""
 
 import httpx
-from platform_contracts.service import ServiceFault, release_headers
+from platform_contracts.runtime_context import DeploymentContext
+from platform_contracts.service import ServiceFault, deployment_headers
 
 
 class Client:
-    def __init__(self, url, token):
+    def __init__(self, url, token, *, deployment: DeploymentContext):
         if not url.startswith(("http://", "https://")) or len(token or "") < 32:
             raise ValueError("Explicit service URL and credential required")
         self.client = httpx.Client(
             base_url=url,
-            headers=release_headers({"Authorization": "Bearer " + token}),
+            headers=deployment_headers({"Authorization": "Bearer " + token}, deployment=deployment),
             timeout=5,
             trust_env=False,
         )

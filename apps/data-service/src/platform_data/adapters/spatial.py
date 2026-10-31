@@ -3,23 +3,51 @@
 import json
 import os
 import re
+import shutil
 import subprocess
 from pathlib import Path
 
+from platform_contracts.runtime_context import ContainerIdentity
+
+DOCKER_COMMAND_TIMEOUT_SECONDS = 30
+
 
 class SpatialInspector:
-    def __init__(self, image_id: str, work_root: str):
+    def __init__(
+        self,
+        image_id: str,
+        work_root: str,
+        *,
+        container_identity: ContainerIdentity | None = None,
+    ):
         if re.fullmatch(r"sha256:[0-9a-f]{64}", image_id or "") is None:
             raise ValueError("Spatial inspector requires an immutable image ID")
         self.image_id = image_id
         self.work_root = Path(work_root).resolve()
+        self.container_identity = container_identity or ContainerIdentity()
         self.work_root.mkdir(parents=True, exist_ok=True)
+        # The rootless daemon resolves bind sources as the host user, while
+        # this worker writes them as its remapped uid.  Permit traversal only;
+        # individual staged inputs remain read-only.
+        try:
+            self.work_root.chmod(0o711)
+        except PermissionError:
+            # Direct Compose prepares this bind root behind a 0700 instance
+            # directory.  Rootless namespace ownership prevents this non-root
+            # process from changing the mount point itself, so accept only an
+            # already writable and traversable root.
+            if not os.access(self.work_root, os.W_OK | os.X_OK):
+                raise
 
     @staticmethod
-    def command(*args, timeout=10):
-        result = subprocess.run(
-            ["docker", *args], capture_output=True, check=False, timeout=timeout
-        )
+    def command(*args, timeout=DOCKER_COMMAND_TIMEOUT_SECONDS):
+        try:
+            result = subprocess.run(
+                ["docker", *args], capture_output=True, check=False, timeout=timeout
+            )
+        except subprocess.TimeoutExpired as error:
+            operation = args[0] if args else "unknown"
+            raise OSError(f"Spatial container runtime {operation} timed out") from error
         if result.returncode:
             raise OSError("Spatial container runtime operation failed")
         return result.stdout.decode().strip()
@@ -29,12 +57,15 @@ class SpatialInspector:
         return "v7-spatial-import-" + upload_id
 
     def inspect(self, upload_id):
-        result = subprocess.run(
-            ["docker", "inspect", self.name(upload_id)],
-            capture_output=True,
-            check=False,
-            timeout=5,
-        )
+        try:
+            result = subprocess.run(
+                ["docker", "inspect", self.name(upload_id)],
+                capture_output=True,
+                check=False,
+                timeout=DOCKER_COMMAND_TIMEOUT_SECONDS,
+            )
+        except subprocess.TimeoutExpired as error:
+            raise OSError("Spatial container runtime inspect timed out") from error
         if result.returncode:
             self.command("info", "--format", "{{.ServerVersion}}")
             if b"No such" in result.stderr:
@@ -49,8 +80,7 @@ class SpatialInspector:
             "v7.digest": claim["payload"]["digest"],
             "v7.format": claim["payload"]["format"],
         }
-        if os.environ.get("V7_TEST_RUN_ID"):
-            expected["v7.test-run"] = os.environ["V7_TEST_RUN_ID"]
+        expected |= self.container_identity.labels()
         if any(labels.get(key) != value for key, value in expected.items()):
             raise ValueError("Spatial inspection container identity differs")
         if info["Image"] != self.image_id:
@@ -62,11 +92,20 @@ class SpatialInspector:
             raise ValueError("Spatial inspection work path escaped")
         output = root / "output"
         output.mkdir(parents=True, exist_ok=True)
+        # A rootless daemon remaps the requested container UID.  Grant that
+        # remapped UID create access to this per-upload output directory; the
+        # parent remains traversal-only and the staged input stays read-only.
+        output.chmod(0o733)
         return root, output
 
     def create(self, claim, source):
-        _, output = self.paths(claim)
+        root, output = self.paths(claim)
         source = Path(source).resolve()
+        staged_source = root / (
+            "source.gpkg" if claim["payload"]["format"] == "geopackage" else "source.tif"
+        )
+        shutil.copyfile(source, staged_source)
+        staged_source.chmod(0o444)
         container_source = (
             "/input/source.gpkg"
             if claim["payload"]["format"] == "geopackage"
@@ -102,7 +141,7 @@ class SpatialInspector:
             "--tmpfs",
             "/tmp:rw,noexec,nosuid,size=128m",
             "--mount",
-            f"type=bind,src={source},dst={container_source},readonly",
+            f"type=bind,src={staged_source},dst={container_source},readonly",
             "--mount",
             f"type=bind,src={output},dst=/output",
         ]
@@ -112,8 +151,8 @@ class SpatialInspector:
             ("format", claim["payload"]["format"]),
         ):
             args += ["--label", f"v7.{key}={value}"]
-        if os.environ.get("V7_TEST_RUN_ID"):
-            args += ["--label", f"v7.test-run={os.environ['V7_TEST_RUN_ID']}"]
+        for key, value in self.container_identity.labels().items():
+            args += ["--label", f"{key}={value}"]
         args += [
             self.image_id,
             "platform-spatial",

@@ -2,7 +2,6 @@
 
 import base64
 import binascii
-import os
 import re
 from typing import Annotated
 
@@ -11,6 +10,7 @@ from platform_contracts.agent import AgentAnswerCreate, AgentAnswerReceipt, Agen
 from platform_contracts.control import (
     BudgetView,
     ControlRequest,
+    CurrentIdentityView,
     ExecutionSummaryPage,
     GrantCreate,
     GrantPage,
@@ -31,6 +31,8 @@ from platform_core.application.control import ControlService
 from platform_core.application.errors import RuleViolation
 from platform_core.application.ports import Identity
 from starlette.responses import JSONResponse
+
+from .identity import AuthenticatedIdentity
 
 router = APIRouter(
     responses={status: {"model": ErrorEnvelope} for status in [400, 401, 403, 404, 409, 422, 503]}
@@ -58,11 +60,22 @@ def service(request: Request) -> ControlService:
     )
 
 
-def identity(request: Request, authorization: Annotated[str | None, Header()] = None) -> Identity:
-    if not authorization or not authorization.startswith("Bearer ") or len(authorization) > 256:
-        raise RuleViolation("AUTHENTICATION_REQUIRED", "Valid authentication is required", 401)
+def authenticated_identity(
+    request: Request, authorization: Annotated[str | None, Header()] = None
+) -> AuthenticatedIdentity:
+    cached = getattr(request.state, "authenticated_identity", None)
+    if cached is not None:
+        return cached
     service(request)
-    return request.app.state.database.authenticate(authorization[7:])
+    resolved = request.app.state.identity_resolver.resolve(request.headers, authorization)
+    request.state.authenticated_identity = resolved
+    return resolved
+
+
+def identity(
+    value: Annotated[AuthenticatedIdentity, Depends(authenticated_identity)],
+) -> Identity:
+    return value.actor
 
 
 Actor = Annotated[Identity, Depends(identity)]
@@ -125,7 +138,10 @@ def ready(request: Request):
         from platform_core.application.catalog import validate_catalog
 
         validate_catalog(request.app.state.operator_catalog)
-        if os.environ.get("V7_OPERATOR_CATALOG"):
+        if (
+            request.app.state.catalog_context.operator_catalog_path is not None
+            and request.app.state.execution is not None
+        ):
             remote = request.app.state.execution.json("GET", "/readyz")
             if (
                 remote.get("operator_catalog_digest")
@@ -135,7 +151,9 @@ def ready(request: Request):
             if request.app.state.release_digest is not None and (
                 remote.get("release_digest") != request.app.state.release_digest
             ):
-                raise RuntimeError("Platform and Execution release locks differ")
+                raise RuntimeError("Platform and Execution deployment revisions differ")
+        elif request.app.state.deployment_context.is_direct:
+            raise RuntimeError("Direct Platform requires Execution readiness")
         if not request.app.state.agent_configuration_complete:
             raise RuntimeError("Agent runtime and model catalogue must be configured together")
     except Exception:
@@ -153,6 +171,21 @@ def list_projects(actor: Actor, app: Application, limit: Limit = 50, cursor: Cur
     return page(
         app.projects(actor, after(cursor, "projects"), limit + 1), limit, "project_id", "projects"
     )
+
+
+@router.get("/me", response_model=CurrentIdentityView)
+def current_user(
+    request: Request,
+    value: Annotated[AuthenticatedIdentity, Depends(authenticated_identity)],
+):
+    details = request.app.state.database.identity_view(value.actor)
+    return {
+        "principal_id": details["principal_id"],
+        "display_name": value.display_name,
+        "authentication_mode": value.mode,
+        "subject": value.subject or details["external_subject"],
+        "projects": details["projects"],
+    }
 
 
 @router.get(PREFIX, response_model=ProjectView)
@@ -398,7 +431,7 @@ def answer_agent_question(
     with request.app.state.database.transaction() as uow:
         uow.access.authorize(actor, project_id, "EDITOR")
         uow.tasks.get(project_id, task_id)
-        run = uow.agents.run_by_task(task_id, required=True)
+        run = uow.agent_runs.run_by_task(task_id, required=True)
     result = coordinator.answer_question(
         actor,
         project_id,

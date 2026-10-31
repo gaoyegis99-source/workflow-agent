@@ -9,6 +9,8 @@ from platform_core.application.agent_kernel import AgentCoordinator
 from platform_core.application.agent_waiting import AgentWaitReconciler
 from platform_infrastructure.database import Database
 
+from platform_agent_runtime.composition import AgentAdminComposition
+
 
 def serial(value):
     if isinstance(value, (datetime, date)):
@@ -22,20 +24,22 @@ def serial(value):
 
 def list_runs(database, blocked_only=False):
     with database.transaction() as uow:
-        return uow.agents.blocked_runs() if blocked_only else uow.agents.waiting_runs()
+        return (
+            uow.agent_recovery.blocked_runs() if blocked_only else uow.agent_recovery.waiting_runs()
+        )
 
 
 def export_run(database, agent_run_id):
     with database.transaction() as uow:
-        run = uow.agents.run_by_id(agent_run_id)
+        run = uow.agent_runs.run_by_id(agent_run_id)
         return {
             "run": run,
-            "plans": uow.agents.plans(agent_run_id),
-            "events": uow.agents.events(agent_run_id),
-            "wakeups": uow.agents.wakeups(agent_run_id),
-            "wait_dependencies": uow.agents.wait_dependencies(agent_run_id),
-            "runtime_recoveries": uow.agents.runtime_recoveries(agent_run_id),
-            "delivery_attempts": uow.agents.delivery_attempts(agent_run_id),
+            "plans": uow.agent_runs.plans(agent_run_id),
+            "events": uow.agent_conversations.events(agent_run_id),
+            "wakeups": uow.agent_conversations.wakeups(agent_run_id),
+            "wait_dependencies": uow.agent_recovery.wait_dependencies(agent_run_id),
+            "runtime_recoveries": uow.agent_recovery.runtime_recoveries(agent_run_id),
+            "delivery_attempts": uow.agent_tools.delivery_attempts(agent_run_id),
         }
 
 
@@ -47,7 +51,8 @@ def main():
     )
     parser.add_argument("--agent-run-id")
     args = parser.parse_args()
-    database = Database.from_environment()
+    composition = AgentAdminComposition.from_environment()
+    database = Database(composition.database_url)
     try:
         database.check_schema()
         if args.command == "reconcile":

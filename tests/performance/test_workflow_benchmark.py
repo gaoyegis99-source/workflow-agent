@@ -6,6 +6,7 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from types import SimpleNamespace
 
+from platform_core.application.catalog import build_catalog
 from platform_core.application.workflow_compiler import compile_package
 
 SOURCE = Path(__file__).resolve().parents[2] / "benchmarks/p4/workflow_benchmark.py"
@@ -59,9 +60,10 @@ def test_generator_is_deterministic_and_reaches_public_row_boundary():
 
 
 def test_performance_packages_compile_with_production_catalog():
-    parallel = compile_package(parallel_package())
-    scatter = compile_package(scatter_package())
-    direct = compile_package(direct_scatter_package())
+    catalog = build_catalog()
+    parallel = compile_package(parallel_package(), catalog=catalog)
+    scatter = compile_package(scatter_package(), catalog=catalog)
+    direct = compile_package(direct_scatter_package(), catalog=catalog)
     assert len(parallel["invocations"]) == 2
     assert len(scatter["invocations"]) == len(direct["invocations"]) == 1
     assert len(direct["files"]) < len(scatter["files"])

@@ -31,6 +31,20 @@ class Identity:
     # Service-side continuations (Agent/checker orchestration) retain the
     # authenticated principal but never retain the user's bearer token.
     token_id: str | None
+    # ``trusted-proxy`` is an authenticated *user* identity even though it has
+    # no locally stored Bearer token.  ``service-continuation`` is reserved for
+    # the internal Agent/checker path.  Keeping both kinds explicit prevents an
+    # arbitrary token-free Identity from being mistaken for either credential.
+    credential_kind: str = "token"
+
+    @property
+    def is_service_continuation(self) -> bool:
+        """Whether this is the explicit token-free internal continuation path."""
+        return self.token_id is None and self.credential_kind == "service-continuation"
+
+    @property
+    def is_trusted_proxy(self) -> bool:
+        return self.credential_kind == "trusted-proxy"
 
 
 @dataclass(frozen=True, slots=True)

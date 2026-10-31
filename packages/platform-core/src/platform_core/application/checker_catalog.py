@@ -6,7 +6,6 @@ is versioned source code and therefore changes the capability digest.
 """
 
 import json
-import os
 from pathlib import Path
 
 from platform_core.application.control import digest
@@ -158,17 +157,16 @@ _DEFINITIONS = (
     },
 )
 
+SOURCE_IMAGES = {
+    "CHECKER": "sha256:" + "1" * 64,
+    "GDAL_CHECKER": "sha256:" + "2" * 64,
+}
+
 
 def build_catalog(images=None):
     """Return a validated immutable catalogue using deployment image IDs."""
 
-    catalog_path = os.environ.get("V7_CHECKER_CATALOG")
-    if images is None and catalog_path:
-        return load_catalog(catalog_path)
-    images = images or {
-        "CHECKER": os.environ.get("V7_CHECKER_IMAGE", "sha256:" + "1" * 64),
-        "GDAL_CHECKER": os.environ.get("V7_GDAL_CHECKER_IMAGE", "sha256:" + "2" * 64),
-    }
+    images = images or SOURCE_IMAGES
     require(
         set(images) == {"CHECKER", "GDAL_CHECKER"}
         and all(
@@ -198,7 +196,7 @@ def build_catalog(images=None):
     return catalog
 
 
-def load_catalog(path):
+def load_catalog(path, images):
     """Load deployment output and prove it is the catalogue this source defines."""
 
     try:
@@ -207,16 +205,11 @@ def load_catalog(path):
         raise ValueError("Checker catalogue cannot be read") from exc
     roles = value.get("images") if isinstance(value, dict) else None
     require(isinstance(roles, dict), "INVALID_BINDING", "Checker catalogue has no image lock")
-    configured = {
-        "CHECKER": os.environ.get("V7_CHECKER_IMAGE"),
-        "GDAL_CHECKER": os.environ.get("V7_GDAL_CHECKER_IMAGE"),
-    }
-    if all(configured.values()):
-        require(
-            roles == configured,
-            "INVALID_BINDING",
-            "Checker catalogue image lock differs from Platform runtime",
-        )
+    require(
+        roles == images,
+        "INVALID_BINDING",
+        "Checker catalogue image lock differs from Platform runtime",
+    )
     expected = build_catalog(roles)
     require(
         value.get("catalog") == expected,

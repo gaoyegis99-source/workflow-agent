@@ -5,7 +5,6 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-import os
 from pathlib import Path
 
 import psycopg
@@ -15,6 +14,7 @@ from psycopg import sql
 
 from platform_agent_runtime.checkpoint import SCHEMA_VERSION as CHECKPOINT_SCHEMA
 from platform_agent_runtime.checkpoint import psycopg_url
+from platform_agent_runtime.composition import AgentBackupComposition
 
 
 def _table_names(kind: str, connection) -> list[str]:
@@ -151,21 +151,15 @@ def restore_backup(
     return manifest
 
 
-def _required(name: str) -> str:
-    value = os.environ.get(name)
-    if not value:
-        raise SystemExit(f"{name} is required")
-    return value
-
-
 def main() -> None:
     parser = argparse.ArgumentParser(description="Back up or restore the P6 Agent stores")
     parser.add_argument("command", choices=("backup", "restore"))
     parser.add_argument("directory")
     parser.add_argument("--confirm-restore", action="store_true")
     args = parser.parse_args()
-    platform_url = _required("V7_DATABASE_URL")
-    checkpoint_url = _required("V7_AGENT_CHECKPOINT_DATABASE_URL")
+    composition = AgentBackupComposition.from_environment()
+    platform_url = composition.database_url
+    checkpoint_url = composition.checkpoint_database_url
     if args.command == "backup":
         value = create_backup(platform_url, checkpoint_url, args.directory)
     else:

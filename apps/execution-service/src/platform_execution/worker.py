@@ -2,7 +2,6 @@
 
 import argparse
 import logging
-import os
 import time
 
 from platform_contracts.health import touch_worker_heartbeat
@@ -14,6 +13,7 @@ from platform_execution.adapters.parquet import ParquetInspector
 from platform_execution.adapters.repository import Repository
 from platform_execution.application.runner import Runner
 from platform_execution.application.workflow_runner import WorkflowRunner
+from platform_execution.composition import ExecutionComposition
 from platform_execution.database import Database
 
 ROLE_CLASSES = {
@@ -37,19 +37,29 @@ def Worker(
     execution_url=None,
     role="all",
     credentials=None,
+    runtime_config=None,
 ):
     if role not in ROLE_CLASSES:
         raise ValueError("Unknown Execution worker role")
     repository = Repository(database)
     workflow = (
-        WorkflowRunner(repository, workflow_docker, data, platform, execution_url)
+        WorkflowRunner(
+            repository,
+            workflow_docker,
+            data,
+            platform,
+            execution_url,
+            runtime_config=runtime_config,
+        )
         if workflow_docker
         else None
     )
     if credentials is None:
         from platform_execution.adapters.remote import CredentialProvider
 
-        credentials = CredentialProvider()
+        credentials = (
+            CredentialProvider(runtime=runtime_config) if runtime_config else CredentialProvider()
+        )
     from platform_execution.adapters.remote import RemoteClient
 
     return Runner(
@@ -69,29 +79,48 @@ def main(argv=None):
     parser = argparse.ArgumentParser()
     parser.add_argument("--role", choices=tuple(ROLE_CLASSES), default="all")
     args = parser.parse_args(argv)
-    db = Database(os.environ["V7_EXECUTION_DATABASE_URL"])
+    composition = ExecutionComposition.from_environment()
+    db = Database(composition.database_url)
     db.check_schema()
-    touch_worker_heartbeat()
-    data = Client(os.environ["V7_DATA_URL"], os.environ["V7_EXECUTION_DATA_TOKEN"])
-    platform = Client(os.environ["V7_PLATFORM_URL"], os.environ["V7_EXECUTION_PLATFORM_TOKEN"])
-    docker = Docker(
-        os.environ["V7_OPERATOR_IMAGE"],
-        os.environ["V7_CHECKER_IMAGE"],
-        os.environ.get("V7_SPATIAL_QGIS_IMAGE_ID"),
-        os.environ.get("V7_SPATIAL_NATIVE_IMAGE_ID"),
-        os.environ.get("V7_GDAL_CHECKER_IMAGE"),
-        os.environ.get("V7_TABULAR_OPERATOR_IMAGE"),
+    touch_worker_heartbeat(composition.runtime.worker_heartbeat_file)
+    data = Client(
+        composition.data.url,
+        composition.data.token,
+        deployment=composition.runtime.deployment,
     )
-    cwl = CwlDocker(os.environ["V7_CWL_IMAGE"]) if os.environ.get("V7_CWL_IMAGE") else None
+    platform = Client(
+        composition.platform.url,
+        composition.platform.token,
+        deployment=composition.runtime.deployment,
+    )
+    docker = Docker(
+        composition.catalog.image("operator"),
+        composition.catalog.image("checker"),
+        composition.catalog.image("qgis"),
+        composition.catalog.image("spatial_native"),
+        composition.catalog.image("gdal_checker"),
+        composition.catalog.image("tabular"),
+        container_identity=composition.runtime.container_identity,
+    )
+    cwl = (
+        CwlDocker(
+            composition.workflow_image,
+            container_identity=composition.runtime.container_identity,
+            workload_network=composition.runtime.workload_network,
+        )
+        if composition.workflow_image
+        else None
+    )
     worker = Worker(
         db,
-        os.environ["V7_EXECUTION_WORKDIR"],
+        composition.runtime.work_root,
         docker,
         data,
         platform,
         cwl,
-        os.environ.get("V7_EXECUTION_CALLBACK_URL"),
+        composition.runtime.workflow_engine_callback_url,
         args.role,
+        runtime_config=composition.runtime,
     )
     try:
         while True:
@@ -100,7 +129,7 @@ def main(argv=None):
             except (OSError, SQLAlchemyError):
                 active = False
                 logging.warning("Execution dependency unavailable")
-            touch_worker_heartbeat()
+            touch_worker_heartbeat(composition.runtime.worker_heartbeat_file)
             if not active:
                 time.sleep(0.2)
     finally:

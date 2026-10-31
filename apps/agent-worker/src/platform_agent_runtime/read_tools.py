@@ -4,8 +4,7 @@ from __future__ import annotations
 
 from datetime import date, datetime
 
-from platform_core.application.catalog import configured_catalog, operators
-from platform_core.application.checker_catalog import build_catalog as build_checker_catalog
+from platform_core.application.catalog import operators
 from platform_core.application.read_tools import ReadResult
 from platform_core.domain.control import require
 
@@ -46,15 +45,15 @@ class PlatformReadTools:
         data=None,
         knowledge=None,
         execution=None,
-        checkers=None,
-        operator_catalog=None,
+        checkers,
+        operator_catalog,
     ):
         self.database = database
         self.data = data
         self.knowledge = knowledge
         self.execution = execution
-        self.checkers = checkers or build_checker_catalog()
-        self.operator_catalog = operator_catalog or configured_catalog()
+        self.checkers = checkers
+        self.operator_catalog = operator_catalog
 
     def _resources(self, context):
         with self.database.transaction() as uow:
@@ -125,8 +124,8 @@ class PlatformReadTools:
             return ReadResult(_json(spec), contains_untrusted_data=True)
         if tool_id == "plan.read_current":
             with self.database.transaction() as uow:
-                run = uow.agents.run_by_task(task_id, required=True)
-                plan = uow.agents.plan(run["agent_run_id"])
+                run = uow.agent_runs.run_by_task(task_id, required=True)
+                plan = uow.agent_runs.plan(run["agent_run_id"])
             return ReadResult(_json(plan or {"status": "NO_PLAN"}))
         if tool_id == "data.list_assets":
             require(self.data is not None, "DEPENDENCY_UNAVAILABLE", "Data is unavailable", 503)
@@ -191,7 +190,11 @@ class PlatformReadTools:
                 ),
                 contains_untrusted_data=True,
             )
-        if tool_id in {"knowledge.search", "knowledge.read_evidence"}:
+        if tool_id in {
+            "knowledge.search",
+            "knowledge.semantic_search",
+            "knowledge.read_evidence",
+        }:
             require(
                 self.knowledge is not None,
                 "DEPENDENCY_UNAVAILABLE",
@@ -209,6 +212,23 @@ class PlatformReadTools:
                         "sources": resources,
                     },
                 )
+                return ReadResult(result, contains_untrusted_data=True)
+            if tool_id == "knowledge.semantic_search":
+                result = self.knowledge.json(
+                    "POST",
+                    f"/internal/projects/{project}/knowledge/semantic-search-scoped",
+                    json={
+                        "query": arguments["query"],
+                        "limit": arguments.get("limit", 20),
+                        "index": {
+                            "index_id": arguments["index_id"],
+                            "profile_digest": arguments["profile_digest"],
+                        },
+                        "sources": resources,
+                    },
+                )
+                # Candidate snippets are untrusted discovery content.  The
+                # model must call knowledge.read_evidence before citing one.
                 return ReadResult(result, contains_untrusted_data=True)
             version = self.knowledge.json(
                 "GET",

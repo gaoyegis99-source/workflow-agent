@@ -29,7 +29,8 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from platform_agent_runtime.model_providers import DeterministicModelProvider  # noqa: E402
-from platform_core.application.catalog import operators, ports, target  # noqa: E402
+from platform_contracts import DeploymentContext  # noqa: E402
+from platform_core.application.catalog import build_catalog, operators, ports, target  # noqa: E402
 from platform_core.application.workflow_compiler import compile_package  # noqa: E402
 from platform_core.domain.control import RuleViolation  # noqa: E402
 from platform_infrastructure.services import ExecutionClient  # noqa: E402
@@ -46,9 +47,10 @@ def percentile(values: list[float], rank: float) -> float:
 
 
 def workflow_package() -> dict:
-    operator = operators()[0]
+    catalog = build_catalog()
+    operator = operators(catalog)[0]
     operator_target = target(operator)
-    input_ports, output_ports = ports(operator_target)
+    input_ports, output_ports = ports(operator_target, catalog)
     return {
         "profile": "v7-cwl-p4-v1",
         "entrypoint": "main",
@@ -80,7 +82,7 @@ def probe_compiler(rounds: int, concurrency: int) -> dict:
     def one(index: int) -> None:
         started = time.perf_counter()
         try:
-            compiled = compile_package(deepcopy(package))
+            compiled = compile_package(deepcopy(package), catalog=build_catalog())
             invocation = compiled["invocations"].get("invoke")
             if not invocation or invocation["target"] != package["implementations"]["operator"]:
                 raise AssertionError("compiler lost the implementation target")
@@ -293,7 +295,7 @@ def probe_execution_adapter(rounds: int, concurrency: int) -> dict:
             },
         )
 
-    client = ExecutionClient("http://simulated-execution", "t" * 40)
+    client = ExecutionClient("http://simulated-execution", "t" * 40, deployment=DeploymentContext())
     client.client.close()
     client.client = httpx.Client(
         base_url="http://simulated-execution",
@@ -367,7 +369,7 @@ def probe_contract_rejections() -> dict:
     invalid["implementations"]["operator"]["operator_id"] = "not-registered"
     failures: list[str] = []
     try:
-        compile_package(invalid)
+        compile_package(invalid, catalog=build_catalog())
     except RuleViolation as error:
         if (error.code, error.status) != ("UNSUPPORTED_TARGET", 422):
             failures.append(f"unexpected compiler rejection: {error.code}/{error.status}")

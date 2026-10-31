@@ -2,9 +2,10 @@
 
 import json
 import logging
-import os
+import subprocess
 import threading
 import time
+from pathlib import Path
 from uuid import uuid4
 
 from platform_contracts.health import touch_worker_heartbeat
@@ -13,14 +14,16 @@ from sqlalchemy.exc import SQLAlchemyError
 from platform_data.adapters.blobs import Blobs
 from platform_data.adapters.repository import Repository
 from platform_data.adapters.spatial import SpatialInspector
+from platform_data.composition import DataComposition
 from platform_data.database import Database
 
 
 class SpatialWorker:
-    def __init__(self, database, blobs, inspector):
+    def __init__(self, database, blobs, inspector, *, heartbeat_file: Path | None = None):
         self.repo, self.blobs, self.inspector = Repository(database), blobs, inspector
         self.owner = uuid4().hex
         self.lease_seconds, self.heartbeat_seconds = 30, 10
+        self.heartbeat_file = heartbeat_file
 
     def _error(self, claim, reason, category="SpatialInputError"):
         return self.repo.import_result(
@@ -55,12 +58,13 @@ class SpatialWorker:
         thread = threading.Thread(target=heartbeat, daemon=True)
         thread.start()
         info = None
+        settled = False
         try:
             runtime = claim.get("runtime") or {}
             info = self.inspector.inspect(claim["upload_id"])
             if info is None:
                 if runtime.get("phase") == "STARTED":
-                    self._error(claim, "INSPECTION_IDENTITY_LOST", "RecoveryError")
+                    settled = self._error(claim, "INSPECTION_IDENTITY_LOST", "RecoveryError")
                     return True
                 self.repo.update_import_runtime(
                     claim,
@@ -80,15 +84,15 @@ class SpatialWorker:
             while True:
                 info = self.inspector.inspect(claim["upload_id"])
                 if info is None:
-                    self._error(claim, "INSPECTION_IDENTITY_LOST", "RecoveryError")
+                    settled = self._error(claim, "INSPECTION_IDENTITY_LOST", "RecoveryError")
                     return True
                 self.inspector.check(claim, info)
                 if not info["State"]["Running"]:
                     break
-                touch_worker_heartbeat()
+                touch_worker_heartbeat(self.heartbeat_file)
                 if time.monotonic() >= deadline:
                     self.inspector.stop(info["Id"])
-                    self._error(claim, "SPATIAL_INSPECTION_TIMEOUT", "ResourceLimit")
+                    settled = self._error(claim, "SPATIAL_INSPECTION_TIMEOUT", "ResourceLimit")
                     return True
                 time.sleep(0.2)
             _, output = self.inspector.paths(claim)
@@ -99,7 +103,7 @@ class SpatialWorker:
                     value = json.loads(error_file.read_text())
                     reason = str(value.get("reason", reason))[:128]
                     category = str(value.get("category", category))[:128]
-                self._error(claim, reason, category)
+                settled = self._error(claim, reason, category)
                 return True
             descriptor = json.loads((output / "inspection.json").read_text())
             if descriptor.get("source") != {
@@ -130,33 +134,51 @@ class SpatialWorker:
                 ],
             }
             self.repo.update_import_runtime(claim, phase="COLLECTED")
-            self.repo.import_result(claim, manifest)
-        except (OSError, ValueError, KeyError, json.JSONDecodeError) as exc:
+            settled = self.repo.import_result(claim, manifest)
+        except (OSError, subprocess.TimeoutExpired, SQLAlchemyError) as exc:
+            # Docker may continue a create/start request after the bounded CLI
+            # call loses its response.  Keep CREATE_INTENT/STARTED durable and
+            # leave the deterministic container in place; the expired lease
+            # lets the next tick inspect and reconcile the same external effect.
+            logging.warning(
+                "Spatial import dependency unavailable upload_id=%s generation=%s "
+                "phase=%s category=%s",
+                claim["upload_id"],
+                claim["generation"],
+                (claim.get("runtime") or {}).get("phase", "CLAIMED"),
+                type(exc).__name__,
+            )
+        except (ValueError, KeyError, json.JSONDecodeError) as exc:
             logging.warning(
                 "Spatial import failed upload_id=%s category=%s",
                 claim["upload_id"],
                 type(exc).__name__,
             )
-            self._error(claim, "SPATIAL_INSPECTION_FAILED", type(exc).__name__)
+            settled = self._error(claim, "SPATIAL_INSPECTION_FAILED", type(exc).__name__)
         finally:
             stop.set()
             thread.join(timeout=self.heartbeat_seconds + 4)
-            if info is not None and not info.get("State", {}).get("Running", False):
+            if settled and info is not None and not info.get("State", {}).get("Running", False):
                 self.inspector.remove(info["Id"])
         return True
 
 
 def main():
-    database = Database(os.environ["V7_DATA_DATABASE_URL"])
+    composition = DataComposition.from_environment(role="spatial")
+    if composition.spatial_image is None or composition.spatial_work_root is None:
+        raise RuntimeError("V7_SPATIAL_COMPOSITION_INVALID")
+    database = Database(composition.database_url)
     database.check_schema()
-    touch_worker_heartbeat()
+    touch_worker_heartbeat(composition.heartbeat_file)
     worker = SpatialWorker(
         database,
-        Blobs(os.environ["V7_DATA_STORAGE"]),
+        Blobs(composition.storage_root),
         SpatialInspector(
-            os.environ["V7_SPATIAL_QGIS_IMAGE_ID"],
-            os.environ.get("V7_DATA_SPATIAL_WORK_ROOT", ".p4-runtime/spatial-imports"),
+            composition.spatial_image,
+            composition.spatial_work_root,
+            container_identity=composition.container_identity,
         ),
+        heartbeat_file=composition.heartbeat_file,
     )
     try:
         while True:
@@ -165,7 +187,7 @@ def main():
             except (SQLAlchemyError, OSError) as exc:
                 logging.warning("Spatial worker dependency unavailable: %s", type(exc).__name__)
                 active = False
-            touch_worker_heartbeat()
+            touch_worker_heartbeat(composition.heartbeat_file)
             if not active:
                 time.sleep(0.5)
     finally:

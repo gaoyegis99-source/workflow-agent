@@ -11,7 +11,7 @@ from platform_infrastructure.database import SCHEMA_VERSION
 
 
 def test_a4_schema_is_current_and_repeatable(database):
-    assert SCHEMA_VERSION == "0023_workflow_release_lifecycle"
+    assert SCHEMA_VERSION == "0026_worker_lane_leases"
     database.migrate()
     database.check_schema()
     names = set(sa.inspect(database.engine).get_table_names())

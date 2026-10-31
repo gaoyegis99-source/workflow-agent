@@ -3,8 +3,8 @@
 from fastapi.testclient import TestClient
 from platform_execution.api import create_app
 
-from tests.p2.conftest import postgres  # noqa: F401
-from tests.p3.conftest import service_databases  # noqa: F401
+from tests.platform.database.conftest import postgres  # noqa: F401
+from tests.platform.services.conftest import service_databases  # noqa: F401
 
 
 def test_execution_workflow_bridge_routes_have_observed_rejections(service_databases):  # noqa: F811

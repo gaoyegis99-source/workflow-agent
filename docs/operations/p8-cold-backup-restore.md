@@ -1,13 +1,19 @@
-# P8.2 冷备份、停车快照与干净恢复
+# P8 冷备份、停车快照与干净恢复
 
-普通冷备份仍以可校验、可在全新实例中恢复的静止快照为目标：所有 Action、导入、检查、原子发布、Agent 调用和 Studio 判定必须先收敛。P8.2 的维护升级流程另行生成 schema v2 备份；它只允许 `park-manifest.json` 已精确证明停车、且恢复身份和目录摘要完整的在途事实进入备份。
+P8 使用直接 Compose 实例。控制文件 `compose.env` 与服务级环境文件是部署描述的一部分，
+但不使用 Release Lock 作为启动或恢复门禁。运行时操作必须由维护者明确执行；Docker socket
+不可用时命令阻断，不启动 daemon 或回退宿主 Docker。
+
+普通冷备份以可校验、可在全新实例中恢复的静止快照为目标：所有 Action、导入、检查、原子
+发布、Agent 调用和 Studio 判定必须先收敛。若存在在途事实，`park-manifest.json` 必须精确
+证明停车，且恢复身份和目录摘要完整；否则备份应失败关闭。
 
 ## 创建冷备份
 
 ```bash
-bash scripts/p8.sh backup \
-  .p8-runtime/instances/production/p8.env \
-  .p8-runtime/instances/production/backups/backup-20261017
+bin/p8 backup \
+  runtime/p8/instances/production/compose.env \
+  runtime/p8/instances/production/backups/backup-20261017
 ```
 
 命令按以下顺序执行：
@@ -18,44 +24,55 @@ bash scripts/p8.sh backup \
 4. 再次检查收敛状态，然后停止结算 Worker 和 API。
 5. 分别以只读 `REPEATABLE READ` 事务导出四个 PostgreSQL 数据库。每张表使用 PostgreSQL binary COPY，记录表名、恢复顺序、行数和 SHA-256。
 6. 复制 Data 字节、Knowledge 正文、Execution 工作目录、Toil JobStore 和空间检查目录。符号链接只保存链接文本，绝不跟随到树外。
-7. 复制 Release Lock 和 Operator、Checker、Tool Catalog；Release Lock 固定所有运行镜像摘要。
+7. 复制实例部署描述、Operator、Checker、Tool、Model Catalog 与 Runtime Profile；记录
+   artifact 文件摘要、部署 revision 和显式镜像输入。
 8. 写入 manifest，`fsync` 后原子重命名备份目录。
 
 备份完成后实例保持停止和维护状态。先验证备份，再决定恢复原实例：
 
 ```bash
-bash scripts/p8.sh verify \
-  .p8-runtime/instances/production/p8.env \
-  .p8-runtime/instances/production/backups/backup-20261017
+bin/p8 verify \
+  runtime/p8/instances/production/compose.env \
+  runtime/p8/instances/production/backups/backup-20261017
 
-bash scripts/p8.sh resume .p8-runtime/instances/production/p8.env
+bin/p8 resume runtime/p8/instances/production/compose.env
 ```
 
-`verify` 会重新计算数据库 COPY、状态文件、目录清单和配置摘要，并核对 Release Lock。任何已列文件、表快照、目录清单或配置发生变化都会失败。
+`verify` 会重新计算数据库 COPY、状态文件、目录清单和部署描述摘要。任何已列文件、表快照、
+目录清单或配置发生变化都会失败。
 
 ## 在全新环境恢复
 
 恢复目标必须使用新实例名、新端口、新数据库目录和新状态目录。不要把目标指向原实例路径。
 
 ```bash
-uv run --locked python scripts/configure_p8.py \
+bin/configure-p8 \
   --instance restored \
-  --gateway-port 18100 \
-  --execution-port 18102 \
-  --postgres-port 55470
+  --artifact-dir runtime/active/artifacts/restored \
+  --app-image groundwater-v7-app:restored \
+  --operator-image sha256:<operator> \
+  --checker-image sha256:<checker> \
+  --gdal-checker-image sha256:<gdal-checker> \
+  --spatial-qgis-image sha256:<qgis> \
+  --spatial-native-image sha256:<native> \
+  --tabular-image sha256:<tabular> \
+  --cwl-image sha256:<cwl> \
+  --gateway-port 18100
 ```
 
 将备份作为完整目录复制到新实例的 `backups` 目录，然后执行：
 
 ```bash
-bash scripts/p8.sh restore \
-  .p8-runtime/instances/restored/p8.env \
-  .p8-runtime/instances/restored/backups/backup-20261017
+bin/p8 restore \
+  runtime/p8/instances/restored/compose.env \
+  runtime/p8/instances/restored/backups/backup-20261017
 
-bash scripts/p8.sh resume .p8-runtime/instances/restored/p8.env
+bin/p8 resume runtime/p8/instances/restored/compose.env
 ```
 
-恢复流程先启动空 PostgreSQL、创建四数据库和角色、运行与备份完全相同的 schema，再打开维护标记。恢复器在修改第一套数据库前预检四个目标 schema 和 Release Lock；随后清空业务表并按外键顺序导入 binary COPY，再替换四棵状态目录。恢复期间 API 与 Worker不运行。
+恢复流程先启动空 PostgreSQL、创建四数据库和角色、运行与备份兼容的 schema，再打开维护标记。
+恢复器在修改第一套数据库前预检四个目标 schema、实例部署描述和 artifact 摘要；随后清空业务表
+并按外键顺序导入 binary COPY，再替换四棵状态目录。恢复期间 API 与 Worker 不运行。
 
 恢复完成后应核对：
 
@@ -72,10 +89,11 @@ P8.2 已真实验证活动 QGIS/Native/StaticMap 工作流的维护停车与升�
 
 协议仍保持以下保守边界：
 
-- 普通 `p8.sh backup` 只接受完全收敛的实例；在途升级必须经 `p8-upgrade.sh prepare` 建立维护屏障、停车事实和 schema v2 备份。
+- 普通 `bin/p8 backup` 只接受完全收敛的实例；在途工作必须先建立维护屏障和可验证的
+  停车事实，不能使用已退役的 `p8-upgrade.sh`。
 - 已启动的本地科学容器最多等待 240 秒完成并交接输出；未完成时停车失败并恢复旧服务，不强杀后继续备份。
 - 已被远端接受的 Action 保存原远程 Execution ID。普通 404、断线和响应丢失保持 `PARKED_UNKNOWN/UNKNOWN`，不得换身份重算。
 - JobStore 关键文件缺失、摘要不符、执行身份冲突或兼容镜像缺失时停止恢复，不重新编译、不生成新节点，也不猜测结果。
-- 同一持久目录不能由两个 deployment 同时接管；Release digest 不一致的服务不能进入 ready 状态。
+- 同一持久目录不能由两个 deployment 同时接管；部署 revision 不一致的服务不能进入 ready 状态。
 
 该流程是单机维护窗口下的冷停车与恢复协议，不是在线热备份或蓝绿双写。灾难恢复的 RPO 仍取决于最近一次成功且已验证的备份。

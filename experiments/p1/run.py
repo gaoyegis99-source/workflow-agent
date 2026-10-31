@@ -3,6 +3,7 @@
 import argparse
 import hashlib
 import json
+import os
 import platform
 import signal
 import subprocess
@@ -16,6 +17,11 @@ from gate import select_engine
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from scripts.lib.runtime_layout import P1_RUNTIME_ROOT  # noqa: E402
+from scripts.maintenance.project_environment import docker_executable  # noqa: E402
 
 
 def run_probe(command: list[str], directory: Path, log: Path, *, candidate: str) -> dict:
@@ -63,7 +69,7 @@ def source_hashes() -> dict:
         "toil/uv.lock",
     ]:
         paths.extend(HERE.glob(pattern))
-    paths += [ROOT / "scripts/check_p1.sh", ROOT / "uv.lock"]
+    paths += [ROOT / "scripts/checks/check_p1.sh", ROOT / "uv.lock"]
     return {
         str(path.relative_to(ROOT)): hashlib.sha256(path.read_bytes()).hexdigest()
         for path in sorted(paths)
@@ -80,11 +86,20 @@ def main():
     )
     args = parser.parse_args()
     timestamp = datetime.now(ZoneInfo("Asia/Shanghai")).isoformat(timespec="seconds")
-    directory = ROOT / ".p1-runtime" / ("verification-" + uuid.uuid4().hex[:12])
+    directory = P1_RUNTIME_ROOT / ("verification-" + uuid.uuid4().hex[:12])
     directory.mkdir(parents=True)
     reports = {}
     for name, script, python in [
-        ("Toil", "toil_probe.py", HERE / "toil/.venv/bin/python"),
+        (
+            "Toil",
+            "toil_probe.py",
+            Path(
+                os.environ.get(
+                    "V7_P1_TOIL_PYTHON",
+                    str(ROOT.parent / "runtime/toolchain/p1-toil/bin/python"),
+                )
+            ),
+        ),
         ("Weaver", "weaver_probe.py", Path(sys.executable)),
         ("gVisor", "isolation_probe.py", Path(sys.executable)),
     ]:
@@ -114,7 +129,12 @@ def main():
         "platform": platform.platform(),
         "python": platform.python_version(),
         "docker": subprocess.check_output(
-            ["docker", "version", "--format", "{{.Client.Version}} / {{.Server.Version}}"],
+            [
+                docker_executable(),
+                "version",
+                "--format",
+                "{{.Client.Version}} / {{.Server.Version}}",
+            ],
             text=True,
         ).strip(),
         "sources_sha256": source_hashes(),

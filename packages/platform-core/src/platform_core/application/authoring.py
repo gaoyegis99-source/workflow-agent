@@ -105,7 +105,7 @@ class AuthoringService:
 
     @staticmethod
     def _authorize(uow, actor: Identity, project: str, role: str = "VIEWER") -> None:
-        if actor.token_id is None:
+        if actor.is_service_continuation:
             uow.access.authorize_principal(actor.principal_id, project, role)
         else:
             uow.access.authorize(actor, project, role)
@@ -409,6 +409,7 @@ class AuthoringValidationProcessor:
         parameter_validator,
         environment: Record,
         *,
+        operator_catalog: Record,
         owner: str,
         lease_seconds: float = 120,
     ):
@@ -417,6 +418,7 @@ class AuthoringValidationProcessor:
         self.descriptor = descriptor
         self.parameter_validator = parameter_validator
         self.environment = environment
+        self.operator_catalog = operator_catalog
         self.owner = owner
         self.lease_seconds = lease_seconds
 
@@ -456,7 +458,7 @@ class AuthoringValidationProcessor:
                 status = "REJECTED"
             else:
                 try:
-                    compiled = compile_package(claim["source"])
+                    compiled = compile_package(claim["source"], catalog=self.operator_catalog)
                     self.validator.validate(compiled)
                     status = "PASSED"
                 except RuleViolation as problem:

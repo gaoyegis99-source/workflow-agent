@@ -49,6 +49,12 @@ def compile_coverage(
     """Compile the fixed open-science-v1 catalogue into a deterministic plan."""
 
     require(spec["profile"] == "open-science-v1", "INVALID_BINDING", "Unknown profile")
+    require(
+        candidate.get("identity_mode") == "EXACT"
+        and all("role_id" in item for item in spec.get("required_outputs", [])),
+        "PRECONDITION_UNRESOLVED",
+        "Legacy output identities are not executable",
+    )
     artifacts = candidate["payload"].get("artifacts", [])
     outputs = set(candidate["payload"].get("executions", [])) | {
         item["output"] for item in candidate["payload"].get("workflow_outputs", [])
@@ -196,22 +202,10 @@ def compile_coverage(
         }
     ]
     exact_outputs = [value for value in spec["required_outputs"] if "role_id" in value]
-    legacy_outputs = [value for value in spec["required_outputs"] if "output_id" in value]
     role_bindings = {
         value["role_id"]: value["output_ref"]
         for value in candidate["payload"].get("role_bindings", [])
     }
-    for output in legacy_outputs:
-        raw_items.append(
-            {
-                "requirement_id": "output-" + output["output_id"],
-                "check_type": "RUNTIME_INTEGRITY",
-                "necessary": output["necessary"],
-                "automatic": True,
-                "description": "Required output " + output["output_id"],
-                "output_id": output["output_id"],
-            }
-        )
     for output in exact_outputs:
         binding = role_bindings.get(output["role_id"])
         raw_items.append(
@@ -249,12 +243,6 @@ def compile_coverage(
         )
         schema_version = 3
         checker_catalog = catalog["catalog_digest"]
-    limitations = []
-    if (
-        legacy_outputs
-        or candidate.get("identity_mode", candidate["payload"].get("identity_mode")) == "LEGACY"
-    ):
-        limitations.append("LEGACY_OUTPUT_IDENTITY")
     plan = {
         "schema_version": schema_version,
         "profile": "open-science-v1",
@@ -268,7 +256,7 @@ def compile_coverage(
         "required_outputs": spec["required_outputs"],
         "role_bindings": role_bindings,
         "analysis_registration_id": selected["registration_id"] if selected else None,
-        "limitations": limitations,
+        "limitations": [],
         "items": items,
         "checker_runs": checker_runs,
         "facts": facts,

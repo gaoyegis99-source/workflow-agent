@@ -8,11 +8,15 @@ from platform_core.application.catalog import OPEN_CHECK_TARGET, build_catalog, 
 from playwright.sync_api import expect, sync_playwright
 
 from tests.authoring.browser_helpers import connect_workspace
-from tests.p2.processes import eventually
-from tests.p5r2.test_composed_runs import analysis_request
-from tests.p71b.test_real_agent_acceptance import CASES, _acceptance, _upload
-from tests.p72b.test_real_filter_acceptance import filter_parameters
-from tests.p73a.test_real_aggregate_acceptance import AGGREGATE_PARAMETERS
+from tests.knowledge.checkers.test_composed_runs import analysis_request
+from tests.operators.aggregate.test_real_aggregate_acceptance import AGGREGATE_PARAMETERS
+from tests.operators.filters.test_real_filter_acceptance import filter_parameters
+from tests.operators.tabular.acceptance.test_real_agent_acceptance import (
+    CASES,
+    _acceptance,
+    _upload,
+)
+from tests.platform.database.processes import eventually
 
 
 def authoring_once(cluster):
@@ -150,7 +154,7 @@ def test_real_candidate_trial_and_release_uses_existing_task_budget(cluster, own
         },
         key="a3-real-candidate",
     )
-    cluster.launch("platform-worker")
+    cluster.launch_platform_worker_lanes()
 
     def candidate_ready():
         value = cluster.request("GET", candidate["status_url"])

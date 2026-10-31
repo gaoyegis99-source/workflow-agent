@@ -43,7 +43,10 @@ LangGraph 1.2 把非空 `checkpoint_ns` 解释成已编译子图路径。顶层�
 - Deep Agents：内置计划、文件系统、memory 和子 Agent 与 V7 权威重叠。
 - OpenAI Agents SDK 自动工具循环：会模糊单一副作用执行路径。
 - Microsoft Agent Framework/AutoGen：首期单 Agent 不需要第二套 workflow/message runtime。
-- Temporal：现有 PostgreSQL outbox 和业务账本足够，增加它会形成额外恢复权威。
+- Temporal：未作为 P6 的 Agent 决策运行时采用；当时现有 PostgreSQL outbox 和业务
+  账本足够，额外引入它会形成恢复权威重叠。这个结论只适用于 P6 的受控决策循环；P9
+  已为通用工作流采用 Temporal，并以 [P9 决策](p9-temporal-general-workflows.md) 明确
+  保留账本治理权、限制 Temporal 为编排恢复权。
 
 ## 回退
 

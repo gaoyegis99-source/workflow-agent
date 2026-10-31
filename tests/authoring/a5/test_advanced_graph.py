@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import pytest
 from platform_contracts.authoring import build_authoring_descriptor, validate_operator_parameters
 from platform_core.application.authoring import (
@@ -16,6 +14,7 @@ from platform_core.domain.authoring_graph import preview_graph, validate_source_
 from platform_core.domain.control import RuleViolation
 from platform_infrastructure.cwl import CwlValidator
 
+from scripts.lib.runtime_layout import P4_RUNTIME_ROOT
 from tests.authoring.a5.helpers import advanced_source
 
 
@@ -41,7 +40,7 @@ def descriptor():
 def test_a5_source_compiles_and_plans_distinct_scatter_instances(method, count, indices):
     source = advanced_source(method)
     validate_source_envelope(source)
-    frozen = PackageProcessor.freeze(source)
+    frozen = PackageProcessor.freeze(source, operator_catalog=build_catalog())
     inputs = {
         "tables": [{"class": "File", "location": "one"}] * 2,
         "enabled": True,
@@ -71,7 +70,7 @@ def test_a5_source_compiles_and_plans_distinct_scatter_instances(method, count, 
 
 def test_condition_empty_scatter_and_node_limit_are_explicit():
     source = advanced_source()
-    frozen = PackageProcessor.freeze(source)
+    frozen = PackageProcessor.freeze(source, operator_catalog=build_catalog())
     skipped = build_execution_plan(
         source,
         frozen,
@@ -183,6 +182,7 @@ def test_formal_validation_and_candidate_use_the_same_advanced_manifest(database
         current_descriptor,
         validate_operator_parameters,
         environment,
+        operator_catalog=build_catalog(),
         owner="a5-validation",
     ).process_one()
     validation = service.validation(actor, project["project_id"], receipt["validation_id"])
@@ -204,16 +204,24 @@ def test_formal_validation_and_candidate_use_the_same_advanced_manifest(database
             "validation_id": validation["validation_id"],
         },
     )
-    assert PackageProcessor(database, Validator(), owner="a5-package").process_one()
+    assert PackageProcessor(
+        database,
+        Validator(),
+        operator_catalog=build_catalog(),
+        owner="a5-package",
+    ).process_one()
     view = releases.candidate(
         actor, project["project_id"], definition["definition_id"], candidate["candidate_id"]
     )
     assert view["status"] == "READY"
     assert (
-        view["package_ref"]["manifest_digest"] == PackageProcessor.freeze(source)["manifest_digest"]
+        view["package_ref"]["manifest_digest"]
+        == PackageProcessor.freeze(source, operator_catalog=build_catalog())["manifest_digest"]
     )
 
 
 def test_fixed_cwltool_container_accepts_a5_generated_package():
-    image = Path(".p4-runtime/cwl-image.txt").read_text(encoding="utf-8").strip()
-    CwlValidator(image, timeout=90).validate(PackageProcessor.freeze(advanced_source()))
+    image = (P4_RUNTIME_ROOT / "cwl-image.txt").read_text(encoding="utf-8").strip()
+    CwlValidator(image, timeout=90).validate(
+        PackageProcessor.freeze(advanced_source(), operator_catalog=build_catalog())
+    )

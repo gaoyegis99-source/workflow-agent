@@ -1,0 +1,969 @@
+{
+  "schema_version": 2,
+  "project": "groundwater-v7",
+  "checks": {
+    "layout-source": {
+      "kind": "local",
+      "command": [
+        "{python}",
+        "scripts/maintenance/check_internal_layout.py",
+        "--scope",
+        "source"
+      ],
+      "requires": []
+    },
+    "active-compatibility": {
+      "kind": "local",
+      "command": [
+        "{python}",
+        "scripts/maintenance/check_active_compatibility.py"
+      ],
+      "requires": []
+    },
+    "architecture-boundaries": {
+      "kind": "local",
+      "command": [
+        "{python}",
+        "scripts/maintenance/check_architecture_boundaries.py"
+      ],
+      "requires": []
+    },
+    "diff-whitespace": {
+      "kind": "local",
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "requires": []
+    },
+    "git-hygiene": {
+      "kind": "local",
+      "command": [
+        "{python}",
+        "scripts/maintenance/check_project_hygiene.py"
+      ],
+      "requires": []
+    },
+    "workspace-boundary": {
+      "kind": "local",
+      "command": [
+        "{python}",
+        "scripts/maintenance/check_workspace_dependencies.py"
+      ],
+      "requires": []
+    },
+    "maintenance-local": {
+      "kind": "local",
+      "command": [
+        "{python}",
+        "-m",
+        "pytest",
+        "-q",
+        "tests/architecture/test_maintenance_checks.py",
+        "tests/architecture/test_project_environment.py",
+        "tests/architecture/test_cleanup_core.py",
+        "tests/architecture/test_cleanup_runtime.py"
+      ],
+      "requires": [
+        "module:pytest"
+      ]
+    },
+    "layout-runtime": {
+      "kind": "release",
+      "command": [
+        "{python}",
+        "scripts/maintenance/check_internal_layout.py",
+        "--scope",
+        "all"
+      ],
+      "requires": [
+        "p8-direct-config"
+      ]
+    },
+    "release-acceptance": {
+      "kind": "release",
+      "command": [
+        "bash",
+        "scripts/checks/check_p8.sh",
+        "--phase",
+        "upgrade"
+      ],
+      "requires": [
+        "p8-direct-config",
+        "docker"
+      ]
+    },
+    "platform-local": {
+      "kind": "local",
+      "command": [
+        "{python}",
+        "-m",
+        "pytest",
+        "-q",
+        "tests/contracts",
+        "tests/architecture/test_identity_resolver.py"
+      ],
+      "requires": [
+        "module:pytest"
+      ]
+    },
+    "platform-integration": {
+      "kind": "integration",
+      "command": [
+        "bash",
+        "scripts/checks/check_p2.sh"
+      ],
+      "requires": [
+        "docker"
+      ]
+    },
+    "data-local": {
+      "kind": "local",
+      "command": [
+        "{python}",
+        "-m",
+        "pytest",
+        "-q",
+        "tests/platform/services/test_contracts.py"
+      ],
+      "requires": [
+        "module:pytest"
+      ]
+    },
+    "data-integration": {
+      "kind": "integration",
+      "command": [
+        "bash",
+        "scripts/checks/check_p3.sh"
+      ],
+      "requires": [
+        "docker"
+      ]
+    },
+    "knowledge-local": {
+      "kind": "local",
+      "command": [
+        "{python}",
+        "-m",
+        "pytest",
+        "-q",
+        "tests/knowledge/core/test_contracts_and_domain.py"
+      ],
+      "requires": [
+        "module:pytest"
+      ]
+    },
+    "knowledge-integration": {
+      "kind": "integration",
+      "command": [
+        "bash",
+        "scripts/checks/check_p5.sh",
+        "--phase",
+        "all"
+      ],
+      "requires": [
+        "docker"
+      ]
+    },
+    "execution-local": {
+      "kind": "local",
+      "command": [
+        "{python}",
+        "-m",
+        "pytest",
+        "-q",
+        "tests/contracts/test_execution_identifiers.py"
+      ],
+      "requires": [
+        "module:pytest"
+      ]
+    },
+    "execution-integration": {
+      "kind": "integration",
+      "command": [
+        "bash",
+        "scripts/checks/check_p4.sh",
+        "--phase",
+        "workflows"
+      ],
+      "requires": [
+        "docker"
+      ]
+    },
+    "spatial-local": {
+      "kind": "local",
+      "command": [
+        "{python}",
+        "-m",
+        "pytest",
+        "-q",
+        "tests/spatial/native/test_contracts.py"
+      ],
+      "requires": [
+        "module:pytest"
+      ]
+    },
+    "spatial-integration": {
+      "kind": "integration",
+      "command": [
+        "bash",
+        "scripts/checks/check_p4.sh",
+        "--phase",
+        "spatial"
+      ],
+      "requires": [
+        "docker"
+      ]
+    },
+    "agent-local": {
+      "kind": "local",
+      "command": [
+        "{python}",
+        "-m",
+        "pytest",
+        "-q",
+        "tests/agent/runtime/test_contracts.py"
+      ],
+      "requires": [
+        "module:pytest"
+      ]
+    },
+    "agent-integration": {
+      "kind": "integration",
+      "command": [
+        "bash",
+        "scripts/checks/check_p6.sh",
+        "--phase",
+        "all"
+      ],
+      "requires": [
+        "docker"
+      ]
+    },
+    "operators-local": {
+      "kind": "local",
+      "command": [
+        "{python}",
+        "-m",
+        "pytest",
+        "-q",
+        "tests/operators/catalog/test_operator_catalog.py"
+      ],
+      "requires": [
+        "module:pytest"
+      ]
+    },
+    "operators-integration": {
+      "kind": "integration",
+      "command": [
+        "bash",
+        "scripts/checks/check_p7.sh",
+        "--phase",
+        "compatibility"
+      ],
+      "requires": [
+        "docker"
+      ]
+    },
+    "authoring-local": {
+      "kind": "local",
+      "command": [
+        "{python}",
+        "-m",
+        "pytest",
+        "-q",
+        "tests/authoring/a1/test_contracts.py"
+      ],
+      "requires": [
+        "module:pytest"
+      ]
+    },
+    "authoring-integration": {
+      "kind": "integration",
+      "command": [
+        "bash",
+        "scripts/checks/check_authoring.sh",
+        "--phase",
+        "release-lifecycle"
+      ],
+      "requires": [
+        "docker"
+      ]
+    },
+    "studio-types": {
+      "kind": "local",
+      "command": [
+        "npm",
+        "--prefix",
+        "apps/capability-studio",
+        "run",
+        "typecheck"
+      ],
+      "requires": [
+        "command:npm",
+        "path:apps/capability-studio/node_modules"
+      ]
+    },
+    "studio-tests": {
+      "kind": "local",
+      "command": [
+        "npm",
+        "--prefix",
+        "apps/capability-studio",
+        "test"
+      ],
+      "requires": [
+        "command:npm",
+        "path:apps/capability-studio/node_modules"
+      ]
+    },
+    "studio-build": {
+      "kind": "local",
+      "command": [
+        "{python}",
+        "scripts/build/build_studio.py",
+        "--skip-install",
+        "--skip-checks"
+      ],
+      "requires": [
+        "command:npm",
+        "path:apps/capability-studio/node_modules"
+      ]
+    },
+    "studio-wheel": {
+      "kind": "local",
+      "command": [
+        "{python}",
+        "scripts/checks/check_studio_distribution.py"
+      ],
+      "requires": [
+        "command:uv",
+        "path:../runtime/work/capability-studio/index.html"
+      ]
+    },
+    "temporal-tests": {
+      "kind": "local",
+      "command": [
+        "{python}",
+        "-m",
+        "pytest",
+        "-q",
+        "packages/temporal-workflow-runtime/tests"
+      ],
+      "requires": [
+        "module:pytest"
+      ]
+    },
+    "temporal-lint": {
+      "kind": "local",
+      "command": [
+        "{python}",
+        "-m",
+        "ruff",
+        "check",
+        "packages/temporal-workflow-runtime"
+      ],
+      "requires": [
+        "module:ruff"
+      ]
+    }
+  },
+  "levels": {
+    "fast": [
+      "layout-source",
+      "active-compatibility",
+      "architecture-boundaries",
+      "diff-whitespace",
+      "git-hygiene",
+      "workspace-boundary"
+    ],
+    "changed": [
+      "layout-source",
+      "active-compatibility",
+      "architecture-boundaries",
+      "diff-whitespace",
+      "git-hygiene",
+      "workspace-boundary"
+    ],
+    "release": [
+      "layout-source",
+      "active-compatibility",
+      "architecture-boundaries",
+      "diff-whitespace",
+      "git-hygiene",
+      "workspace-boundary",
+      "studio-types",
+      "studio-tests",
+      "studio-build",
+      "studio-wheel",
+      "temporal-tests",
+      "temporal-lint",
+      "layout-runtime",
+      "release-acceptance"
+    ]
+  },
+  "capabilities": {
+    "maintenance": [
+      "maintenance-local",
+      "active-compatibility"
+    ],
+    "release": [
+      "layout-runtime",
+      "release-acceptance"
+    ],
+    "platform": [
+      "platform-local",
+      "platform-integration"
+    ],
+    "data": [
+      "data-local",
+      "data-integration"
+    ],
+    "knowledge": [
+      "knowledge-local",
+      "knowledge-integration"
+    ],
+    "execution": [
+      "execution-local",
+      "execution-integration"
+    ],
+    "spatial": [
+      "spatial-local",
+      "spatial-integration"
+    ],
+    "agent": [
+      "agent-local",
+      "agent-integration"
+    ],
+    "operators": [
+      "operators-local",
+      "operators-integration"
+    ],
+    "authoring": [
+      "authoring-local",
+      "authoring-integration",
+      "studio-types",
+      "studio-tests",
+      "studio-build",
+      "studio-wheel"
+    ],
+    "temporal": [
+      "temporal-tests",
+      "temporal-lint"
+    ]
+  },
+  "paths": [
+    {
+      "classification": "active",
+      "prefixes": [
+        "packages/temporal-workflow-runtime/",
+        "deploy/temporal/"
+      ],
+      "exact": [],
+      "capabilities": [
+        "temporal"
+      ]
+    },
+    {
+      "classification": "active",
+      "prefixes": [
+        "apps/platform-api/",
+        "packages/platform-core/",
+        "packages/platform-infrastructure/",
+        "packages/contracts/",
+        "tests/platform/",
+        "tests/contracts/",
+        "tests/integration/",
+        "deploy/platform/"
+      ],
+      "exact": [],
+      "capabilities": [
+        "platform"
+      ]
+    },
+    {
+      "classification": "active",
+      "prefixes": [
+        "apps/data-service/"
+      ],
+      "exact": [],
+      "capabilities": [
+        "data"
+      ]
+    },
+    {
+      "classification": "active",
+      "prefixes": [
+        "apps/knowledge-service/",
+        "tests/knowledge/",
+        "deploy/knowledge/"
+      ],
+      "exact": [],
+      "capabilities": [
+        "knowledge"
+      ]
+    },
+    {
+      "classification": "active",
+      "prefixes": [
+        "apps/execution-service/",
+        "runtimes/",
+        "experiments/",
+        "tests/execution/",
+        "tests/performance/",
+        "deploy/execution/"
+      ],
+      "exact": [],
+      "capabilities": [
+        "execution"
+      ]
+    },
+    {
+      "classification": "active",
+      "prefixes": [
+        "tests/spatial/",
+        "benchmarks/",
+        "deploy/spatial/"
+      ],
+      "exact": [],
+      "capabilities": [
+        "spatial"
+      ]
+    },
+    {
+      "classification": "active",
+      "prefixes": [
+        "apps/agent-worker/",
+        "tests/agent/",
+        "evaluations/",
+        "deploy/agent/"
+      ],
+      "exact": [],
+      "capabilities": [
+        "agent"
+      ]
+    },
+    {
+      "classification": "active",
+      "prefixes": [
+        "packages/operator-pack/",
+        "packages/tabular-operator-pack/",
+        "packages/checker-pack/",
+        "tests/operators/",
+        "deploy/operators/"
+      ],
+      "exact": [],
+      "capabilities": [
+        "operators"
+      ]
+    },
+    {
+      "classification": "active",
+      "prefixes": [
+        "apps/capability-studio/",
+        "tests/authoring/"
+      ],
+      "exact": [],
+      "capabilities": [
+        "authoring"
+      ]
+    },
+    {
+      "classification": "active",
+      "prefixes": [
+        "deploy/production/",
+        "scripts/release/",
+        "tests/release/"
+      ],
+      "exact": [],
+      "capabilities": [
+        "release"
+      ]
+    },
+    {
+      "classification": "active",
+      "prefixes": [
+        "examples/"
+      ],
+      "exact": [],
+      "capabilities": [
+        "execution",
+        "operators"
+      ]
+    },
+    {
+      "classification": "active",
+      "prefixes": [
+        "scripts/",
+        "tests/architecture/",
+        "tests/pathing.py",
+        "tests/__init__.py",
+        "tests/conftest.py"
+      ],
+      "exact": [],
+      "capabilities": [
+        "maintenance"
+      ]
+    },
+    {
+      "classification": "active",
+      "prefixes": [
+        "scripts/lib/"
+      ],
+      "exact": [
+        "pyproject.toml",
+        "uv.lock",
+        "pytest.ini",
+        "ruff.toml",
+        ".ruff.toml",
+        "package-lock.json",
+        "kernel/requirements.lock",
+        "scripts/checks/requirements-dev.lock"
+      ],
+      "capabilities": [
+        "maintenance",
+        "release",
+        "platform",
+        "data",
+        "knowledge",
+        "execution",
+        "spatial",
+        "agent",
+        "operators",
+        "authoring",
+        "temporal"
+      ]
+    },
+    {
+      "classification": "active",
+      "prefixes": [],
+      "exact": [
+        ".gitignore",
+        ".ignore",
+        ".dockerignore",
+        ".gitattributes",
+        ".gitmodules",
+        "Makefile",
+        "Dockerfile"
+      ],
+      "capabilities": [
+        "maintenance"
+      ]
+    },
+    {
+      "classification": "active",
+      "prefixes": [
+        "docs/maintenance/maintenance-gates."
+      ],
+      "exact": [],
+      "capabilities": [
+        "maintenance"
+      ]
+    },
+    {
+      "classification": "active",
+      "prefixes": [
+        "scripts/checks/check_p2",
+        "scripts/build/build_p2",
+        "scripts/configure/configure_p2"
+      ],
+      "exact": [],
+      "capabilities": [
+        "platform"
+      ]
+    },
+    {
+      "classification": "active",
+      "prefixes": [
+        "scripts/checks/check_p3",
+        "scripts/build/build_p3",
+        "scripts/configure/configure_p3"
+      ],
+      "exact": [],
+      "capabilities": [
+        "data"
+      ]
+    },
+    {
+      "classification": "active",
+      "prefixes": [
+        "scripts/checks/check_p4",
+        "scripts/build/build_p4",
+        "scripts/configure/configure_p4"
+      ],
+      "exact": [],
+      "capabilities": [
+        "execution"
+      ]
+    },
+    {
+      "classification": "active",
+      "prefixes": [
+        "scripts/checks/check_p4",
+        "scripts/build/build_p4"
+      ],
+      "exact": [],
+      "capabilities": [
+        "spatial"
+      ]
+    },
+    {
+      "classification": "active",
+      "prefixes": [
+        "scripts/checks/check_p5",
+        "scripts/build/build_p5",
+        "scripts/configure/configure_p5"
+      ],
+      "exact": [],
+      "capabilities": [
+        "knowledge"
+      ]
+    },
+    {
+      "classification": "active",
+      "prefixes": [
+        "scripts/checks/check_p6",
+        "scripts/build/build_p6",
+        "scripts/configure/configure_p6"
+      ],
+      "exact": [],
+      "capabilities": [
+        "agent"
+      ]
+    },
+    {
+      "classification": "active",
+      "prefixes": [
+        "scripts/checks/check_p7",
+        "scripts/build/build_p7",
+        "scripts/configure/configure_p7"
+      ],
+      "exact": [],
+      "capabilities": [
+        "operators"
+      ]
+    },
+    {
+      "classification": "active",
+      "prefixes": [
+        "scripts/checks/check_p8",
+        "scripts/build/build_p8",
+        "scripts/configure/configure_p8"
+      ],
+      "exact": [],
+      "capabilities": [
+        "release"
+      ]
+    },
+    {
+      "classification": "active",
+      "prefixes": [
+        "scripts/build/build_studio",
+        "scripts/checks/check_studio_distribution"
+      ],
+      "exact": [
+        "apps/platform-api/hatch_build.py",
+        "apps/platform-api/pyproject.toml",
+        "apps/platform-api/src/platform_api/app.py",
+        "apps/platform-api/src/platform_api/composition.py",
+        "deploy/production/app.Dockerfile"
+      ],
+      "capabilities": [
+        "authoring"
+      ]
+    },
+    {
+      "classification": "historical",
+      "prefixes": [
+        "archive/"
+      ],
+      "exact": [],
+      "capabilities": []
+    },
+    {
+      "classification": "historical",
+      "prefixes": [
+        "deploy\/p2.compose.yaml",
+        "tests\/p2/"
+      ],
+      "exact": [],
+      "capabilities": [
+        "platform"
+      ]
+    },
+    {
+      "classification": "historical",
+      "prefixes": [
+        "deploy\/p3.compose.yaml",
+        "deploy\/p3/",
+        "tests\/p3/"
+      ],
+      "exact": [],
+      "capabilities": [
+        "data"
+      ]
+    },
+    {
+      "classification": "historical",
+      "prefixes": [
+        "deploy\/p4/",
+        "tests\/p4/"
+      ],
+      "exact": [],
+      "capabilities": [
+        "execution"
+      ]
+    },
+    {
+      "classification": "historical",
+      "prefixes": [
+        "deploy\/p42",
+        "deploy\/p43/",
+        "tests\/p42/",
+        "tests\/p422/",
+        "tests\/p43/",
+        "tests\/p431a/",
+        "tests\/p432/"
+      ],
+      "exact": [],
+      "capabilities": [
+        "spatial"
+      ]
+    },
+    {
+      "classification": "historical",
+      "prefixes": [
+        "deploy\/p5/",
+        "tests\/p51/",
+        "tests\/p52/",
+        "tests\/p53/",
+        "tests\/p5r1/",
+        "tests\/p5r2/",
+        "tests\/p5r21/"
+      ],
+      "exact": [],
+      "capabilities": [
+        "knowledge"
+      ]
+    },
+    {
+      "classification": "historical",
+      "prefixes": [
+        "deploy\/p6/",
+        "tests\/p60/",
+        "tests\/p61/",
+        "tests\/p610/",
+        "tests\/p62/",
+        "tests\/p63/",
+        "tests\/p64/",
+        "tests\/p65/",
+        "tests\/p66/",
+        "tests\/p67/",
+        "tests\/p68/",
+        "tests\/p69/"
+      ],
+      "exact": [],
+      "capabilities": [
+        "agent"
+      ]
+    },
+    {
+      "classification": "historical",
+      "prefixes": [
+        "deploy\/p7/",
+        "tests\/p70/",
+        "tests\/p71a/",
+        "tests\/p71b/",
+        "tests\/p72a/",
+        "tests\/p72b/",
+        "tests\/p72c/",
+        "tests\/p73a/"
+      ],
+      "exact": [],
+      "capabilities": [
+        "operators"
+      ]
+    },
+    {
+      "classification": "historical",
+      "prefixes": [
+        "deploy\/p8",
+        "tests\/p81/",
+        "tests\/p82/"
+      ],
+      "exact": [],
+      "capabilities": [
+        "release"
+      ]
+    },
+    {
+      "classification": "documentation",
+      "prefixes": [
+        "docs/"
+      ],
+      "exact": [
+        "README.md",
+        "AGENTS.md",
+        "LICENSE",
+        "LICENSE.md"
+      ],
+      "capabilities": []
+    },
+    {
+      "classification": "documentation",
+      "suffixes": [
+        ".md",
+        ".rst"
+      ],
+      "capabilities": []
+    }
+  ],
+  "destructive": [
+    {
+      "id": "identity-bind",
+      "requires": [
+        "--execute",
+        "existing-principal",
+        "stable-subject",
+        "reviewer",
+        "reason",
+        "database-audit-event"
+      ]
+    },
+    {
+      "id": "runtime-backup-restore-start-stop",
+      "requires": [
+        "--execute",
+        "direct-compose-preflight",
+        "cold-backup-review"
+      ]
+    },
+    {
+      "id": "release-apply",
+      "requires": [
+        "--execute",
+        "direct-compose-preflight",
+        "cold-backup-review",
+        "operation-record"
+      ]
+    },
+    {
+      "id": "cleanup-stage",
+      "requires": [
+        "--execute",
+        "planned-candidate-id",
+        "hash-and-reference-recheck"
+      ]
+    },
+    {
+      "id": "cleanup-purge",
+      "requires": [
+        "--execute",
+        "planned-candidate-id",
+        "passed-quarantine-verification",
+        "purge-receipt"
+      ]
+    }
+  ]
+}

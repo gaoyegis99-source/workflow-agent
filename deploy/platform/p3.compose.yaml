@@ -1,0 +1,28 @@
+name: groundwater-v7-p3
+services:
+  postgres:
+    image: postgres@sha256:3645570cccdfa447589da9f57dd740faa29b30938e861289a5574b6ca6b03826
+    environment:
+      POSTGRES_USER: v7_p3_admin
+      POSTGRES_DB: postgres
+      POSTGRES_PASSWORD: ${V7_P3_PG_PASSWORD:?generate P3 configuration first}
+      V7_PLATFORM_DB_PASSWORD: ${V7_PLATFORM_DB_PASSWORD:?required}
+      V7_DATA_DB_PASSWORD: ${V7_DATA_DB_PASSWORD:?required}
+      V7_EXECUTION_DB_PASSWORD: ${V7_EXECUTION_DB_PASSWORD:?required}
+    ports: ["127.0.0.1:${V7_P3_PG_PORT:-55437}:5432"]
+    volumes:
+      - p3_pg:/var/lib/postgresql/data
+      - ./init-db.sh:/docker-entrypoint-initdb.d/10-v7-services.sh:ro
+    networks: [p3_private]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U v7_p3_admin -d postgres"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+volumes:
+  p3_pg:
+networks:
+  p3_private:
+    driver: bridge
+    driver_opts:
+      com.docker.network.bridge.host_binding_ipv4: "127.0.0.1"

@@ -1,21 +1,20 @@
-"""Production HTTP adapters. Credentials and service addresses are configuration only."""
-
-import os
+"""Production HTTP adapters built from explicit composition values."""
 
 import httpx
-from platform_contracts.service import release_headers
+from platform_contracts.runtime_context import DeploymentContext, ServiceEndpoint
+from platform_contracts.service import deployment_headers
 from platform_core.domain.control import ExternalObservation, RuleViolation
 
 TRANSFER_TIMEOUT = httpx.Timeout(30, connect=5)
 
 
 class Remote:
-    def __init__(self, url, token):
+    def __init__(self, url, token, *, deployment: DeploymentContext):
         if not url.startswith(("http://", "https://")) or len(token or "") < 32:
             raise RuntimeError("Explicit service URL and credential required")
         self.url, self.headers = (
             url.rstrip("/"),
-            release_headers({"Authorization": "Bearer " + token}),
+            deployment_headers({"Authorization": "Bearer " + token}, deployment=deployment),
         )
         self.client = httpx.Client(base_url=url, headers=self.headers, timeout=5, trust_env=False)
 
@@ -119,16 +118,23 @@ class ExecutionClient(Remote):
         )
 
 
-def from_environment():
-    if not os.environ.get("V7_DATA_URL") or not os.environ.get("V7_EXECUTION_URL"):
-        return None, None
+def data_client(
+    endpoint: ServiceEndpoint | None, *, deployment: DeploymentContext
+) -> Remote | None:
+    return None if endpoint is None else Remote(endpoint.url, endpoint.token, deployment=deployment)
+
+
+def execution_client(
+    endpoint: ServiceEndpoint | None, *, deployment: DeploymentContext
+) -> ExecutionClient | None:
     return (
-        Remote(os.environ["V7_DATA_URL"], os.environ["V7_PLATFORM_DATA_TOKEN"]),
-        ExecutionClient(os.environ["V7_EXECUTION_URL"], os.environ["V7_PLATFORM_EXECUTION_TOKEN"]),
+        None
+        if endpoint is None
+        else ExecutionClient(endpoint.url, endpoint.token, deployment=deployment)
     )
 
 
-def knowledge_from_environment():
-    if not os.environ.get("V7_KNOWLEDGE_URL"):
-        return None
-    return Remote(os.environ["V7_KNOWLEDGE_URL"], os.environ["V7_PLATFORM_KNOWLEDGE_TOKEN"])
+def knowledge_client(
+    endpoint: ServiceEndpoint | None, *, deployment: DeploymentContext
+) -> Remote | None:
+    return None if endpoint is None else Remote(endpoint.url, endpoint.token, deployment=deployment)

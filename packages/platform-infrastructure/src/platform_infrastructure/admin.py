@@ -2,18 +2,14 @@
 
 import argparse
 import json
-import os
 import sys
 
 from platform_core.application.catalog import load_catalog
-from platform_core.application.deployment_evidence import (
-    load_pinned_release,
-    verify_operator_catalog,
-)
 from platform_core.application.operator_proposals import OperatorProposalMaintainer
 from platform_core.domain.control import RuleViolation
 from sqlalchemy.exc import SQLAlchemyError
 
+from platform_infrastructure.composition import PlatformAdminComposition
 from platform_infrastructure.database import Database
 
 
@@ -22,7 +18,13 @@ def main():
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("migrate")
     commands.add_parser("check-schema")
-    commands.add_parser("principal-create").add_argument("--name", required=True)
+    principal = commands.add_parser("principal-create")
+    principal.add_argument("--name", required=True)
+    bind_subject = commands.add_parser("principal-bind-subject")
+    bind_subject.add_argument("--principal-id", required=True)
+    bind_subject.add_argument("--subject", required=True)
+    bind_subject.add_argument("--reviewer", required=True)
+    bind_subject.add_argument("--reason", required=True)
     issue = commands.add_parser("token-issue")
     issue.add_argument("--principal-id", required=True)
     issue.add_argument("--ttl-seconds", type=int, default=2592000)
@@ -59,7 +61,8 @@ def main():
     args = parser.parse_args()
     database = None
     try:
-        database = Database.from_environment()
+        composition = PlatformAdminComposition.from_environment()
+        database = Database(composition.database_url)
         result = {"status": "ok"}
         if args.command == "migrate":
             database.migrate()
@@ -67,12 +70,19 @@ def main():
             database.check_schema()
             if args.command == "principal-create":
                 result = {"principal_id": database.create_principal(args.name)}
+            elif args.command == "principal-bind-subject":
+                result = database.bind_subject(
+                    args.principal_id,
+                    args.subject,
+                    reviewer=args.reviewer,
+                    reason=args.reason,
+                )
             elif args.command == "token-issue":
                 result = database.issue_token(args.principal_id, args.ttl_seconds)
             elif args.command == "token-revoke":
                 database.revoke_token(args.token_id)
             elif args.command == "member-set":
-                actor = database.authenticate(os.environ.get("V7_OWNER_TOKEN", ""))
+                actor = database.authenticate(composition.owner_token)
                 database.set_member(args.project_id, args.principal_id, args.role, actor=actor)
             elif args.command in {"service-binding-create", "service-binding-revise"}:
                 with open(args.file, encoding="utf-8") as stream:
@@ -92,19 +102,33 @@ def main():
                 "operator-proposal-review",
                 "operator-proposal-deployment-import",
             }:
-                operator_path = os.environ.get("V7_OPERATOR_CATALOG")
-                release_path = os.environ.get("V7_RELEASE_LOCK")
-                release_digest = os.environ.get("V7_RELEASE_DIGEST")
-                if not operator_path or not release_path or not release_digest:
+                operator_path = composition.operator_catalog_path
+                revision = composition.deployment.deployment_revision
+                if operator_path is None or not revision:
                     raise RuntimeError(
-                        "Maintainer proposal commands require the pinned operator catalog "
-                        "and release lock"
+                        "Maintainer proposal commands require an explicit operator catalog "
+                        "and direct deployment revision"
                     )
                 catalog = load_catalog(operator_path)
-                release = load_pinned_release(release_path, release_digest)
-                verify_operator_catalog(release, operator_path, catalog)
+                deployment_evidence = {
+                    # The persistent receipt field keeps its old wire name for
+                    # historical reads, but this is not a Release Lock.
+                    "release_digest": revision,
+                    "operator_catalog": {"digest": catalog["catalog_digest"]},
+                    "source_tree": {
+                        "digest": composition.deployment_source_digest or "UNAVAILABLE"
+                    },
+                }
+                if (
+                    args.command == "operator-proposal-deployment-import"
+                    and composition.deployment_source_digest is None
+                ):
+                    raise RuntimeError(
+                        "Deployment import requires V7_DEPLOYMENT_SOURCE_DIGEST; "
+                        "direct Compose never infers source identity"
+                    )
                 maintainer = OperatorProposalMaintainer(
-                    database, operator_catalog=catalog, release_lock=release
+                    database, operator_catalog=catalog, release_lock=deployment_evidence
                 )
                 if args.command == "operator-proposal-review":
                     result = maintainer.review(

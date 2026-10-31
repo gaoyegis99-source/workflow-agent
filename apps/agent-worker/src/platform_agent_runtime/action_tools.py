@@ -15,7 +15,7 @@ from platform_contracts.science import (
 )
 from platform_contracts.workflows import WorkflowExecutionCreate
 from platform_core.application.action_tools import ActionResult
-from platform_core.application.catalog import configured_catalog, operators, resolve, target
+from platform_core.application.catalog import operators, resolve, target
 from platform_core.application.research import Research
 from platform_core.application.science import Science
 from platform_core.application.workflows import Workflows
@@ -23,12 +23,27 @@ from platform_core.domain.control import Identity, require
 
 
 class PlatformActionTools:
-    def __init__(self, database, *, data, execution, knowledge=None, operator_catalog=None):
+    def __init__(
+        self,
+        database,
+        *,
+        data,
+        execution,
+        knowledge=None,
+        operator_catalog,
+        checker_catalog=None,
+    ):
         self.database = database
         self.data = data
         self.knowledge = knowledge
-        self.operator_catalog = operator_catalog or configured_catalog()
-        self.science = Science(database, data, execution, operator_catalog=self.operator_catalog)
+        self.operator_catalog = operator_catalog
+        self.science = Science(
+            database,
+            data,
+            execution,
+            operator_catalog=self.operator_catalog,
+            checker_catalog=checker_catalog,
+        )
         self.workflows = Workflows(
             database, data, execution, operator_catalog=self.operator_catalog
         )
@@ -67,7 +82,11 @@ class PlatformActionTools:
         return selected
 
     def execute(self, tool_id, arguments, context, tool_request_id):
-        actor = Identity(context["principal_id"], None)
+        # This worker executes a frozen action on behalf of an already
+        # authenticated principal.  It deliberately never retains a user
+        # bearer token, so the service-continuation credential must be
+        # explicit rather than inferred from a missing token.
+        actor = Identity(context["principal_id"], None, "service-continuation")
         project, task_id = context["project_id"], context["task_id"]
         agent_context = {
             "frame_id": context["frame_id"],
@@ -313,11 +332,39 @@ class PlatformActionTools:
             )
 
         if tool_id == "deliverable.register":
-            self._task_spec(context)
+            spec = self._task_spec(context)
+            acceptance = spec.get("acceptance_spec")
+            require(
+                acceptance is not None and acceptance.get("profile") == "p3-timeseries-v1",
+                "PRECONDITION_UNRESOLVED",
+                "P3 registration requires a frozen time-series acceptance specification",
+            )
+            bindings = []
+            for execution_id in arguments["execution_ids"]:
+                execution = self.science.execution_view(actor, project, execution_id)
+                operator_id = execution.get("request", {}).get("target", {}).get("operator_id")
+                require(
+                    operator_id in acceptance["required_outputs"],
+                    "INVALID_BINDING",
+                    "Execution output is not required by the frozen Task specification",
+                    422,
+                )
+                bindings.append(
+                    self.science.operator_role_binding(
+                        actor,
+                        project,
+                        task_id,
+                        context["task_spec_revision"],
+                        operator_id,
+                        execution_id,
+                        "result",
+                    )
+                )
+            bindings.sort(key=lambda value: value["role_id"])
             body = DeliverableCreate.model_validate(
                 {
                     "expected_spec_revision": context["task_spec_revision"],
-                    "executions": arguments["execution_ids"],
+                    "role_bindings": bindings,
                 }
             ).model_dump(mode="json")
             value = self.science.candidate(actor, project, task_id, tool_request_id, body)

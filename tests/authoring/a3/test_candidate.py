@@ -8,12 +8,10 @@ from platform_core.application.authoring import (
     AuthoringValidationProcessor,
     semantic_environment,
 )
-from platform_core.application.authoring_release import (
-    AuthoringReleaseService,
-    TrialVerdictProcessor,
-)
+from platform_core.application.authoring_release import AuthoringReleaseService
 from platform_core.application.catalog import build_catalog
 from platform_core.application.control import ControlService
+from platform_core.application.trial_verdict import TrialVerdictProcessor
 from platform_core.application.workflows import PackageProcessor
 from platform_core.domain.control import RuleViolation
 from platform_infrastructure import tables
@@ -81,6 +79,7 @@ def frozen_definition(database, owner):
         descriptor,
         validate_operator_parameters,
         environment,
+        operator_catalog=build_catalog(),
         owner="validation-worker",
     ).process_one()
     return (
@@ -112,7 +111,12 @@ def test_candidate_freezes_package_atomically_and_becomes_ready(database, owner)
     receipt = service.create_candidate(actor, project, definition, "candidate", request)
     assert service.create_candidate(actor, project, definition, "candidate", request) == receipt
     assert receipt["status"] == "QUEUED"
-    assert PackageProcessor(database, Validator(), owner="package-worker").process_one()
+    assert PackageProcessor(
+        database,
+        Validator(),
+        operator_catalog=build_catalog(),
+        owner="package-worker",
+    ).process_one()
     view = service.candidate(actor, project, definition, receipt["candidate_id"])
     assert view["status"] == "READY"
     assert view["current_valid"]
@@ -137,7 +141,7 @@ def test_candidate_compiler_accepts_a5_graph_features(database, owner):
             }
         },
     }
-    assert PackageProcessor.freeze(source)["invocations"]
+    assert PackageProcessor.freeze(source, operator_catalog=build_catalog())["invocations"]
 
 
 def test_candidate_failure_rolls_back_its_workflow_package(database, owner, monkeypatch):
@@ -214,7 +218,12 @@ def ready_candidate(database, owner):
             "validation_id": validation["validation_id"],
         },
     )
-    assert PackageProcessor(database, Validator(), owner="package-trial").process_one()
+    assert PackageProcessor(
+        database,
+        Validator(),
+        operator_catalog=build_catalog(),
+        owner="package-trial",
+    ).process_one()
     return values, service, service.candidate(actor, project, definition, receipt["candidate_id"])
 
 

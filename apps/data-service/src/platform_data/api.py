@@ -1,7 +1,6 @@
 """Authenticated internal Data HTTP surface. Public authorization remains in Platform."""
 
 import logging
-import os
 import re
 from contextlib import asynccontextmanager
 from importlib.metadata import version as package_version
@@ -22,13 +21,19 @@ from platform_contracts.science import (
     UploadCreate,
     UploadFinalize,
 )
-from platform_contracts.service import ReleaseIdentityMiddleware, ServiceFault, authenticate, ensure
+from platform_contracts.service import (
+    DeploymentIdentityMiddleware,
+    ServiceFault,
+    authenticate,
+    ensure,
+)
 from sqlalchemy.exc import SQLAlchemyError
 
 from platform_data.adapters.blobs import Blobs
 from platform_data.adapters.repository import Repository
 from platform_data.application.data import Data
 from platform_data.application.publication import Publication
+from platform_data.composition import DataComposition
 from platform_data.database import Database
 from platform_data.domain.model import MAX_BYTES
 
@@ -38,15 +43,14 @@ Key = Annotated[str, Header(alias="Idempotency-Key", min_length=1, max_length=12
 Actor = Annotated[str, Header(alias="X-Actor-ID", pattern=PATTERN)]
 
 
-def create_app(database=None, blobs=None, credentials=None):
+def create_app(database=None, blobs=None, credentials=None, *, composition=None):
+    composition = composition or (
+        DataComposition.from_environment() if database is None else DataComposition.for_test()
+    )
     owned = database is None
-    database = database or Database(os.environ["V7_DATA_DATABASE_URL"])
-    blobs = blobs or Blobs(os.environ["V7_DATA_STORAGE"])
-    credentials = credentials or {
-        "platform": os.environ.get("V7_PLATFORM_DATA_TOKEN"),
-        "execution": os.environ.get("V7_EXECUTION_DATA_TOKEN"),
-        "knowledge": os.environ.get("V7_KNOWLEDGE_DATA_TOKEN"),
-    }
+    database = database or Database(composition.database_url)
+    blobs = blobs or Blobs(composition.storage_root)
+    credentials = credentials or composition.credentials
     service = Data(Repository(database), blobs)
 
     @asynccontextmanager
@@ -71,7 +75,7 @@ def create_app(database=None, blobs=None, credentials=None):
         version=package_version("groundwater-data-service"),
         lifespan=lifespan,
     )
-    app.add_middleware(ReleaseIdentityMiddleware)
+    app.add_middleware(DeploymentIdentityMiddleware, deployment=composition.deployment)
 
     @app.exception_handler(ServiceFault)
     async def fault(request, exc):
@@ -235,9 +239,10 @@ def create_app(database=None, blobs=None, credentials=None):
 
 
 def main():
+    composition = DataComposition.from_environment()
     uvicorn.run(
-        create_app(),
-        host=os.environ.get("V7_DATA_HOST", "127.0.0.1"),
-        port=int(os.environ.get("V7_DATA_PORT", "8011")),
+        create_app(composition=composition),
+        host=composition.host,
+        port=composition.port,
         access_log=False,
     )

@@ -4,12 +4,16 @@ import pytest
 from fastapi import Body
 from fastapi.testclient import TestClient
 from platform_api.app import create_app
+from platform_api.composition import PlatformComposition
 from platform_contracts.v1 import ErrorEnvelope, TaskRef
 
 
 @pytest.fixture
 def client():
-    with TestClient(create_app(), raise_server_exceptions=False) as client:
+    with TestClient(
+        create_app(composition=PlatformComposition.for_test()),
+        raise_server_exceptions=False,
+    ) as client:
         yield client
 
 
@@ -46,12 +50,13 @@ def test_method_not_allowed_preserves_allow_header(client):
 
 def test_openapi_only_advertises_implemented_routes(client):
     schema = client.get("/api/v1/openapi.json").json()
-    assert schema["info"]["description"].startswith("P8.2 / A7:")
+    assert schema["info"]["description"].startswith("P8 / A7:")
     project = "/api/v1/projects/{project_id}"
     task = project + "/tasks/{task_id}"
     assert set(schema["paths"]) == {
         "/api/v1/health",
         "/api/v1/ready",
+        "/api/v1/me",
         "/api/v1/projects",
         project,
         project + "/workspace-summary",
@@ -121,6 +126,8 @@ def test_openapi_only_advertises_implemented_routes(client):
         project + "/knowledge/documents",
         project + "/knowledge/documents/{document_id}/versions/{version_id}",
         project + "/knowledge/search",
+        project + "/knowledge/semantic-search",
+        project + "/knowledge/fusion-search",
         project + "/knowledge/documents/{document_id}/versions/{version_id}/units/{unit_id}",
         project + "/knowledge/documents/{document_id}/versions/{version_id}/withdraw",
         task + "/analysis-revisions",
@@ -148,7 +155,7 @@ def test_openapi_exposes_bounded_cursor_pagination_for_all_three_catalogues(clie
 
 def test_unconfigured_api_is_live_but_not_ready(client):
     assert client.get("/api/v1/ready").status_code == 503
-    assert client.get("/api/v1/projects").status_code == 401
+    assert client.get("/api/v1/projects").status_code == 503
     assert (
         client.get("/api/v1/projects", headers={"Authorization": "Bearer unavailable"}).status_code
         == 503
@@ -156,7 +163,7 @@ def test_unconfigured_api_is_live_but_not_ready(client):
 
 
 def test_internal_error_is_redacted_and_traceable():
-    app = create_app()
+    app = create_app(composition=PlatformComposition.for_test())
 
     @app.get("/test-only-failure")
     def failing_handler():
@@ -176,7 +183,7 @@ def test_internal_error_is_redacted_and_traceable():
 
 @pytest.mark.parametrize("body", [b'{"task_id": "private",', b'{"private-secret": 42}'])
 def test_validation_errors_use_safe_envelope(body):
-    app = create_app()
+    app = create_app(composition=PlatformComposition.for_test())
 
     @app.post("/test-only-contract")
     def validate_contract(payload: Annotated[TaskRef, Body()]):
@@ -194,8 +201,8 @@ def test_validation_errors_use_safe_envelope(body):
 
 
 def test_app_factories_do_not_share_routes():
-    first = create_app()
-    second = create_app()
+    first = create_app(composition=PlatformComposition.for_test())
+    second = create_app(composition=PlatformComposition.for_test())
 
     @first.get("/test-only-local")
     def local_route():

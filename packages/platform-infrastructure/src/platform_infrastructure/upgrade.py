@@ -1,7 +1,7 @@
 """P8.2 maintenance-window upgrade, parking and rollback evidence.
 
 The module owns release compatibility and durable operation facts.  Docker
-Compose orchestration stays in ``scripts/p8-upgrade.sh`` so operators can audit
+Compose orchestration stays in ``scripts/operations/p8-upgrade.sh`` so operators can audit
 every service transition without granting the application an orchestration API.
 """
 

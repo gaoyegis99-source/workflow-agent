@@ -1,7 +1,6 @@
 """Pure P5.2 policy evaluation over already acquired structured facts."""
 
-import hashlib
-import json
+from platform_core.domain.canonical import canonical_json, digest_uri
 
 POLICY_ID = "groundwater-head-comparison-v1"
 POLICY_VERSION = "1.0.0"
@@ -34,13 +33,11 @@ LENGTH_UNITS = {
 
 
 def canonical(value):
-    return json.dumps(
-        value, sort_keys=True, separators=(",", ":"), ensure_ascii=False, allow_nan=False
-    ).encode()
+    return canonical_json(value)
 
 
 def digest(value):
-    return "sha256:" + hashlib.sha256(canonical(value)).hexdigest()
+    return digest_uri(value)
 
 
 POLICY_DIGEST = digest(POLICY_SPEC)

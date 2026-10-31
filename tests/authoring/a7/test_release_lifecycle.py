@@ -8,6 +8,7 @@ from alembic.config import Config
 from fastapi.testclient import TestClient
 from platform_api.app import create_app
 from platform_contracts.authoring import WorkflowReleaseLifecycleCreate
+from platform_core.application.catalog import build_catalog
 from platform_core.application.science import Science
 from platform_core.application.workflows import Workflows
 from platform_core.domain.control import RuleViolation
@@ -20,7 +21,7 @@ from tests.authoring.a6.test_release_execution import (
     execution_request,
     published_release,
 )
-from tests.p4.test_node_budget import dispatch_root
+from tests.execution.workflows.test_node_budget import dispatch_root
 
 
 def transition(service, actor, project, definition, release, key, state, revision, reason=None):
@@ -166,7 +167,9 @@ def test_revoke_before_node_permission_prevents_start(database, owner):
         "epoch": 1,
     }
     node_id = planned["node_id"]
-    result = Workflows(database).permit_node(receipt["action_id"], root, node_id, request)
+    result = Workflows(database, operator_catalog=build_catalog()).permit_node(
+        receipt["action_id"], root, node_id, request
+    )
     assert result == {
         "decision": "DENY",
         "reportable": False,
@@ -188,7 +191,7 @@ def test_disabled_release_allows_already_accepted_action_to_continue(database, o
         planned = next(
             item for item in action["request"]["execution_plan"]["nodes"] if item["condition"]
         )
-    result = Workflows(database).permit_node(
+    result = Workflows(database, operator_catalog=build_catalog()).permit_node(
         receipt["action_id"],
         root,
         planned["node_id"],
@@ -200,8 +203,11 @@ def test_disabled_release_allows_already_accepted_action_to_continue(database, o
         },
     )
     assert result["decision"] == "ALLOW"
-    assert Science(database, None, None).permit_publication(receipt["action_id"])["decision"] == (
-        "ALLOW"
+    assert (
+        Science(database, None, None, operator_catalog=build_catalog()).permit_publication(
+            receipt["action_id"]
+        )["decision"]
+        == "ALLOW"
     )
 
 
@@ -223,7 +229,7 @@ def test_node_permit_replay_survives_revocation_after_permit(database, owner):
         "inputs": {},
         "epoch": 1,
     }
-    workflows = Workflows(database)
+    workflows = Workflows(database, operator_catalog=build_catalog())
     assert (
         workflows.permit_node(receipt["action_id"], root, planned["node_id"], request)["decision"]
         == "ALLOW"
@@ -237,7 +243,7 @@ def test_publication_permit_and_revocation_have_deterministic_order(database, ow
     actor, project, definition, service, release, _, _, receipt = admitted_release_action(
         database, owner
     )
-    science = Science(database, None, None)
+    science = Science(database, None, None, operator_catalog=build_catalog())
     first = science.permit_publication(receipt["action_id"])
     assert first["decision"] == "ALLOW"
     transition(service, actor, project, definition, release, "revoke", "REVOKED", 1)
@@ -256,9 +262,16 @@ def test_revocation_before_publication_permit_is_final(database, owner):
         database, owner
     )
     transition(service, actor, project, definition, release, "revoke", "REVOKED", 1)
-    first = Science(database, None, None).permit_publication(receipt["action_id"])
+    first = Science(database, None, None, operator_catalog=build_catalog()).permit_publication(
+        receipt["action_id"]
+    )
     assert first["decision"] == "DENY" and first["reason"] == "RELEASE_REVOKED"
-    assert Science(database, None, None).permit_publication(receipt["action_id"]) == first
+    assert (
+        Science(database, None, None, operator_catalog=build_catalog()).permit_publication(
+            receipt["action_id"]
+        )
+        == first
+    )
 
 
 def test_lifecycle_http_and_openapi(database, owner):

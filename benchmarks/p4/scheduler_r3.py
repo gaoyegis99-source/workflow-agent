@@ -20,7 +20,8 @@ from platform_infrastructure.database import Database  # noqa: E402
 
 from benchmarks.p4.scheduler_diagnostics import distribution, run_once  # noqa: E402
 from benchmarks.p4.scheduler_r2 import summarize  # noqa: E402
-from scripts.p2_environment import PostgreSQL  # noqa: E402
+from scripts.configure.p2_environment import PostgreSQL  # noqa: E402
+from scripts.lib.runtime_layout import P4_RUNTIME_ROOT  # noqa: E402
 
 PROFILES = {
     "quick": {"rows": 20_000, "groups": 200, "nodes": 4, "concurrency": 4, "repeats": 1},
@@ -32,14 +33,14 @@ PROFILES = {
         "repeats": 3,
     },
 }
-BASELINE_PATH = ROOT / "docs/verification/p4-r2-scheduler-evidence.json"
+BASELINE_PATH = P4_RUNTIME_ROOT / "verification/p4-r2-scheduler-evidence.json"
 LIFECYCLE_SOURCES = (
     "runtimes/cwl/engine.py",
     "apps/execution-service/src/platform_execution/adapters/docker.py",
     "apps/execution-service/src/platform_execution/application/workflow_runner.py",
     "benchmarks/p4/scheduler_r3.py",
     "tests/performance/probe_worker.py",
-    "scripts/check_p4_scheduler_r3.sh",
+    "scripts/checks/check_p4_scheduler_r3.sh",
 )
 
 
@@ -155,8 +156,8 @@ def environment():
         "docker": subprocess.check_output(
             ["docker", "version", "--format", "{{.Server.Version}}"], text=True
         ).strip(),
-        "cwl_image": (ROOT / ".p4-runtime/cwl-image.txt").read_text().strip(),
-        "performance_operator_image": (ROOT / ".p4-runtime/performance-operator-image.txt")
+        "cwl_image": (P4_RUNTIME_ROOT / "cwl-image.txt").read_text().strip(),
+        "performance_operator_image": (P4_RUNTIME_ROOT / "performance-operator-image.txt")
         .read_text()
         .strip(),
     }
@@ -182,10 +183,10 @@ def main():
     args = parser.parse_args()
     if args.output is None:
         suffix = "-quick" if args.profile == "quick" else ""
-        args.output = ROOT / f"docs/verification/p4-r3-lifecycle{suffix}-evidence.json"
+        args.output = P4_RUNTIME_ROOT / f"verification/p4-r3-lifecycle{suffix}-evidence.json"
     if args.report is None:
         suffix = "-quick" if args.profile == "quick" else ""
-        args.report = ROOT / f"docs/verification/p4-r3-lifecycle{suffix}-report.md"
+        args.report = P4_RUNTIME_ROOT / f"verification/p4-r3-lifecycle{suffix}-report.md"
     profile = PROFILES[args.profile]
     configuration = {
         "id": "R3_LIFECYCLE",
@@ -193,7 +194,7 @@ def main():
         "workers": 2,
         "init": True,
         "baseline_resources": False,
-        "cwl_image": (ROOT / ".p4-runtime/cwl-image.txt").read_text().strip(),
+        "cwl_image": (P4_RUNTIME_ROOT / "cwl-image.txt").read_text().strip(),
     }
     runs = []
     started = time.perf_counter()

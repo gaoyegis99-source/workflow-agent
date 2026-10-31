@@ -8,12 +8,14 @@
 
 ```bash
 uv sync --locked
+source scripts/lib/runtime-layout.sh
 umask 077
-mkdir -p .p2-runtime/local
+mkdir -p "$V7_P2_RUNTIME_ROOT/local"
 uv run --locked python - <<'PY'
+import os
 from pathlib import Path
 import secrets
-path = Path('.p2-runtime/local/database.env')
+path = Path(os.environ['V7_P2_RUNTIME_ROOT']) / 'local/database.env'
 password = secrets.token_hex(32)
 with path.open('x') as output:
     output.write('V7_POSTGRES_PASSWORD=' + password + '\n')
@@ -22,9 +24,9 @@ with path.open('x') as output:
                  + '@127.0.0.1:5547/v7_control\n')
 PY
 set -a
-source .p2-runtime/local/database.env
+source "$V7_P2_RUNTIME_ROOT/local/database.env"
 set +a
-docker compose -f deploy/p2.compose.yaml up -d --wait
+../bin/compose -f deploy/platform/p2.compose.yaml up -d --wait
 uv run --locked platform-admin migrate
 uv run --locked platform-admin check-schema
 ```
@@ -34,10 +36,10 @@ uv run --locked platform-admin check-schema
 ```bash
 uv run --locked platform-api --host 127.0.0.1 --port 8007
 # 另一个配置相同环境变量的终端：
-uv run --locked platform-worker
+uv run --locked platform-worker --lane action
 ```
 
-Worker 默认租约 30 秒、每 10 秒续租；生产入口不连接模拟计算服务。`platform-worker --once` 至多处理一次可领取事件并退出。未配置数据库时 Worker 拒绝启动；API 可启动供存活检查，但 ready 为 503。若配置了数据库，API／Worker 必须检查到匹配迁移版本才启动。进程退出不会取消任务；未完成 outbox 在租约过期后可接管。
+Worker 按 `package`、`action`、`acceptance`、`knowledge` 四个 lane 独立部署和退避；每个进程必须通过 `--lane` 选择唯一职责。Action lane 默认租约 30 秒、每 10 秒续租；生产入口不连接模拟计算服务。`platform-worker --lane <lane> --once` 至多处理一次对应 lane 的可领取工作并退出。未配置数据库时 Worker 拒绝启动；API 可启动供存活检查，但 ready 为 503。若配置了数据库，API／Worker 必须检查到匹配迁移版本才启动。进程退出不会取消任务；未完成 outbox 在租约过期后可接管。
 
 ## 本机令牌与成员管理
 
@@ -96,13 +98,13 @@ uv run --locked platform-admin member-set \
 ## 运行验收
 
 ```bash
-bash scripts/check_p2.sh
+bash scripts/checks/check_p2.sh
 ```
 
 检查入口主动移除继承的 `V7_DATABASE_URL`／`V7_OWNER_TOKEN`，自动建立随机名称的数据库容器、凭据、网络、卷。只对这些自建测试资源注入 stop/start，HTTP 故障服务与 Worker 位于独立进程。平台用真实 PostgreSQL 独立卷；模拟外部服务自己的 SQLite 文件不是平台数据库替代品。Linux 下测试模拟服务使用每个用例独立的 `/dev/shm/v7-p2-peer-*` 目录、WAL 和 FULL 同步，文件跨模拟进程 SIGKILL／重启保留，用例结束后清理。这样隔离共享宿主磁盘延迟对 5 秒 HTTP 故障时点的干扰；本测试不证明主机断电后的外部服务持久性。
 
 测试覆盖并发额度、重复请求、修订／控制竞争、事务提交前后 SIGKILL、外部接受后丢失响应、API／Worker／模拟服务重启、SIGSTOP 旧 Worker 接管、取消封存和晚到提交、心跳续租、乱序观察、数据库停机恢复。时间较长的接管测试会将测试 outbox 租约推进到数据库当前时间，再验证真实第二进程接管；不把缩短的测试等待描述为默认 30 秒租约的计时精度测试。
 
-验收结束清理测试资源，不启动长期运行的业务部署。`.p2-runtime/verification/tests.xml` 保存测试用例结果，`docs/verification/p2-evidence.json` 保存统一验收计数、锁定依赖版本和源码摘要，不保存密码或令牌。
+验收结束清理测试资源，不启动长期运行的业务部署。`$V7_P2_RUNTIME_ROOT/verification/` 保存本次测试结果；需要长期留存时上传外部制品系统，不在源码树保存副本。结果不包含密码或令牌。
 
 补齐测试另覆盖：成员降权／移除与三类业务写入竞争，同版本观察恢复、冲突及过期代次，授权自然到期、无授权恢复、持久拒绝、普通 404 恢复，真实 API 回执经测试代理丢弃后重启重放，以及已安装发行包的旧库升级和未知命令查询。

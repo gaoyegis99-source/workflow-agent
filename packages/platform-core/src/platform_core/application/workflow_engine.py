@@ -15,20 +15,22 @@ import re
 from dataclasses import dataclass
 from typing import Any
 
+from platform_contracts.engine_package import EnginePackageViolation
+from platform_contracts.engine_package import (
+    validate_engine_package as validate_engine_package_contract,
+)
+
 from platform_core.application.workflow_plan import fingerprint
 from platform_core.domain.control import require
 
 CONTEXT = "v7_context"
 CONDITION = "v7_run_condition"
-MAX_ENGINE_PACKAGE_BYTES = 8 * 1024 * 1024
-MAX_ENGINE_FILES = 1005
 COORDINATION_RESOURCES = {
     "coresMin": 0.2,
     "coresMax": 0.2,
     "ramMin": 128,
     "ramMax": 128,
 }
-MEMBER = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,127}")
 
 
 @dataclass(frozen=True)
@@ -535,118 +537,22 @@ class FlatCompiler:
 
 
 def validate_engine_package(package, compiled, plan):
-    require(
-        isinstance(package, dict)
-        and set(package)
-        == {
-            "schema_version",
-            "strategy",
-            "source_package_digest",
-            "plan_digest",
-            "entrypoint",
-            "files",
-            "node_map",
-            "package_digest",
-        }
-        and package.get("schema_version") == 1
-        and package.get("strategy") in {"flat_v1", "legacy_v1"}
-        and package.get("source_package_digest") == compiled.get("manifest_digest")
-        and package.get("plan_digest") == plan.get("plan_digest")
-        and isinstance(package.get("files"), dict)
-        and 0 < len(package["files"]) <= MAX_ENGINE_FILES
-        and package.get("entrypoint") in package["files"]
-        and all(
-            MEMBER.fullmatch(name) and isinstance(value, dict)
-            for name, value in package["files"].items()
-        )
-        and isinstance(package.get("node_map"), dict),
-        "INVALID_BINDING",
-        "Invalid immutable workflow engine package",
-        422,
-    )
-    body = {key: value for key, value in package.items() if key != "package_digest"}
-    require(
-        package["package_digest"] == fingerprint(body)
-        and len(canonical(package)) <= MAX_ENGINE_PACKAGE_BYTES,
-        "INVALID_BINDING",
-        "Workflow engine package digest or size is invalid",
-        422,
-    )
-    expected = {node["node_id"]: node for node in plan["nodes"] if node["condition"] is not False}
-    require(
-        set(package["node_map"]) == set(expected),
-        "INVALID_BINDING",
-        "Engine node map differs from plan",
-        422,
-    )
-    for node_id, item in package["node_map"].items():
-        node = expected[node_id]
-        require(
-            isinstance(item, dict)
-            and set(item)
-            == {
-                "node_id",
-                "call_path",
-                "scatter_indices",
-                "operator_id",
-                "implementation_digest",
-                "output_ports",
-                "step_id",
-            }
-            and item["node_id"] == node_id
-            and item["call_path"] == node["call_path"]
-            and item["scatter_indices"] == node["scatter_indices"]
-            and item["operator_id"] == node["operator_id"]
-            and item["implementation_digest"] == node["implementation_digest"]
-            and item["output_ports"] == node["output_ports"]
-            and (item["step_id"] is None or MEMBER.fullmatch(item["step_id"])),
-            "INVALID_BINDING",
-            "Engine node map entry differs from plan",
-            422,
-        )
-    deferred = bool(plan["deferred_templates"])
-    require(
-        package["strategy"] == ("legacy_v1" if deferred else "flat_v1"),
-        "INVALID_BINDING",
-        "Workflow engine strategy does not match the plan",
-        422,
-    )
-    if package["strategy"] == "flat_v1":
-        root = package["files"][package["entrypoint"]]
-        require(
-            root.get("class") == "Workflow"
-            and "v7_gather" in root.get("steps", {})
-            and all(item["step_id"] in root["steps"] for item in package["node_map"].values())
-            and not any("scatter" in step for step in root["steps"].values()),
-            "INVALID_BINDING",
-            "Flat workflow graph is inconsistent",
-            422,
-        )
-    return package
+    try:
+        return validate_engine_package_contract(package, compiled, plan)
+    except EnginePackageViolation as error:
+        require(False, error.code, error.message, error.status)
 
 
 def build_engine_package(source, compiled, plan, inputs, *, bridge_command=None):
     require(plan.get("schema_version") == 1, "INVALID_BINDING", "Execution plan is required", 422)
-    if plan["deferred_templates"]:
-        files = compiled["files"]
-        entrypoint = compiled["entrypoint"]
-        node_map = {
-            node["node_id"]: {
-                "node_id": node["node_id"],
-                "call_path": node["call_path"],
-                "scatter_indices": node["scatter_indices"],
-                "operator_id": node["operator_id"],
-                "implementation_digest": node["implementation_digest"],
-                "output_ports": node["output_ports"],
-                "step_id": None,
-            }
-            for node in plan["nodes"]
-            if node["condition"] is not False
-        }
-        strategy = "legacy_v1"
-    else:
-        files, node_map = FlatCompiler(source, compiled, plan, inputs, bridge_command).build()
-        entrypoint, strategy = "workflow.cwl", "flat_v1"
+    require(
+        not plan["deferred_templates"],
+        "DEFERRED_TEMPLATE_UNRESOLVED",
+        "Workflow contains runtime-dependent templates that cannot be flattened",
+        422,
+    )
+    files, node_map = FlatCompiler(source, compiled, plan, inputs, bridge_command).build()
+    entrypoint, strategy = "workflow.cwl", "flat_v1"
     body = {
         "schema_version": 1,
         "strategy": strategy,

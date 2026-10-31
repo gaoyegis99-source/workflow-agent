@@ -1,6 +1,6 @@
 """P5.2 immutable research protocols, claims, provenance and policy decisions."""
 
-from platform_core.application.control import ControlService
+from platform_core.application.commands import write_command
 from platform_core.domain.control import require
 from platform_core.domain.research import digest, evaluate_groundwater_comparison
 
@@ -23,48 +23,12 @@ def policy_view(row):
     }
 
 
-def freeze_research_context(uow, project, task, context):
-    """Validate a protocol link at action admission and return its immutable decision facts."""
-
-    if context is None:
-        return None
-    registration = uow.research.registration(
-        project, task.task_id, context["analysis_registration_id"]
-    )
-    require(
-        registration["task_spec_revision"] == task.spec_revision,
-        "REVISION_CONFLICT",
-        "Analysis registration targets an older task specification",
-    )
-    require(
-        uow.research.successor(registration["revision_id"]) is None,
-        "REVISION_CONFLICT",
-        "Analysis registration has been superseded",
-    )
-    decision = uow.research.policy_decision(registration["policy_decision_id"])
-    requirement = context.get("policy_requirement")
-    if requirement is not None:
-        require(
-            decision["policy_id"] == requirement and decision["result"] == "APPLICABLE",
-            "PRECONDITION_UNRESOLVED",
-            "The declared action policy has unresolved missing or conflicting facts",
-        )
-    return {
-        "analysis_registration_id": registration["registration_id"],
-        "analysis_revision_id": registration["revision_id"],
-        "policy_requirement": requirement,
-        "policy_decision_id": decision["decision_id"],
-        "policy_id": decision["policy_id"],
-        "policy_version": decision["policy_version"],
-        "policy_digest": decision["policy_digest"],
-        "policy_result": decision["result"],
-    }
-
-
 class Research:
     def __init__(self, store):
         self.store = store
-        self.control = ControlService(store)
+
+    def _write(self, actor, project, operation, key, payload, role, action):
+        return write_command(self.store, actor, project, operation, key, payload, role, action)
 
     def authorize(self, actor, project, role="VIEWER"):
         with self.store.transaction() as uow:
@@ -315,9 +279,7 @@ class Research:
             return self._analysis_view(uow, record)
 
         payload = request | {"task_id": task_id}
-        return self.control._write(
-            actor, project, "create_analysis", key, payload, "EDITOR", create
-        )
+        return self._write(actor, project, "create_analysis", key, payload, "EDITOR", create)
 
     def register(self, actor, project, task_id, revision_id, key, request):
         def register(uow):
@@ -398,7 +360,7 @@ class Research:
             uow.research.add_registration(record)
             return self._registration_view(uow, record)
 
-        return self.control._write(
+        return self._write(
             actor,
             project,
             "register_analysis",
@@ -516,7 +478,7 @@ class Research:
                 )
             return self._claim_view(record)
 
-        return self.control._write(
+        return self._write(
             actor,
             project,
             "create_claim",

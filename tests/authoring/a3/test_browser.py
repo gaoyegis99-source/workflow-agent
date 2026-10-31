@@ -33,7 +33,12 @@ def test_browser_rebuilds_candidate_and_task_state_without_persisting_token(
             "validation_id": validation["validation_id"],
         },
     )
-    assert PackageProcessor(database, Validator(), owner="browser-package").process_one()
+    assert PackageProcessor(
+        database,
+        Validator(),
+        operator_catalog=build_catalog(),
+        owner="browser-package",
+    ).process_one()
     task = ControlService(database).create_task(
         actor,
         project,

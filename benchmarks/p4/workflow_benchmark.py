@@ -8,7 +8,6 @@ V7 or V6 database.
 import argparse
 import hashlib
 import json
-import os
 import math
 import os
 import platform
@@ -21,9 +20,6 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-P3_RUNTIME_ROOT = Path(
-    os.environ.get("V7_P3_RUNTIME_ROOT", str(ROOT / ".p3-runtime"))
-).expanduser().resolve()
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -33,9 +29,10 @@ from platform_data.database import Database as DataDatabase  # noqa: E402
 from platform_execution.database import Database as ExecutionDatabase  # noqa: E402
 from platform_infrastructure.database import Database  # noqa: E402
 
-from scripts.p2_environment import PostgreSQL  # noqa: E402
-from tests.p2.processes import eventually  # noqa: E402
-from tests.p3.harness import Cluster  # noqa: E402
+from scripts.configure.p2_environment import PostgreSQL  # noqa: E402
+from scripts.lib.runtime_layout import P3_RUNTIME_ROOT, P4_RUNTIME_ROOT  # noqa: E402
+from tests.platform.database.processes import eventually  # noqa: E402
+from tests.platform.services.harness import Cluster  # noqa: E402
 
 MAX_BYTES = 20 * 1024 * 1024
 MIN_LONG_NODE_SECONDS = 25.0
@@ -657,8 +654,8 @@ def environment(profile_name):
             ["docker", "version", "--format", "{{.Server.Version}}"], text=True
         ).strip(),
         "images": {
-            "cwl": (ROOT / ".p4-runtime/cwl-image.txt").read_text().strip(),
-            "performance_operator": (ROOT / ".p4-runtime/performance-operator-image.txt")
+            "cwl": (P4_RUNTIME_ROOT / "cwl-image.txt").read_text().strip(),
+            "performance_operator": (P4_RUNTIME_ROOT / "performance-operator-image.txt")
             .read_text()
             .strip(),
             **json.loads((P3_RUNTIME_ROOT / "images.json").read_text()),
@@ -680,16 +677,16 @@ def run_benchmark(profile_name, selected):
         admin = sa.create_engine(postgres.url, isolation_level="AUTOCOMMIT")
         services = service_databases(postgres.url, admin)
         cluster = Cluster(Path(temp), database, tuple(value for _, value in services))
-        cluster.env["V7_CWL_IMAGE"] = (ROOT / ".p4-runtime/cwl-image.txt").read_text().strip()
+        cluster.env["V7_CWL_IMAGE"] = (P4_RUNTIME_ROOT / "cwl-image.txt").read_text().strip()
         cluster.env["V7_OPERATOR_IMAGE"] = (
-            (ROOT / ".p4-runtime/performance-operator-image.txt").read_text().strip()
+            (P4_RUNTIME_ROOT / "performance-operator-image.txt").read_text().strip()
         )
         cluster.env["V7_EXECUTION_CALLBACK_URL"] = cluster.env["V7_EXECUTION_URL"]
         try:
             principal = database.create_principal("p4-performance-owner")
             token = database.issue_token(principal, ttl_seconds=7200)["token"]
             cluster.start_services()
-            cluster.launch("platform-worker")
+            cluster.launch_platform_worker_lanes()
             cluster.launch("execution-worker")
             functions = {
                 "boundary": boundary_scenario,
@@ -750,7 +747,7 @@ def main():
     parser.add_argument(
         "--output",
         type=Path,
-        default=ROOT / "docs/verification/p4-workflow-performance-evidence.json",
+        default=P4_RUNTIME_ROOT / "verification/p4-workflow-performance-evidence.json",
     )
     args = parser.parse_args()
     selected = {item.strip() for item in args.only.split(",") if item.strip()}

@@ -184,7 +184,7 @@ class OperatorProposalService:
 
     @staticmethod
     def _authorize(uow, actor: Identity, project: str, role: str = "VIEWER") -> None:
-        if actor.token_id is None:
+        if actor.is_service_continuation:
             uow.access.authorize_principal(actor.principal_id, project, role)
         else:
             uow.access.authorize(actor, project, role)

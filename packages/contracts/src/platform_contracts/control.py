@@ -37,6 +37,21 @@ class ProjectView(ProjectCreate):
     role: Literal["VIEWER", "EDITOR", "OWNER"]
 
 
+class CurrentIdentityProject(Contract):
+    project_id: Identifier
+    role: Literal["VIEWER", "EDITOR", "OWNER"]
+
+
+class CurrentIdentityView(Contract):
+    """Authenticated principal and its server-authoritative project roles."""
+
+    principal_id: Identifier
+    display_name: ShortText
+    authentication_mode: Literal["token", "trusted-proxy"]
+    subject: Annotated[str, StringConstraints(min_length=1, max_length=128)] | None
+    projects: list[CurrentIdentityProject]
+
+
 class WorkspaceResourceCounts(Contract):
     assets: Annotated[int, Field(ge=0)]
     workflow_definitions: Annotated[int, Field(ge=0)]

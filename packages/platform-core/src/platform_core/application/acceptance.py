@@ -1,6 +1,8 @@
 """Consume only authenticated checker execution facts; completion is a local task transaction."""
 
+import threading
 from dataclasses import replace
+from uuid import uuid4
 
 from platform_core.application.control import ControlService, digest
 from platform_core.application.open_acceptance import (
@@ -13,17 +15,101 @@ from platform_core.domain.control import RuleViolation, require
 
 
 class AcceptanceProcessor:
-    def __init__(self, store, execution):
+    def __init__(
+        self,
+        store,
+        execution,
+        *,
+        owner: str | None = None,
+        lease_seconds: float = 30,
+        heartbeat_seconds: float = 10,
+    ):
+        if lease_seconds <= 0 or heartbeat_seconds <= 0 or heartbeat_seconds >= lease_seconds:
+            raise ValueError("Acceptance heartbeat must be positive and shorter than the lease")
         self.store, self.execution = store, execution
+        self.owner = owner or uuid4().hex
+        self.lease_seconds, self.heartbeat_seconds = lease_seconds, heartbeat_seconds
 
-    def process(self):
-        changed = False
-        while self._process_r2():
-            changed = True
+    def _claim_owned(self, uow, claim) -> bool:
+        """Fence a claimed acceptance before a durable state transition."""
+
+        if claim is None:
+            return True
+        lost = getattr(self, "_lease_lost", None)
+        if lost is not None and lost.is_set():
+            return False
+        current = uow.science.acceptance_owned(
+            claim["acceptance_id"], claim["owner"], claim["generation"]
+        )
+        if not current and lost is not None:
+            lost.set()
+        return current
+
+    def process_one(self) -> bool:
+        """Advance one acceptance transition under a renewable fenced lease.
+
+        The historic ``process`` API remains a batch maintenance helper for
+        existing tests and one-off repair tooling.  The deployed acceptance
+        lane calls this method, so one poll can never drain an unbounded queue.
+        """
+
         with self.store.transaction() as uow:
-            pending = uow.science.pending_checks()
+            claim = uow.science.claim_acceptance(self.owner, self.lease_seconds)
+        if claim is None:
+            return False
+        stop, lost = threading.Event(), threading.Event()
+        self._lease_lost = lost
+
+        def heartbeat():
+            while not stop.wait(self.heartbeat_seconds):
+                try:
+                    with self.store.transaction() as uow:
+                        renewed = uow.science.renew_acceptance(
+                            claim["acceptance_id"],
+                            claim["owner"],
+                            claim["generation"],
+                            self.lease_seconds,
+                        )
+                except Exception:
+                    renewed = False
+                if not renewed:
+                    lost.set()
+                    return
+
+        thread = threading.Thread(target=heartbeat, daemon=True)
+        thread.start()
+        changed = False
+        try:
+            changed = self.process(acceptance_id=claim["acceptance_id"], claim=claim)
+        finally:
+            stop.set()
+            thread.join(timeout=self.heartbeat_seconds + 1)
+            try:
+                if not lost.is_set():
+                    with self.store.transaction() as uow:
+                        operation = (
+                            uow.science.finish_acceptance
+                            if changed
+                            else uow.science.release_acceptance
+                        )
+                        operation(claim["acceptance_id"], claim["owner"], claim["generation"])
+            finally:
+                del self._lease_lost
+        return True
+
+    def process(self, acceptance_id=None, claim=None):
+        changed = False
+        if acceptance_id is None:
+            while self._process_r2():
+                changed = True
+        else:
+            changed = self._process_r2(acceptance_id=acceptance_id, claim=claim) or changed
+        with self.store.transaction() as uow:
+            pending = uow.science.pending_checks(acceptance_id)
         for item in pending:
             with self.store.transaction() as uow:
+                if not self._claim_owned(uow, claim):
+                    return changed
                 action = uow.actions.get(item["action_id"])
                 task = uow.tasks.get(item["project_id"], item["task_id"])
             if not action["stopped"]:
@@ -38,6 +124,8 @@ class AcceptanceProcessor:
                         "execution_state": action["state"],
                     }
                 else:
+                    if getattr(self, "_lease_lost", None) is not None and self._lease_lost.is_set():
+                        return changed
                     execution = self.execution.json(
                         "GET",
                         f"/internal/projects/{item['project_id']}/executions/{action['execution_id']}",
@@ -75,6 +163,8 @@ class AcceptanceProcessor:
                     "deliverable_id": item["deliverable_id"],
                 }
             with self.store.transaction() as uow:
+                if not self._claim_owned(uow, claim):
+                    return changed
                 current = uow.tasks.get(item["project_id"], item["task_id"], lock=True)
                 record = uow.science.check(item["project_id"], item["acceptance_id"])
                 plan = uow.science.plan(item["acceptance_id"])
@@ -200,16 +290,23 @@ class AcceptanceProcessor:
             )
             uow.budgets.save(replace(budget, reserved=budget.reserved - remaining))
 
-    def _process_r2(self):
-        """Advance one dependency-safe step for each composed R2 acceptance."""
+    def _process_r2(self, acceptance_id=None, claim=None):
+        """Advance one dependency-safe step for each selected R2 acceptance.
+
+        Passing an acceptance id is the worker path: it has one lease and may
+        perform at most one loop transition.  Omitting it preserves the
+        explicit batch helper used by maintenance-only callers.
+        """
 
         from platform_core.application.checker_runs import admit, request_for_run
 
         with self.store.transaction() as uow:
-            pending = uow.science.active_r2_checks()
+            pending = uow.science.active_r2_checks(acceptance_id)
         changed = False
         for acceptance in pending:
             with self.store.transaction() as uow:
+                if not self._claim_owned(uow, claim):
+                    return changed
                 task = uow.tasks.get(acceptance["project_id"], acceptance["task_id"], lock=True)
                 record = uow.science.check(acceptance["project_id"], acceptance["acceptance_id"])
                 plan_row = uow.science.plan(acceptance["acceptance_id"])
@@ -240,6 +337,12 @@ class AcceptanceProcessor:
                                 progressed = True
                             else:
                                 waiting_for_stop = True
+                        # A lane poll advances one logical R2 transition.  The
+                        # batch helper may still drain a stale plan for repair,
+                        # but a leased worker must yield so other acceptances
+                        # receive a fair opportunity to run.
+                        if claim is not None and progressed:
+                            break
                     if progressed:
                         changed = True
                         continue
@@ -286,6 +389,8 @@ class AcceptanceProcessor:
             queued = next((run for run in runs if run["status"] == "QUEUED"), None)
             if queued is not None:
                 with self.store.transaction() as uow:
+                    if not self._claim_owned(uow, claim):
+                        return changed
                     action = uow.actions.get(queued["action_id"])
                 if not action["stopped"]:
                     continue
@@ -294,6 +399,8 @@ class AcceptanceProcessor:
                         plan, queued, "ERROR", "Checker was rejected before a trusted run began."
                     )
                 else:
+                    if getattr(self, "_lease_lost", None) is not None and self._lease_lost.is_set():
+                        return changed
                     execution = self.execution.json(
                         "GET",
                         f"/internal/projects/{acceptance['project_id']}/executions/"
@@ -317,6 +424,8 @@ class AcceptanceProcessor:
                     )
                 validate_capability_report(plan, queued, report)
                 with self.store.transaction() as uow:
+                    if not self._claim_owned(uow, claim):
+                        return changed
                     locked = uow.science.check_run(queued["run_id"], lock=True)
                     if locked["status"] != "QUEUED":
                         continue
@@ -343,6 +452,8 @@ class AcceptanceProcessor:
                     "CANCELLED_BEFORE_CHECKER_START",
                 )
                 with self.store.transaction() as uow:
+                    if not self._claim_owned(uow, claim):
+                        return changed
                     locked = uow.science.check_run(run["run_id"], lock=True)
                     if locked["status"] != "PLANNED":
                         continue
@@ -373,6 +484,8 @@ class AcceptanceProcessor:
                     )
                     report = self._failure_report(plan, run, status, reason)
                     with self.store.transaction() as uow:
+                        if not self._claim_owned(uow, claim):
+                            return changed
                         uow.science.apply_item_results(plan_row["plan_id"], report["items"])
                         uow.science.skip_check_run(run["run_id"], "SKIPPED", report)
                     changed = True
@@ -381,6 +494,8 @@ class AcceptanceProcessor:
                 if not all(value in {"PASS", "REUSED"} for value in dependency_states):
                     continue
                 with self.store.transaction() as uow:
+                    if not self._claim_owned(uow, claim):
+                        return changed
                     current = uow.tasks.get(
                         acceptance["project_id"], acceptance["task_id"], lock=True
                     )
@@ -430,6 +545,8 @@ class AcceptanceProcessor:
                 continue
 
             with self.store.transaction() as uow:
+                if not self._claim_owned(uow, claim):
+                    return changed
                 current = uow.tasks.get(acceptance["project_id"], acceptance["task_id"], lock=True)
                 current_runs = uow.science.check_runs(acceptance["acceptance_id"], lock=True)
                 if any(run["status"] in {"PLANNED", "QUEUED"} for run in current_runs):

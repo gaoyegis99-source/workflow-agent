@@ -1,12 +1,58 @@
-"""Standard-library validation for a deployment-pinned V7 release lock."""
+"""Historical Release Lock validation retained for read-only audit evidence.
+
+Direct Compose deployments deliberately do not import this module at startup,
+authorize requests with it, or use it to select a deployment.  The functions
+remain here solely so archived P8 evidence and old cold-backup manifests can be
+inspected without changing their bytes.
+"""
 
 from __future__ import annotations
 
 import hashlib
 import json
-import os
 import re
+from dataclasses import dataclass
 from pathlib import Path
+from typing import Protocol
+
+
+@dataclass(frozen=True)
+class ReleaseContext:
+    """Explicit, read-only context for historical Release Lock inspection.
+
+    This type is intentionally separate from ``DeploymentContext``: it is
+    accepted only by audit/restore helpers in this module and is never loaded
+    by active application composition.  Keeping the legacy values explicit
+    preserves the public audit API without restoring an environment-driven
+    startup gate.
+    """
+
+    deployment_mode: str = "development"
+    release_lock_path: Path | None = None
+    release_digest: str | None = None
+
+    def __post_init__(self) -> None:
+        if self.deployment_mode not in {"development", "production"}:
+            raise ValueError("V7_LEGACY_RELEASE_MODE_INVALID")
+        if self.release_lock_path is not None and not isinstance(self.release_lock_path, Path):
+            raise ValueError("V7_LEGACY_RELEASE_LOCK_INVALID")
+        if self.release_digest is not None and not _sha256(self.release_digest):
+            raise ValueError("V7_LEGACY_RELEASE_DIGEST_INVALID")
+        if self.is_production and (self.release_lock_path is None or self.release_digest is None):
+            raise ValueError("V7_LEGACY_RELEASE_CONTEXT_INCOMPLETE")
+
+    @property
+    def is_production(self) -> bool:
+        return self.deployment_mode == "production"
+
+
+class LegacyReleaseContext(Protocol):
+    """Minimal historical shape accepted by the audit-only helpers below."""
+
+    is_production: bool
+    release_lock_path: Path | None
+    release_digest: str | None
+
 
 REQUIRED_WHEELS = {
     "groundwater_agent_runtime",
@@ -24,11 +70,33 @@ REQUIRED_WHEELS = {
 
 SHA256 = re.compile(r"sha256:[0-9a-f]{64}")
 P8_DATABASE_SCHEMAS = {
+    "platform": "0026_worker_lane_leases",
+    "data": "0004_document_assets",
+    "execution": "0006_remote_reliability",
+    "knowledge": "0002_lifecycle_outbox",
+}
+PRE_WORKER_LANE_LEASE_P8_DATABASE_SCHEMAS = {
+    "platform": "0025_exact_identity_only",
+    "data": "0004_document_assets",
+    "execution": "0006_remote_reliability",
+    "knowledge": "0002_lifecycle_outbox",
+}
+# Existing, signed P8.2 release locks remain readable for audit and N-1
+# recovery.  Only a *target* release may use ``P8_DATABASE_SCHEMAS``; the
+# upgrade planner enforces that distinction before any runtime action.
+LEGACY_P8_DATABASE_SCHEMAS = {
     "platform": "0023_workflow_release_lifecycle",
     "data": "0004_document_assets",
     "execution": "0006_remote_reliability",
     "knowledge": "0002_lifecycle_outbox",
 }
+SUPPORTED_P8_DATABASE_SCHEMAS = frozenset(
+    {
+        tuple(sorted(P8_DATABASE_SCHEMAS.items())),
+        tuple(sorted(PRE_WORKER_LANE_LEASE_P8_DATABASE_SCHEMAS.items())),
+        tuple(sorted(LEGACY_P8_DATABASE_SCHEMAS.items())),
+    }
+)
 
 
 def _sha256(value: object) -> bool:
@@ -82,7 +150,9 @@ def validate_release_lock(value: object) -> dict:
         and all(isinstance(item, str) and item for item in compatibility["upgrade_from"])
         and compatibility.get("api_contract") == "api/v1"
         and compatibility.get("backup_formats") == [1, 2]
-        and compatibility.get("database_schemas") == P8_DATABASE_SCHEMAS
+        and isinstance(compatibility.get("database_schemas"), dict)
+        and tuple(sorted(compatibility["database_schemas"].items()))
+        in SUPPORTED_P8_DATABASE_SCHEMAS
         and isinstance(compatibility.get("recovery_releases"), dict)
     ):
         raise ValueError("Release compatibility contract is invalid")
@@ -140,11 +210,10 @@ def file_digest(path: str | Path) -> str:
     return "sha256:" + hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
-def production_mode() -> bool:
-    mode = os.environ.get("V7_DEPLOYMENT_MODE", "development")
-    if mode not in {"development", "production"}:
-        raise ValueError("V7_DEPLOYMENT_MODE must be development or production")
-    return mode == "production"
+def production_mode(release: LegacyReleaseContext) -> bool:
+    """Return the historical audit mode; never use this for active deployment."""
+
+    return release.is_production
 
 
 def load_release_lock(path: str | Path, expected_digest: str) -> dict:
@@ -174,6 +243,7 @@ def verify_catalog(lock: dict, name: str, path: str | Path, catalog: dict) -> No
 
 def production_release(
     *,
+    release: LegacyReleaseContext,
     operator_path: str | Path,
     operator_catalog: dict,
     tool_path: str | Path | None = None,
@@ -182,15 +252,18 @@ def production_release(
     images: dict[str, str | None] | None = None,
     version: str | None = None,
 ) -> dict | None:
-    """Verify deployment inputs in production; development stays source-friendly."""
+    """Verify a historical lock for audit or restore inspection only.
 
-    if not production_mode():
+    Active V7 composition uses :class:`DeploymentContext` and never calls this
+    function.  Keeping the validator separate avoids rewriting signed evidence
+    while ensuring it cannot become an implicit startup gate again.
+    """
+
+    if not production_mode(release):
         return None
-    lock_path = os.environ.get("V7_RELEASE_LOCK")
-    expected = os.environ.get("V7_RELEASE_DIGEST")
-    if not lock_path or not expected:
+    if release.release_lock_path is None or release.release_digest is None:
         raise ValueError("Production requires V7_RELEASE_LOCK and V7_RELEASE_DIGEST")
-    lock = load_release_lock(lock_path, expected)
+    lock = load_release_lock(release.release_lock_path, release.release_digest)
     verify_catalog(lock, "operator_catalog", operator_path, operator_catalog)
     if tool_path is not None or tool_catalog is not None:
         if tool_path is None or tool_catalog is None:

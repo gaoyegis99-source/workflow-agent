@@ -1,5 +1,6 @@
 import pytest
-from platform_core.application.authoring_release import TrialVerdictProcessor
+from platform_core.application.trial_coverage import coverage as project_coverage
+from platform_core.application.trial_coverage import shape
 from platform_core.domain.authoring import canonical_digest
 from platform_core.domain.control import RuleViolation
 from platform_infrastructure import tables
@@ -47,7 +48,7 @@ def node(node_id="node-0", *, indices=None, executed=True):
 
 def test_coverage_records_instances_shapes_and_skipped_branches():
     trial_case = case(expected="SKIPPED")
-    coverage, failures = TrialVerdictProcessor._coverage(
+    coverage, failures = project_coverage(
         trial_case,
         [],
         {"reports": [[None, {"asset": {}, "representation_id": "report"}]]},
@@ -65,7 +66,7 @@ def test_duplicate_scatter_values_keep_distinct_observed_instances():
     trial_case["planned_steps"].append(
         trial_case["planned_steps"][0] | {"node_id": "node-1", "scatter_indices": [1]}
     )
-    coverage, failures = TrialVerdictProcessor._coverage(
+    coverage, failures = project_coverage(
         trial_case,
         [node(), node("node-1", indices=[1])],
         {},
@@ -88,14 +89,14 @@ def test_dynamic_and_unexpected_instances_are_distinguished():
             "operator_id": "table-profile",
         }
     ]
-    coverage, failures = TrialVerdictProcessor._coverage(
+    coverage, failures = project_coverage(
         trial_case,
         [node("dynamic", indices=[4])],
         {},
     )
     assert failures == []
     assert coverage["positive_compute"] is True
-    _, failures = TrialVerdictProcessor._coverage(
+    _, failures = project_coverage(
         trial_case,
         [node("wrong-depth", indices=[4, 5])],
         {},
@@ -106,7 +107,7 @@ def test_dynamic_and_unexpected_instances_are_distinguished():
 def test_legacy_a3_trial_case_does_not_become_invalid_after_upgrade():
     trial_case = case(profile="workflow-trial-case-v1")
     trial_case.pop("planned_steps")
-    coverage, failures = TrialVerdictProcessor._coverage(trial_case, [node()], {})
+    coverage, failures = project_coverage(trial_case, [node()], {})
     assert failures == []
     assert coverage["positive_compute"] is True
 
@@ -161,4 +162,4 @@ def test_excessively_nested_output_shape_is_rejected(depth):
     for _ in range(depth):
         value = [value]
     with pytest.raises(Exception, match="deeply nested"):
-        TrialVerdictProcessor._shape(value)
+        shape(value)

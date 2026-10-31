@@ -208,13 +208,31 @@ export type OperatorProposal = {
   };
 };
 
+/** In-memory marker for an already authenticated trusted-proxy browser flow. */
+export const TRUSTED_PROXY_SESSION = "__v7_trusted_proxy_session__";
+
+export type CurrentIdentity = {
+  principal_id: string;
+  display_name: string;
+  authentication_mode: "token" | "trusted-proxy";
+  subject: string | null;
+  projects: Array<{ project_id: string; role: "VIEWER" | "EDITOR" | "OWNER" }>;
+};
+
+export function authenticatedHeaders(token: string, initial?: HeadersInit): Headers {
+  const headers = new Headers(initial);
+  if (token && token !== TRUSTED_PROXY_SESSION) {
+    headers.set("Authorization", `Bearer ${token}`);
+  }
+  return headers;
+}
+
 export async function request<T>(
   token: string,
   path: string,
   options: RequestInit = {},
 ): Promise<T> {
-  const headers = new Headers(options.headers);
-  headers.set("Authorization", `Bearer ${token}`);
+  const headers = authenticatedHeaders(token, options.headers);
   if (options.body && typeof options.body === "string" && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
   }
@@ -227,7 +245,7 @@ export async function request<T>(
   if (!response.ok) {
     const error = (await response.json().catch(() => ({}))) as { code?: string; message?: string };
     const byCode: Record<string, string> = {
-      AUTHENTICATION_REQUIRED: "令牌无效、已撤销或已过期，请重新连接。",
+      AUTHENTICATION_REQUIRED: "当前身份无效、已撤销或已过期，请重新连接。",
       SCOPE_DENIED: "当前项目角色不足以执行此操作。",
       BUDGET_BLOCKED: "预算或在途名额不足，请检查任务预算。",
       IDEMPOTENCY_CONFLICT: "同一操作键已用于其他内容，请刷新后重试。",
@@ -235,7 +253,7 @@ export async function request<T>(
       DEPENDENCY_UNAVAILABLE: "依赖服务暂不可用；当前状态尚未重新确认。",
     };
     const fallback: Record<number, string> = {
-      401: "令牌无效、已撤销或已过期，请重新连接。",
+      401: "当前身份无效、已撤销或已过期，请重新连接。",
       403: "当前项目角色不足以执行此操作。",
       409: "资源已被其他操作修改，请刷新后重试。",
       422: "提交内容未通过校验，请检查字段。",
@@ -303,7 +321,7 @@ export async function downloadRepresentation(
 ): Promise<Blob> {
   const response = await fetch(
     `/api/v1/projects/${projectId}/assets/${assetId}/versions/${versionId}/representations/${representationId}/content`,
-    { headers: { Authorization: `Bearer ${token}` } },
+    { headers: authenticatedHeaders(token) },
   );
   if (!response.ok) throw new ApiError(response.status, `HTTP_${response.status}`, "下载失败，请刷新并确认权限。");
   return response.blob();

@@ -2,18 +2,15 @@
 
 from __future__ import annotations
 
-import hashlib
 import json
 from typing import Any
 
+from platform_core.domain.canonical import digest_uri
 from platform_core.domain.control import require, valid_identifier
 
 
 def canonical_digest(value: Any) -> str:
-    encoded = json.dumps(
-        value, ensure_ascii=False, sort_keys=True, separators=(",", ":"), allow_nan=False
-    ).encode()
-    return "sha256:" + hashlib.sha256(encoded).hexdigest()
+    return digest_uri(value)
 
 
 def blank_workflow() -> dict:

@@ -2,10 +2,8 @@
 
 import argparse
 import logging
-import os
 import signal
 import threading
-from importlib.metadata import version
 from uuid import uuid4
 
 from platform_contracts.authoring import (
@@ -13,16 +11,16 @@ from platform_contracts.authoring import (
     validate_operator_parameters,
 )
 from platform_contracts.health import touch_worker_heartbeat
-from platform_contracts.release import production_mode, production_release
 from platform_core.application.authoring import (
     AuthoringValidationProcessor,
     semantic_environment,
 )
-from platform_core.application.authoring_release import TrialVerdictProcessor
-from platform_core.application.catalog import configured_catalog
+from platform_core.application.trial_verdict import TrialVerdictProcessor
 from platform_infrastructure.cwl import CwlValidator
 from platform_infrastructure.database import Database, StorageError
-from platform_infrastructure.services import from_environment
+from platform_infrastructure.services import data_client, execution_client
+
+from platform_agent_runtime.composition import AuthoringComposition
 
 logger = logging.getLogger(__name__)
 
@@ -34,29 +32,17 @@ def main():
     logging.basicConfig(level=logging.INFO)
     database = None
     try:
-        image_id = os.environ.get("V7_CWL_IMAGE")
-        if not image_id:
-            raise RuntimeError("V7_CWL_IMAGE is required")
-        database = Database.from_environment()
+        composition = AuthoringComposition.from_environment()
+        image_id = composition.cwl_image
+        database = Database(composition.database_url)
         database.check_schema()
-        touch_worker_heartbeat()
-        catalog = configured_catalog()
-        release = None
-        if production_mode():
-            operator_path = os.environ.get("V7_OPERATOR_CATALOG")
-            if not operator_path:
-                raise RuntimeError("Production authoring worker requires the Operator Catalog")
-            release = production_release(
-                operator_path=operator_path,
-                operator_catalog=catalog,
-                images={"cwl": image_id},
-                version=version("groundwater-agent-runtime"),
-            )
+        touch_worker_heartbeat(composition.heartbeat_file)
+        catalog = composition.operator_catalog
         descriptor = build_authoring_descriptor(catalog)
         environment = semantic_environment(
             descriptor,
             image_id,
-            release["release_digest"] if release else None,
+            composition.deployment.deployment_revision,
         )
         processor = AuthoringValidationProcessor(
             database,
@@ -64,9 +50,11 @@ def main():
             descriptor,
             validate_operator_parameters,
             environment,
+            operator_catalog=catalog,
             owner=uuid4().hex,
         )
-        data, execution = from_environment()
+        data = data_client(composition.data, deployment=composition.deployment)
+        execution = execution_client(composition.execution, deployment=composition.deployment)
         trial_processor = (
             TrialVerdictProcessor(
                 database,
@@ -96,7 +84,7 @@ def main():
                     if not worked:
                         worked = processor.process_one()
                 validation_turn = not validation_turn
-                touch_worker_heartbeat()
+                touch_worker_heartbeat(composition.heartbeat_file)
                 if not worked:
                     stop.wait(0.2)
             except StorageError:

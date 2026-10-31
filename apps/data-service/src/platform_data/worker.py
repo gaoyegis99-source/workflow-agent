@@ -1,7 +1,6 @@
 """Independent import worker, with lease fencing and immutable normalized bytes."""
 
 import logging
-import os
 import threading
 import time
 from uuid import uuid4
@@ -14,6 +13,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from platform_data.adapters.blobs import Blobs
 from platform_data.adapters.repository import Repository
 from platform_data.adapters.tables_io import normalize
+from platform_data.composition import DataComposition
 from platform_data.database import Database
 
 
@@ -89,10 +89,11 @@ class Worker:
 
 
 def main():
-    database = Database(os.environ["V7_DATA_DATABASE_URL"])
+    composition = DataComposition.from_environment(role="worker")
+    database = Database(composition.database_url)
     database.check_schema()
-    touch_worker_heartbeat()
-    worker = Worker(database, Blobs(os.environ["V7_DATA_STORAGE"]))
+    touch_worker_heartbeat(composition.heartbeat_file)
+    worker = Worker(database, Blobs(composition.storage_root))
     try:
         while True:
             try:
@@ -100,7 +101,7 @@ def main():
             except (SQLAlchemyError, OSError) as exc:
                 logging.warning("Data worker dependency unavailable: %s", type(exc).__name__)
                 active = False
-            touch_worker_heartbeat()
+            touch_worker_heartbeat(composition.heartbeat_file)
             if not active:
                 time.sleep(0.5)
     finally:

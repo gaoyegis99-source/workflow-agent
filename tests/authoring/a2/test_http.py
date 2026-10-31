@@ -1,13 +1,16 @@
+from dataclasses import replace
+
 from fastapi.testclient import TestClient
 from platform_api.app import create_app
+from platform_api.composition import PlatformComposition
 from platform_core.application.control import ControlService
 
 
-def test_preview_and_validation_routes_remain_after_a3(database, owner, monkeypatch):
+def test_preview_and_validation_routes_remain_after_a3(database, owner):
     actor, token = owner
     project = ControlService(database).create_project(actor, "a2-http", "A2")
-    monkeypatch.setenv("V7_CWL_IMAGE", "sha256:" + "a" * 64)
-    with TestClient(create_app(database)) as client:
+    composition = replace(PlatformComposition.for_test(), cwl_image="sha256:" + "a" * 64)
+    with TestClient(create_app(database, composition=composition)) as client:
         prefix = f"/api/v1/projects/{project['project_id']}"
         headers = {"Authorization": "Bearer " + token}
         descriptor = client.get(prefix + "/authoring/operator-descriptors", headers=headers).json()

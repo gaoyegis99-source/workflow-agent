@@ -2,9 +2,19 @@
 
 import json
 import re
+import shutil
 import subprocess
 import tempfile
 from pathlib import Path
+
+
+def _docker_executable() -> str:
+    """Prefer this checkout's guarded Docker launcher when it is present."""
+    for parent in Path(__file__).resolve().parents:
+        candidate = parent / "bin" / "docker"
+        if candidate.is_file():
+            return str(candidate)
+    return shutil.which("docker") or "docker"
 
 
 class CwlValidator:
@@ -29,7 +39,7 @@ class CwlValidator:
             try:
                 result = subprocess.run(
                     [
-                        "docker",
+                        _docker_executable(),
                         "run",
                         "--rm",
                         "--network",

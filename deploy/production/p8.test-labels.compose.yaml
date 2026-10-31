@@ -1,0 +1,64 @@
+name: ${V7_P8_PROJECT_NAME:?required}
+
+x-test-labels: &test-labels
+  v7.test-run: ${V7_DEPLOYMENT_ID:?test deployment id required}
+
+services:
+  postgres:
+    labels: *test-labels
+  volume-init:
+    labels: *test-labels
+  migrate:
+    labels: *test-labels
+  platform-api:
+    labels: *test-labels
+  data-api:
+    labels: *test-labels
+  execution-api:
+    labels: *test-labels
+  knowledge-api:
+    labels: *test-labels
+  gateway:
+    labels: *test-labels
+  platform-worker-package:
+    labels: *test-labels
+  platform-worker-action:
+    labels: *test-labels
+  platform-worker-acceptance:
+    labels: *test-labels
+  platform-worker-knowledge:
+    labels: *test-labels
+  authoring-worker:
+    labels: *test-labels
+  data-worker:
+    labels: *test-labels
+  data-document-worker:
+    labels: *test-labels
+  data-spatial-worker:
+    labels: *test-labels
+  execution-supervisor:
+    labels: *test-labels
+  execution-node-1:
+    labels: *test-labels
+  execution-node-2:
+    labels: *test-labels
+  execution-publication:
+    labels: *test-labels
+  knowledge-worker:
+    labels: *test-labels
+  agent-worker:
+    labels: *test-labels
+  backup:
+    labels: *test-labels
+
+networks:
+  v7-ingress:
+    labels: *test-labels
+  v7-service:
+    labels: *test-labels
+  v7-database:
+    labels: *test-labels
+  v7-workload:
+    labels: *test-labels
+  v7-egress:
+    labels: *test-labels

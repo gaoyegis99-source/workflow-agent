@@ -16,7 +16,7 @@ dependencies = [
 platform-admin = "platform_infrastructure.admin:main"
 platform-worker = "platform_infrastructure.worker:main"
 platform-cold-backup = "platform_infrastructure.cold_backup:main"
-platform-release-upgrade = "platform_infrastructure.upgrade:main"
+platform-release-upgrade = "platform_infrastructure.retired_release_lock:main"
 
 [build-system]
 requires = ["hatchling==1.27.0"]

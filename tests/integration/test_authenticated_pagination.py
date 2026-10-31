@@ -12,7 +12,7 @@ from fastapi.testclient import TestClient
 from platform_api.app import create_app
 from platform_core.application.control import ControlService
 
-from tests.p2.conftest import database, owner, postgres  # noqa: F401, F811
+from tests.platform.database.conftest import database, owner, postgres  # noqa: F401, F811
 
 DIGEST = "sha256:" + "0" * 64
 

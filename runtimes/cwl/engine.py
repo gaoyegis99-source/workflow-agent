@@ -19,6 +19,18 @@ GRACE_SECONDS = 20
 FORCE_WAIT_SECONDS = 5
 
 
+def enable_private_bind_cleanup():
+    """Make rootless-owned descendants removable by the owning host worker.
+
+    The complete bind root is reachable only through a worker-owned 0700
+    parent and is sealed back to 0700 after the engine stops.  A zero umask
+    inside that private mount lets the host UID clean up files whose container
+    UID is mapped to a subordinate rootless UID.
+    """
+
+    os.umask(0)
+
+
 def save(path, value):
     temporary = path.with_suffix(".tmp")
     with temporary.open("w") as stream:
@@ -132,6 +144,7 @@ def toil_command(config):
 
 
 def main():
+    enable_private_bind_cleanup()
     config = json.loads(CONFIG.read_text())
     compiled = config.get("engine_package", config["compiled"])
     if sys.argv[1:] == ["validate"]:

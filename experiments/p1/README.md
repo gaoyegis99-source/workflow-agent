@@ -7,14 +7,14 @@
 在 V7 根目录执行：
 
 ```bash
-bash scripts/check_p1.sh --record docs/verification/p1-rootless-correction-evidence.json
+bash scripts/checks/check_p1.sh
 ```
 
 该入口先完成 P0 回归与仓库外安装验证，再运行 13 项实验适配／选型单元测试，最后依次执行真实 Toil、Weaver、gVisor 验证。组件报告中保留失败项；总退出码由明确的阶段准入规则决定，并不要求两个候选都通过。不要设置 `PYTHONOPTIMIZE` 或使用 `python -O`。
 
-要求 Linux x86_64、Python 3.12、uv，以及当前用户可访问的 Docker daemon 和 Compose v2。本轮验证的 Docker 为 28.1.1、Compose 为 2.35.1。第一次运行需要网络、镜像空间和安装依赖的时间；缓存后实际探针仍需数分钟。Weaver 使用临时 MongoDB，仅属于候选自身的状态存储，不是 V7 的业务数据库。
+要求 Linux x86_64、Python 3.12、uv，以及当前用户可访问的 V7 rootless Docker daemon 和 Compose v2。本轮验证的 Docker 为 28.1.1、Compose 为 2.35.1。第一次运行需要网络、镜像空间和安装依赖的时间；缓存后实际探针仍需数分钟。Weaver 使用临时 MongoDB，仅属于候选自身的状态存储，不是 V7 的业务数据库。
 
-Toil 使用 `toil/pyproject.toml`、独立 `toil/uv.lock` 和 `toil/.venv`，不会加入根工作区运行依赖。镜像按 digest 固定在 `pins.json` 与 Compose 文件，gVisor 发行归档固定版本与 SHA-512。Weaver 启动仍会访问外部 OGC／GeoJSON Schema；这部分尚未冻结，所以当前 Weaver 环境不是完整离线复现环境。
+Toil 使用 `toil/pyproject.toml` 与独立 `toil/uv.lock`，环境由 `runtime/toolchain/p1-toil/` 重建，不会加入根工作区运行依赖。镜像按 digest 固定在 `pins.json` 与 Compose 文件，gVisor 发行归档固定版本与 SHA-512。Weaver 启动仍会访问外部 OGC／GeoJSON Schema；这部分尚未冻结，所以当前 Weaver 环境不是完整离线复现环境。
 
 Weaver 的结果地址需由部署方提供文件服务，应用自身不提供该下载端点，见 [官方配置说明](https://pavics-weaver.readthedocs.io/en/stable/configuration.html)。实验用固定 Python 镜像启动只读 HTTP 文件服务，只发布临时本机端口。Manager 与 Worker 将输出目录映射为 `/v7-p1-outputs`，避免隐藏目录名称被上游路径清理改写。该文件服务只用于受信任探针，不是平台的资产发布服务。
 
@@ -27,17 +27,15 @@ uv run --locked python -m unittest discover -s experiments/p1 -p 'test_*.py' -v
 独立调试命令如下；每次使用新的结果目录，不并发运行这些实验（Weaver 的输出与临时文件根目录是共享的）：
 
 ```bash
-uv sync --locked --project experiments/p1/toil
-experiments/p1/toil/.venv/bin/python experiments/p1/toil_probe.py suite .p1-runtime/manual-toil-1
-uv run --locked python experiments/p1/weaver_probe.py .p1-runtime/manual-weaver-1
-uv run --locked python experiments/p1/isolation_probe.py .p1-runtime/manual-isolation-1
+UV_PROJECT_ENVIRONMENT=runtime/toolchain/p1-toil uv sync --locked --project source/experiments/p1/toil
+runtime/toolchain/p1-toil/bin/python source/experiments/p1/toil_probe.py suite runtime/work/p1/manual-toil-1
+runtime/toolchain/v7/bin/python source/experiments/p1/weaver_probe.py runtime/work/p1/manual-weaver-1
+runtime/toolchain/v7/bin/python source/experiments/p1/isolation_probe.py runtime/work/p1/manual-isolation-1
 ```
 
 ## 可核对的证据
 
-`run.py` 每次生成独立 `.p1-runtime/verification-<id>/`，包含各探针 stdout／stderr、JSON 报告和总决策。总决策记录版本、环境、开始结束时间（Asia/Shanghai）、源码和锁文件摘要。`--record` 将精简证据额外写到指定路径，默认原始运行材料留在被 Git 忽略的 `.p1-runtime/`。复制精简证据不会同时复制原始日志与 JobStore。
-
-2026-10-12 的重新验证及 rootless 探针修正见 [复验报告](../../docs/verification/p1-p3-runtime-followup-report.md)和 [最新结构化证据](../../docs/verification/p1-rootless-correction-evidence.json)；原 `p1-evidence.json` 与首次复验 `p1-followup-evidence.json` 保持原样。
+`run.py` 每次生成独立 `runtime/work/p1/verification-<id>/`，包含各探针 stdout／stderr、JSON 报告和总决策。总决策记录版本、环境、开始结束时间（Asia/Shanghai）、源码和锁文件摘要。`--record` 将精简证据额外写到指定路径，默认原始运行材料留在非 Git 的 `runtime/work/p1/`。复制精简证据不会同时复制原始日志与 JobStore。
 
 | 实验 | 验证方法 |
 | --- | --- |

@@ -73,8 +73,8 @@ Platform schema 保持 `0022_operator_proposals`。A6 只增加查询、准入�
 统一入口：
 
 ```bash
-bash scripts/check_authoring.sh --phase release-library
-bash scripts/check_p7.sh --phase catalog
-bash scripts/check_p7.sh --phase compatibility
-uv run --locked python scripts/verify_distribution.py
+bash scripts/checks/check_authoring.sh --phase release-library
+bash scripts/checks/check_p7.sh --phase catalog
+bash scripts/checks/check_p7.sh --phase compatibility
+uv run --locked python scripts/checks/verify_distribution.py
 ```

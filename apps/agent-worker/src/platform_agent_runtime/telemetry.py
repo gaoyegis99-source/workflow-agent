@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import os
 from importlib.metadata import version
 
 from opentelemetry import trace
@@ -10,8 +9,9 @@ from opentelemetry import trace
 AGENT_VERSION = version("groundwater-agent-runtime")
 
 
-def configure_telemetry():
-    endpoint = os.environ.get("V7_AGENT_OTEL_ENDPOINT")
+def configure_telemetry(endpoint: str | None = None):
+    """Configure optional telemetry from an explicitly injected endpoint."""
+
     if not endpoint:
         return trace.get_tracer("groundwater.agent", AGENT_VERSION)
 

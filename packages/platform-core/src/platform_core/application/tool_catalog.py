@@ -31,6 +31,13 @@ _READ_TOOLS = (
     ("acceptance.read", ()),
 )
 
+# A new immutable catalogue identity is used for semantic discovery.  Existing
+# P6/P7 catalogues stay byte-for-byte stable; a deployment must opt in instead
+# of acquiring a new model-backed discovery capability by surprise.
+_EVIDENCE_READ_TOOLS = _READ_TOOLS + (
+    ("knowledge.semantic_search", ("query", "index_id", "profile_digest")),
+)
+
 _ACTION_TOOLS = (
     {
         "tool_id": "execution.submit_operator",
@@ -119,12 +126,19 @@ def _read_spec(tool_id, required):
     optional = {
         "data.list_assets": ("after", "limit"),
         "knowledge.search": ("limit",),
+        "knowledge.semantic_search": ("limit",),
         "capability.list_workflows": ("after", "limit"),
         "execution.read_steps": ("after", "limit"),
     }.get(tool_id, ())
     value_shapes = {
         "data.list_assets": {"after": "CURSOR", "limit": "LIMIT_100"},
         "knowledge.search": {"query": "SEARCH_QUERY", "limit": "LIMIT_20"},
+        "knowledge.semantic_search": {
+            "query": "SEARCH_QUERY",
+            "index_id": "IDENTIFIER",
+            "profile_digest": "SHA256",
+            "limit": "LIMIT_20",
+        },
         "capability.list_workflows": {"after": "CURSOR", "limit": "LIMIT_100"},
     }.get(tool_id, {})
     arguments = {
@@ -181,12 +195,13 @@ def _action_spec(value):
 
 def build_tool_catalog(stage: str = "readonly") -> dict:
     require(
-        stage in {"readonly", "actions", "science", "p7-actions", "p7-science"},
+        stage in {"readonly", "evidence", "actions", "science", "p7-actions", "p7-science"},
         "INVALID_BINDING",
         "Unknown tool stage",
         422,
     )
-    specs = [_read_spec(tool_id, required) for tool_id, required in _READ_TOOLS]
+    read_tools = _EVIDENCE_READ_TOOLS if stage == "evidence" else _READ_TOOLS
+    specs = [_read_spec(tool_id, required) for tool_id, required in read_tools]
     if stage in {"actions", "science", "p7-actions", "p7-science"}:
         selected = _P7_ACTION_TOOLS if stage.startswith("p7-") else _ACTION_TOOLS
         specs.extend(_action_spec(value) for value in selected)
@@ -200,6 +215,7 @@ def build_tool_catalog(stage: str = "readonly") -> dict:
     value = {
         "schema_version": {
             "readonly": 1,
+            "evidence": 6,
             "actions": 2,
             "science": 3,
             "p7-actions": 4,
@@ -207,6 +223,7 @@ def build_tool_catalog(stage: str = "readonly") -> dict:
         }[stage],
         "catalog_id": {
             "readonly": "p6-read-tools-v1",
+            "evidence": "p6-evidence-tools-v1",
             "actions": "p6-action-tools-v1",
             "science": "p6-science-tools-v1",
             "p7-actions": "p7-action-tools-v2",
@@ -223,6 +240,7 @@ def validate_tool_catalog(value: dict) -> dict:
         candidate["catalog_id"]: candidate
         for candidate in (
             build_tool_catalog("readonly"),
+            build_tool_catalog("evidence"),
             build_tool_catalog("actions"),
             build_tool_catalog("science"),
             build_tool_catalog("p7-actions"),
@@ -316,6 +334,13 @@ def validate_tool_arguments(spec: dict, arguments: object) -> dict:
                 and 1 <= len(value) <= 200
                 and bool(value.strip())
                 and all(ord(character) >= 32 for character in value)
+            )
+        elif shape == "SHA256":
+            valid = (
+                isinstance(value, str)
+                and len(value) == 71
+                and value.startswith("sha256:")
+                and all(character in "0123456789abcdef" for character in value[7:])
             )
         else:
             valid = (

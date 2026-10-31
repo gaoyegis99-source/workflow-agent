@@ -1,8 +1,5 @@
 """Public P3 adapters: current project permissions precede every service call."""
 
-import hmac
-import os
-from pathlib import Path
 from typing import Annotated
 
 from fastapi import APIRouter, Query, Request
@@ -59,6 +56,7 @@ def service(request):
         request.app.state.data,
         request.app.state.execution,
         operator_catalog=request.app.state.operator_catalog,
+        checker_catalog=request.app.state.checker_catalog,
     )
 
 
@@ -340,24 +338,15 @@ internal = APIRouter(include_in_schema=False)
 
 @internal.post("/internal/actions/{action_id}/permit")
 def permit(action_id: PathId, body: dict, request: Request):
-    token = os.environ.get("V7_EXECUTION_PLATFORM_TOKEN", "")
-    if len(token) < 32 or not hmac.compare_digest(
-        request.headers.get("authorization", ""), "Bearer " + token
-    ):
-        raise RuleViolation("AUTHENTICATION_REQUIRED", "Service credential required", 401)
-    marker = os.environ.get("V7_MAINTENANCE_FILE")
-    if marker and Path(marker).is_file():
+    request.app.state.internal_execution_policy.authorize(request.headers.get("authorization"))
+    if request.app.state.internal_execution_policy.maintenance_active():
         return {"decision": "WAIT", "reason": "DEPLOYMENT_PARKING"}
     return service(request).permit(action_id, body["execution_id"], body["attempt_id"])
 
 
 @internal.post("/internal/actions/{action_id}/publication-permit")
 def publication_permit(action_id: PathId, request: Request):
-    token = os.environ.get("V7_EXECUTION_PLATFORM_TOKEN", "")
-    if len(token) < 32 or not hmac.compare_digest(
-        request.headers.get("authorization", ""), "Bearer " + token
-    ):
-        raise RuleViolation("AUTHENTICATION_REQUIRED", "Service credential required", 401)
+    request.app.state.internal_execution_policy.authorize(request.headers.get("authorization"))
     return service(request).permit_publication(action_id)
 
 

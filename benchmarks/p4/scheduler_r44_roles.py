@@ -20,14 +20,15 @@ from platform_infrastructure.database import Database  # noqa: E402
 
 from benchmarks.p4.scheduler_diagnostics import distribution  # noqa: E402
 from benchmarks.p4.scheduler_r44 import PROFILES, run_pair  # noqa: E402
-from scripts.p2_environment import PostgreSQL  # noqa: E402
+from scripts.configure.p2_environment import PostgreSQL  # noqa: E402
+from scripts.lib.runtime_layout import P4_RUNTIME_ROOT  # noqa: E402
 
 ROLE_CONFIGURATION = {
     "id": "ROLE_SPLIT",
     "workers": 10,
     "roles": ("supervisor",) + ("node",) * 8 + ("publication",),
 }
-BASELINE_PATH = ROOT / "docs/verification/p4-r44-worker-queue-evidence.json"
+BASELINE_PATH = P4_RUNTIME_ROOT / "verification/p4-r44-worker-queue-evidence.json"
 SOURCES = (
     "apps/execution-service/src/platform_execution/adapters/repository.py",
     "apps/execution-service/src/platform_execution/adapters/tables.py",
@@ -38,9 +39,9 @@ SOURCES = (
     "benchmarks/p4/scheduler_r44.py",
     "benchmarks/p4/scheduler_r44_roles.py",
     "tests/performance/long_operator.Dockerfile",
-    "scripts/build_p4_performance_image.sh",
-    "scripts/run_p3.sh",
-    "scripts/run_p4.sh",
+    "scripts/build/build_p4_performance_image.sh",
+    "scripts/operations/run_p3.sh",
+    "scripts/operations/run_p4.sh",
 )
 
 
@@ -181,8 +182,8 @@ def environment():
         "docker": subprocess.check_output(
             ["docker", "version", "--format", "{{.Server.Version}}"], text=True
         ).strip(),
-        "cwl_image": (ROOT / ".p4-runtime/cwl-image.txt").read_text().strip(),
-        "performance_operator_image": (ROOT / ".p4-runtime/performance-operator-image.txt")
+        "cwl_image": (P4_RUNTIME_ROOT / "cwl-image.txt").read_text().strip(),
+        "performance_operator_image": (P4_RUNTIME_ROOT / "performance-operator-image.txt")
         .read_text()
         .strip(),
     }
@@ -195,10 +196,12 @@ def main():
     parser.add_argument("--report", type=Path)
     args = parser.parse_args()
     suffix = "-quick" if args.profile == "quick" else ""
-    args.output = args.output or ROOT / (
-        f"docs/verification/p4-r44-role-split{suffix}-evidence.json"
+    args.output = args.output or P4_RUNTIME_ROOT / (
+        f"verification/p4-r44-role-split{suffix}-evidence.json"
     )
-    args.report = args.report or ROOT / (f"docs/verification/p4-r44-role-split{suffix}-report.md")
+    args.report = (
+        args.report or P4_RUNTIME_ROOT / f"verification/p4-r44-role-split{suffix}-report.md"
+    )
     profile = PROFILES[args.profile]
     runs = []
     started = time.perf_counter()

@@ -224,6 +224,15 @@ class Repository:
                                 search_vector=sa.func.to_tsvector("simple", unit["text"]),
                             )
                         )
+                    # A profile indexes exact immutable units.  A newly
+                    # imported document cannot be silently omitted from an
+                    # existing semantic index, so discovery is fail-closed
+                    # until its owner explicitly rebuilds that index.
+                    connection.execute(
+                        t.semantic_indexes.update()
+                        .where(t.semantic_indexes.c.project_id == row["project_id"])
+                        .values(status="STALE", updated_at=now)
+                    )
                     self._event(
                         connection, row["project_id"], document_id, version_id, 1, "CREATED", {}
                     )
@@ -304,6 +313,345 @@ class Repository:
                 .limit(limit)
             ).mappings()
             return [self.version_view(dict(row)) for row in rows]
+
+    def semantic_index(self, project, index_id):
+        with self.db.engine.connect() as connection:
+            row = (
+                connection.execute(
+                    sa.select(t.semantic_indexes).where(
+                        t.semantic_indexes.c.project_id == project,
+                        t.semantic_indexes.c.index_id == index_id,
+                    )
+                )
+                .mappings()
+                .first()
+            )
+            return dict(row) if row else None
+
+    def begin_semantic_index(self, project, index_id, profile, profile_digest):
+        """Create or re-open only the exact immutable profile requested."""
+
+        with self.db.engine.begin() as connection:
+            now = connection.scalar(sa.select(sa.func.clock_timestamp()))
+            existing = (
+                connection.execute(
+                    sa.select(t.semantic_indexes)
+                    .where(t.semantic_indexes.c.index_id == index_id)
+                    .with_for_update()
+                )
+                .mappings()
+                .first()
+            )
+            if existing is not None:
+                ensure(
+                    existing["project_id"] == project
+                    and existing["profile_digest"] == profile_digest
+                    and existing["profile"] == profile,
+                    "INVALID_BINDING",
+                    "Semantic index identity differs",
+                    409,
+                )
+                connection.execute(
+                    t.semantic_indexes.update()
+                    .where(t.semantic_indexes.c.index_id == index_id)
+                    .values(status="BUILDING", failure_category=None, updated_at=now)
+                )
+                return
+            same_profile = connection.execute(
+                sa.select(t.semantic_indexes.c.index_id).where(
+                    t.semantic_indexes.c.project_id == project,
+                    t.semantic_indexes.c.profile_digest == profile_digest,
+                )
+            ).scalar_one_or_none()
+            ensure(
+                same_profile is None,
+                "INVALID_BINDING",
+                "Semantic profile already belongs to another index identity",
+                409,
+            )
+            connection.execute(
+                t.semantic_indexes.insert().values(
+                    index_id=index_id,
+                    project_id=project,
+                    profile=profile,
+                    profile_digest=profile_digest,
+                    status="BUILDING",
+                    created_at=now,
+                    updated_at=now,
+                )
+            )
+
+    def fail_semantic_index(self, project, index_id, profile_digest, category):
+        with self.db.engine.begin() as connection:
+            now = connection.scalar(sa.select(sa.func.clock_timestamp()))
+            connection.execute(
+                t.semantic_indexes.update()
+                .where(
+                    t.semantic_indexes.c.project_id == project,
+                    t.semantic_indexes.c.index_id == index_id,
+                    t.semantic_indexes.c.profile_digest == profile_digest,
+                )
+                .values(status="FAILED", failure_category=category[:64], updated_at=now)
+            )
+
+    def stale_semantic_index(self, project, index_id, profile_digest):
+        """Retain an interrupted build as stale rather than falsely ready."""
+
+        with self.db.engine.begin() as connection:
+            now = connection.scalar(sa.select(sa.func.clock_timestamp()))
+            connection.execute(
+                t.semantic_indexes.update()
+                .where(
+                    t.semantic_indexes.c.project_id == project,
+                    t.semantic_indexes.c.index_id == index_id,
+                    t.semantic_indexes.c.profile_digest == profile_digest,
+                )
+                .values(status="STALE", failure_category=None, updated_at=now)
+            )
+
+    def active_units_for_semantic_index(self, project):
+        joined = t.units.join(
+            t.versions,
+            sa.and_(
+                t.units.c.document_id == t.versions.c.document_id,
+                t.units.c.version_id == t.versions.c.version_id,
+            ),
+        )
+        with self.db.engine.connect() as connection:
+            rows = connection.execute(
+                sa.select(
+                    t.units.c.document_id,
+                    t.units.c.version_id,
+                    t.units.c.unit_id,
+                    t.units.c.text,
+                    t.versions.c.content_digest,
+                    t.versions.c.lifecycle_revision,
+                )
+                .select_from(joined)
+                .where(
+                    t.units.c.project_id == project,
+                    t.versions.c.project_id == project,
+                    t.versions.c.availability == "ACTIVE",
+                )
+                .order_by(t.units.c.document_id, t.units.c.version_id, t.units.c.unit_id)
+            ).mappings()
+            return [dict(row) for row in rows]
+
+    def replace_semantic_vectors(self, project, index_id, profile_digest, records):
+        """Make one fully validated semantic build visible atomically."""
+
+        with self.db.engine.begin() as connection:
+            now = connection.scalar(sa.select(sa.func.clock_timestamp()))
+            index = one(
+                connection,
+                sa.select(t.semantic_indexes)
+                .where(
+                    t.semantic_indexes.c.project_id == project,
+                    t.semantic_indexes.c.index_id == index_id,
+                )
+                .with_for_update(),
+            )
+            ensure(
+                index["profile_digest"] == profile_digest,
+                "REVISION_CONFLICT",
+                "Semantic profile changed while indexing",
+                409,
+            )
+            ensure(
+                index["status"] == "BUILDING",
+                "REVISION_CONFLICT",
+                "Semantic index was invalidated while indexing",
+                409,
+            )
+            received = {
+                (
+                    record["document_id"],
+                    record["version_id"],
+                    record["unit_id"],
+                    record["content_digest"],
+                    record["lifecycle_revision"],
+                )
+                for record in records
+            }
+            ensure(
+                len(received) == len(records),
+                "INVALID_BINDING",
+                "Semantic build contains duplicate evidence units",
+                422,
+            )
+            active = {
+                (
+                    row["document_id"],
+                    row["version_id"],
+                    row["unit_id"],
+                    row["content_digest"],
+                    row["lifecycle_revision"],
+                )
+                for row in connection.execute(
+                    sa.select(
+                        t.units.c.document_id,
+                        t.units.c.version_id,
+                        t.units.c.unit_id,
+                        t.versions.c.content_digest,
+                        t.versions.c.lifecycle_revision,
+                    )
+                    .select_from(
+                        t.units.join(
+                            t.versions,
+                            sa.and_(
+                                t.units.c.document_id == t.versions.c.document_id,
+                                t.units.c.version_id == t.versions.c.version_id,
+                            ),
+                        )
+                    )
+                    .where(
+                        t.units.c.project_id == project,
+                        t.versions.c.project_id == project,
+                        t.versions.c.availability == "ACTIVE",
+                    )
+                ).mappings()
+            }
+            ensure(
+                received == active,
+                "REVISION_CONFLICT",
+                "Knowledge units changed while indexing",
+                409,
+            )
+            for record in records:
+                version = one(
+                    connection,
+                    sa.select(t.versions).where(
+                        t.versions.c.project_id == project,
+                        t.versions.c.document_id == record["document_id"],
+                        t.versions.c.version_id == record["version_id"],
+                    ),
+                )
+                ensure(
+                    version["availability"] == "ACTIVE"
+                    and version["content_digest"] == record["content_digest"]
+                    and version["lifecycle_revision"] == record["lifecycle_revision"],
+                    "REVISION_CONFLICT",
+                    "Knowledge document changed while indexing",
+                    409,
+                )
+            connection.execute(
+                t.semantic_vectors.update()
+                .where(
+                    t.semantic_vectors.c.project_id == project,
+                    t.semantic_vectors.c.index_id == index_id,
+                    t.semantic_vectors.c.valid.is_(True),
+                )
+                .values(valid=False, invalidated_at=now)
+            )
+            for record in records:
+                values = {
+                    **record,
+                    "index_id": index_id,
+                    "project_id": project,
+                    "valid": True,
+                    "invalidated_at": None,
+                    "created_at": now,
+                }
+                connection.execute(
+                    insert(t.semantic_vectors)
+                    .values(**values)
+                    .on_conflict_do_update(
+                        index_elements=[
+                            t.semantic_vectors.c.index_id,
+                            t.semantic_vectors.c.unit_id,
+                        ],
+                        set_={
+                            key: values[key]
+                            for key in (
+                                "project_id",
+                                "document_id",
+                                "version_id",
+                                "content_digest",
+                                "lifecycle_revision",
+                                "vector",
+                                "valid",
+                                "invalidated_at",
+                                "created_at",
+                            )
+                        },
+                    )
+                )
+            connection.execute(
+                t.semantic_indexes.update()
+                .where(t.semantic_indexes.c.index_id == index_id)
+                .values(status="READY", failure_category=None, updated_at=now)
+            )
+
+    def semantic_candidates(self, project, index_id, profile_digest, *, sources=None):
+        if sources == []:
+            return []
+        joined = (
+            t.semantic_vectors.join(
+                t.semantic_indexes,
+                t.semantic_vectors.c.index_id == t.semantic_indexes.c.index_id,
+            )
+            .join(
+                t.units,
+                sa.and_(
+                    t.semantic_vectors.c.document_id == t.units.c.document_id,
+                    t.semantic_vectors.c.version_id == t.units.c.version_id,
+                    t.semantic_vectors.c.unit_id == t.units.c.unit_id,
+                ),
+            )
+            .join(
+                t.versions,
+                sa.and_(
+                    t.units.c.document_id == t.versions.c.document_id,
+                    t.units.c.version_id == t.versions.c.version_id,
+                ),
+            )
+        )
+        conditions = [
+            t.semantic_vectors.c.project_id == project,
+            t.semantic_vectors.c.index_id == index_id,
+            t.semantic_vectors.c.valid.is_(True),
+            t.semantic_indexes.c.profile_digest == profile_digest,
+            t.versions.c.project_id == project,
+            t.versions.c.availability == "ACTIVE",
+            t.semantic_vectors.c.content_digest == t.versions.c.content_digest,
+            t.semantic_vectors.c.lifecycle_revision == t.versions.c.lifecycle_revision,
+        ]
+        if sources is not None:
+            identities = {
+                (
+                    source["asset_id"],
+                    source["version_id"],
+                    source["version_manifest_digest"],
+                )
+                for source in sources
+            }
+            conditions.append(
+                sa.tuple_(
+                    t.versions.c.source_asset_id,
+                    t.versions.c.source_version_id,
+                    t.versions.c.source_manifest_digest,
+                ).in_(sorted(identities))
+            )
+        with self.db.engine.connect() as connection:
+            rows = connection.execute(
+                sa.select(
+                    t.semantic_vectors.c.vector,
+                    t.units.c.document_id,
+                    t.units.c.version_id,
+                    t.units.c.unit_id,
+                    t.units.c.text,
+                    t.units.c.start_char,
+                    t.units.c.end_char,
+                    t.versions.c.title,
+                    t.versions.c.availability,
+                    t.versions.c.epistemic_status,
+                    t.versions.c.review_state,
+                )
+                .select_from(joined)
+                .where(*conditions)
+                .order_by(t.units.c.unit_id)
+            ).mappings()
+            return [dict(row) for row in rows]
 
     def search(self, project, query, limit, *, sources=None):
         if sources == []:
@@ -436,6 +784,21 @@ class Repository:
                     withdrawn_at=now,
                 )
             )
+            connection.execute(
+                t.semantic_vectors.update()
+                .where(
+                    t.semantic_vectors.c.project_id == project,
+                    t.semantic_vectors.c.document_id == document,
+                    t.semantic_vectors.c.version_id == version,
+                    t.semantic_vectors.c.valid.is_(True),
+                )
+                .values(valid=False, invalidated_at=now)
+            )
+            connection.execute(
+                t.semantic_indexes.update()
+                .where(t.semantic_indexes.c.project_id == project)
+                .values(status="STALE", updated_at=now)
+            )
             self._event(
                 connection,
                 project,
@@ -489,6 +852,7 @@ class Repository:
 
     def ack_lifecycle(self, event_id, owner, generation):
         with self.db.engine.begin() as connection:
+            now = connection.scalar(sa.select(sa.func.clock_timestamp()))
             changed = connection.execute(
                 t.outbox.update()
                 .where(
@@ -496,8 +860,28 @@ class Repository:
                     t.outbox.c.owner == owner,
                     t.outbox.c.generation == generation,
                     t.outbox.c.done.is_(False),
+                    # A late acknowledgement must never finish work claimed by
+                    # a newer worker after the original lease expired.
+                    t.outbox.c.lease_until > now,
                 )
                 .values(done=True, owner=None, lease_until=None)
             ).rowcount
             ensure(changed == 1, "REVISION_CONFLICT", "Lifecycle delivery lease changed", 409)
             return {"event_id": event_id, "status": "ACKNOWLEDGED"}
+
+    def renew_lifecycle(self, event_id, owner, generation, lease_seconds=30):
+        with self.db.engine.begin() as connection:
+            now = connection.scalar(sa.select(sa.func.clock_timestamp()))
+            changed = connection.execute(
+                t.outbox.update()
+                .where(
+                    t.outbox.c.event_id == event_id,
+                    t.outbox.c.owner == owner,
+                    t.outbox.c.generation == generation,
+                    t.outbox.c.done.is_(False),
+                    t.outbox.c.lease_until > now,
+                )
+                .values(lease_until=now + timedelta(seconds=lease_seconds))
+            ).rowcount
+            ensure(changed == 1, "REVISION_CONFLICT", "Lifecycle delivery lease changed", 409)
+            return {"event_id": event_id, "status": "RENEWED"}

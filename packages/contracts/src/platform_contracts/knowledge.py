@@ -4,7 +4,14 @@ from typing import Annotated, Any, Literal
 
 from pydantic import Field, StringConstraints, field_validator
 
-from platform_contracts.v1 import AssetRef, Contract, Identifier, PositiveRevision, Sha256Digest
+from platform_contracts.v1 import (
+    AssetRef,
+    Contract,
+    Identifier,
+    PositiveRevision,
+    Sha256Digest,
+    VersionId,
+)
 
 KnowledgeText = Annotated[str, StringConstraints(min_length=1, max_length=200)]
 
@@ -68,6 +75,110 @@ class KnowledgeSearchResult(Contract):
     index_version: Literal["postgres-lexical-v1"]
     candidate_count: Annotated[int, Field(ge=0)]
     items: Annotated[list[SearchHit], Field(max_length=20)]
+
+
+class SemanticIndexProfile(Contract):
+    """Immutable identity for a candidate-only semantic index.
+
+    The model artifact, vector shape and segmentation contract are all part of
+    the identity.  A profile change therefore creates a new index rather than
+    silently changing the meaning of previously ranked candidates.
+    """
+
+    embedding_model_id: Identifier
+    embedding_model_digest: Sha256Digest
+    dimensions: Annotated[int, Field(ge=1, le=4096)]
+    chunker_id: VersionId
+    chunker_digest: Sha256Digest
+    document_projection_version: VersionId
+
+
+class SemanticIndexRef(Contract):
+    index_id: Identifier
+    profile_digest: Sha256Digest
+
+
+class KnowledgeSemanticSearch(KnowledgeSearch):
+    """Candidate discovery only; callers must still exact-read every citation."""
+
+    index: SemanticIndexRef
+
+
+class KnowledgeScopedSemanticSearch(KnowledgeSemanticSearch):
+    sources: Annotated[list[AssetRef], Field(max_length=4096)]
+
+
+class SemanticSearchHit(Contract):
+    document_id: Identifier
+    version_id: Identifier
+    unit_id: Identifier
+    title: KnowledgeText
+    snippet: Annotated[str, StringConstraints(max_length=600)]
+    start_char: Annotated[int, Field(ge=0)]
+    end_char: Annotated[int, Field(gt=0)]
+    score: float
+    availability: Literal["ACTIVE"]
+    epistemic_status: Literal["DECLARED", "CORROBORATED", "CONFLICTING"]
+    review_state: Literal["UNREVIEWED", "REVIEWED"]
+    discovery_kind: Literal["SEMANTIC_CANDIDATE"] = "SEMANTIC_CANDIDATE"
+    exact_read_required: Literal[True] = True
+
+
+class KnowledgeSemanticSearchResult(Contract):
+    status: Literal["RESULTS", "NO_RESULTS", "INDEX_UNAVAILABLE"]
+    query_digest: Sha256Digest
+    index: SemanticIndexRef
+    profile: SemanticIndexProfile | None = None
+    reason: Literal[
+        "READY",
+        "NO_ACTIVE_VECTORS",
+        "INDEX_NOT_FOUND",
+        "PROFILE_MISMATCH",
+        "INDEX_STALE",
+        "ENCODER_UNAVAILABLE",
+    ]
+    candidate_count: Annotated[int, Field(ge=0)]
+    items: Annotated[list[SemanticSearchHit], Field(max_length=20)]
+
+
+class KnowledgeFusionSearch(KnowledgeSemanticSearch):
+    """Lexical + semantic candidate discovery; neither branch is a citation."""
+
+
+class FusedSearchHit(Contract):
+    document_id: Identifier
+    version_id: Identifier
+    unit_id: Identifier
+    title: KnowledgeText
+    snippet: Annotated[str, StringConstraints(max_length=600)]
+    start_char: Annotated[int, Field(ge=0)]
+    end_char: Annotated[int, Field(gt=0)]
+    score: float
+    discovery_channels: Annotated[
+        list[Literal["LEXICAL", "SEMANTIC"]], Field(min_length=1, max_length=2)
+    ]
+    availability: Literal["ACTIVE"]
+    epistemic_status: Literal["DECLARED", "CORROBORATED", "CONFLICTING"]
+    review_state: Literal["UNREVIEWED", "REVIEWED"]
+    exact_read_required: Literal[True] = True
+
+
+class KnowledgeFusionSearchResult(Contract):
+    status: Literal["RESULTS", "NO_RESULTS", "PARTIAL"]
+    query_digest: Sha256Digest
+    lexical_index_version: Literal["postgres-lexical-v1"]
+    semantic_status: Literal["RESULTS", "NO_RESULTS", "INDEX_UNAVAILABLE"]
+    semantic_reason: Literal[
+        "READY",
+        "NO_ACTIVE_VECTORS",
+        "INDEX_NOT_FOUND",
+        "PROFILE_MISMATCH",
+        "INDEX_STALE",
+        "ENCODER_UNAVAILABLE",
+    ]
+    index: SemanticIndexRef
+    candidate_count: Annotated[int, Field(ge=0)]
+    items: Annotated[list[FusedSearchHit], Field(max_length=20)]
 
 
 class EvidenceRef(Contract):

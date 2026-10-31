@@ -31,7 +31,11 @@ def view(row):
 @router.get(P, response_model=ServiceBindingList)
 def bindings(project_id: PathId, actor: Actor, request: Request):
     Science(
-        request.app.state.database, request.app.state.data, request.app.state.execution
+        request.app.state.database,
+        request.app.state.data,
+        request.app.state.execution,
+        operator_catalog=request.app.state.operator_catalog,
+        checker_catalog=request.app.state.checker_catalog,
     ).authorize(actor, project_id)
     with request.app.state.database.transaction() as uow:
         return {"items": [view(row) for row in uow.service_bindings.list(project_id)]}
@@ -42,7 +46,11 @@ def binding(
     project_id: PathId, service_binding_id: PathId, revision: int, actor: Actor, request: Request
 ):
     Science(
-        request.app.state.database, request.app.state.data, request.app.state.execution
+        request.app.state.database,
+        request.app.state.data,
+        request.app.state.execution,
+        operator_catalog=request.app.state.operator_catalog,
+        checker_catalog=request.app.state.checker_catalog,
     ).authorize(actor, project_id)
     with request.app.state.database.transaction() as uow:
         return view(uow.service_bindings.get(project_id, service_binding_id, revision))

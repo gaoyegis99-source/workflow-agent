@@ -1,14 +1,15 @@
 """Knowledge-owned PostgreSQL connection and explicit migrations."""
 
 import argparse
-import os
 from pathlib import Path
 
 import sqlalchemy as sa
 from alembic import command
 from alembic.config import Config
 
-SCHEMA_VERSION = "0002_lifecycle_outbox"
+from platform_knowledge.composition import KnowledgeAdminComposition
+
+SCHEMA_VERSION = "0003_semantic_discovery"
 
 
 class Database:
@@ -45,7 +46,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("command", choices=["migrate", "check-schema"])
     args = parser.parse_args()
-    database = Database(os.environ["V7_KNOWLEDGE_DATABASE_URL"])
+    composition = KnowledgeAdminComposition.from_environment()
+    database = Database(composition.database_url)
     try:
         database.migrate() if args.command == "migrate" else database.check_schema()
     finally:

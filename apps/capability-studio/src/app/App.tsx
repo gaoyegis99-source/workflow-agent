@@ -54,6 +54,11 @@ const OperatorsPage = lazy(() =>
     default: module.OperatorsPage,
   })),
 );
+const KnowledgePage = lazy(() =>
+  import("../features/knowledge").then((module) => ({
+    default: module.KnowledgePage,
+  })),
+);
 
 function ProjectRoute() {
   const { token } = useSession();
@@ -72,6 +77,7 @@ export function App() {
               <Route path="overview" element={<OverviewPage />} />
               <Route path="assets" element={<AssetsPage />} />
               <Route path="assets/:assetId" element={<AssetDetailPage />} />
+              <Route path="knowledge" element={<KnowledgePage />} />
               <Route path="tasks" element={<TasksPage />} />
               <Route path="tasks/:taskId" element={<TaskDetailPage />} />
               <Route path="runs" element={<RunsPage />} />

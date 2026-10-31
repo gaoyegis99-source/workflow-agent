@@ -167,11 +167,6 @@ class OpenRequirement(Contract):
         return values
 
 
-class RequiredOutput(Contract):
-    output_id: Identifier
-    necessary: bool = True
-
-
 class ExpectedOutput(Contract):
     result_kind: Literal[
         "OPERATOR_RESULT", "SPATIAL_VECTOR", "SPATIAL_SUMMARY", "CARTOGRAPHIC_PRODUCT"
@@ -194,8 +189,8 @@ class OpenScienceAcceptanceSpec(Contract):
     requirements: Annotated[list[OpenRequirement], Field(max_length=64)] = Field(
         default_factory=list
     )
-    required_outputs: Annotated[list[RequiredOutput | OutputRequirement], Field(max_length=64)] = (
-        Field(default_factory=list)
+    required_outputs: Annotated[list[OutputRequirement], Field(max_length=64)] = Field(
+        default_factory=list
     )
     allow_manual_review: bool = False
     max_check_executions: Annotated[int, Field(ge=1, le=4)] = 1
@@ -205,11 +200,7 @@ class OpenScienceAcceptanceSpec(Contract):
         if not self.requirements and not self.required_outputs:
             raise ValueError("Open acceptance requires a clause or required output")
         requirement_ids = [item.requirement_id for item in self.requirements]
-        legacy = [item for item in self.required_outputs if isinstance(item, RequiredOutput)]
-        exact = [item for item in self.required_outputs if isinstance(item, OutputRequirement)]
-        if legacy and exact:
-            raise ValueError("Legacy output identifiers and exact output roles cannot be mixed")
-        output_ids = [item.output_id for item in legacy] + [item.role_id for item in exact]
+        output_ids = [item.role_id for item in self.required_outputs]
         if len(set(requirement_ids)) != len(requirement_ids):
             raise ValueError("Requirement identifiers must be unique")
         if len(set(output_ids)) != len(output_ids):
@@ -816,7 +807,7 @@ class OperatorOutputRef(Contract):
     representation_id: Identifier
     representation_digest: Sha256Digest
     schema_id: Identifier
-    schema_source: Literal["MANIFEST", "COMPATIBILITY_CATALOG"]
+    schema_source: Literal["MANIFEST"]
 
 
 class WorkflowOutputRef(Contract):
@@ -834,7 +825,7 @@ class WorkflowOutputRef(Contract):
     representation_id: Identifier
     representation_digest: Sha256Digest
     schema_id: Identifier
-    schema_source: Literal["MANIFEST", "COMPATIBILITY_CATALOG"]
+    schema_source: Literal["MANIFEST"]
 
 
 BoundOutputRef = Annotated[OperatorOutputRef | WorkflowOutputRef, Field(discriminator="kind")]
@@ -1050,7 +1041,7 @@ class DeliverableView(Contract):
     spec_revision: PositiveRevision
     digest: str
     payload: dict[str, Any]
-    identity_mode: Literal["LEGACY", "EXACT"] = "LEGACY"
+    identity_mode: Literal["EXACT"] = "EXACT"
 
 
 class DeliverableList(Contract):

@@ -20,6 +20,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 import sqlalchemy as sa  # noqa: E402
+from platform_core.application.catalog import build_catalog  # noqa: E402
 from platform_core.application.workflow_compiler import compile_package  # noqa: E402
 from platform_execution.adapters.repository import Repository  # noqa: E402
 from platform_execution.trace import record as trace  # noqa: E402
@@ -37,8 +38,9 @@ from benchmarks.p4.workflow_benchmark import (  # noqa: E402
     scatter_package,
     service_databases,
 )
-from scripts.p2_environment import PostgreSQL  # noqa: E402
-from tests.p3.harness import Cluster  # noqa: E402
+from scripts.configure.p2_environment import PostgreSQL  # noqa: E402
+from scripts.lib.runtime_layout import P4_RUNTIME_ROOT  # noqa: E402
+from tests.platform.services.harness import Cluster  # noqa: E402
 
 CONFIGURATIONS = (
     {"id": "A", "workflow": "nested", "workers": 1, "init": False},
@@ -375,10 +377,10 @@ def run_once(
     services = service_databases(postgres.url, admin)
     cluster = Cluster(directory, platform_database, tuple(value for _, value in services))
     cluster.env["V7_CWL_IMAGE"] = (
-        config.get("cwl_image") or (ROOT / ".p4-runtime/cwl-image.txt").read_text().strip()
+        config.get("cwl_image") or (P4_RUNTIME_ROOT / "cwl-image.txt").read_text().strip()
     )
     cluster.env["V7_OPERATOR_IMAGE"] = (
-        (ROOT / ".p4-runtime/performance-operator-image.txt").read_text().strip()
+        (P4_RUNTIME_ROOT / "performance-operator-image.txt").read_text().strip()
     )
     cluster.env["V7_EXECUTION_CALLBACK_URL"] = cluster.env["V7_EXECUTION_URL"]
     execution = result = None
@@ -400,11 +402,30 @@ def run_once(
         cluster.start_services(execution_command=execution_command)
         if config.get("baseline_resources"):
             process = cluster.start(
-                [sys.executable, "-m", "tests.performance.probe_platform_worker"], cluster.env
+                [
+                    sys.executable,
+                    "-m",
+                    "tests.performance.probe_platform_worker",
+                    "--lane",
+                    "package",
+                ],
+                cluster.env,
             )
             cluster.running["diagnostic-platform-worker"] = process
+            for lane in ("action", "acceptance", "knowledge"):
+                process = cluster.start(
+                    [
+                        sys.executable,
+                        "-c",
+                        "from platform_infrastructure.worker import main; main()",
+                        "--lane",
+                        lane,
+                    ],
+                    cluster.env,
+                )
+                cluster.running[f"diagnostic-platform-worker-{lane}"] = process
         else:
-            cluster.launch("platform-worker")
+            cluster.launch_platform_worker_lanes()
         if config.get("roles"):
             for number, role in enumerate(config["roles"]):
                 process = cluster.start(
@@ -426,7 +447,7 @@ def run_once(
         definition = (
             scatter_package() if config["workflow"] == "nested" else direct_scatter_package()
         )
-        compiled = compile_package(definition)
+        compiled = compile_package(definition, catalog=build_catalog())
         package, validation = register(cluster, definition)
         sampler = ProcessSampler(admin, services[1][0])
         inputs = {"parameter_batches": partition_parameters(parameters, profile["nodes"])}
@@ -615,8 +636,8 @@ def environment(profile_name):
         "long_node_cpu_seconds": LONG_NODE_CPU_SECONDS,
         "minimum_observed_node_seconds": MIN_LONG_NODE_SECONDS,
         "images": {
-            "cwl": (ROOT / ".p4-runtime/cwl-image.txt").read_text().strip(),
-            "performance_operator": (ROOT / ".p4-runtime/performance-operator-image.txt")
+            "cwl": (P4_RUNTIME_ROOT / "cwl-image.txt").read_text().strip(),
+            "performance_operator": (P4_RUNTIME_ROOT / "performance-operator-image.txt")
             .read_text()
             .strip(),
         },
@@ -773,12 +794,12 @@ def main():
     parser.add_argument(
         "--output",
         type=Path,
-        default=ROOT / "docs/verification/p4-workflow-scheduler-diagnostics.json",
+        default=P4_RUNTIME_ROOT / "verification/p4-workflow-scheduler-diagnostics.json",
     )
     parser.add_argument(
         "--report",
         type=Path,
-        default=ROOT / "docs/verification/p4-workflow-scheduler-diagnostics-report.md",
+        default=P4_RUNTIME_ROOT / "verification/p4-workflow-scheduler-diagnostics-report.md",
     )
     args = parser.parse_args()
     profile = PROFILES[args.profile]

@@ -1,0 +1,89 @@
+# Single-machine V7 Temporal profile.  This is deliberately separate from the
+# existing P8 compose stack while the generic-workflow backend is introduced.
+# All image references and secret-bearing env-file paths must be supplied by
+# release configuration; this file contains no credentials or mutable tags.
+name: ${V7_TEMPORAL_PROJECT_NAME:?run the Temporal deployment preparation first}
+
+x-worker: &worker
+  image: ${V7_TEMPORAL_WORKER_IMAGE:?provide an immutable V7 worker image}
+  env_file: ["${V7_TEMPORAL_WORKER_ENV_FILE:?provide a 0600 worker env file}"]
+  restart: unless-stopped
+  read_only: true
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+  tmpfs: [/tmp:rw,noexec,nosuid,size=64m]
+  volumes:
+    - ${V7_TEMPORAL_PLUGIN_MANIFESTS_DIR:?}:/opt/v7/temporal/manifests:ro
+    - ${V7_TEMPORAL_SECRETS_DIR:?}:/run/secrets/v7-temporal:ro
+  networks: [v7-temporal-service, v7-platform-internal]
+
+services:
+  temporal-postgres:
+    image: ${V7_TEMPORAL_POSTGRES_IMAGE:?provide an immutable PostgreSQL image}
+    env_file: ["${V7_TEMPORAL_POSTGRES_ENV_FILE:?provide a 0600 PostgreSQL env file}"]
+    environment:
+      POSTGRES_USER: temporal
+      POSTGRES_DB: temporal
+    volumes:
+      - ${V7_TEMPORAL_POSTGRES_DIR:?}:/var/lib/postgresql/data
+    networks: [v7-temporal-database]
+    healthcheck:
+      test: [CMD-SHELL, pg_isready -h 127.0.0.1 -U temporal -d temporal]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+    restart: unless-stopped
+
+  temporal:
+    image: ${V7_TEMPORAL_SERVER_IMAGE:?provide an immutable Temporal auto-setup image}
+    env_file: ["${V7_TEMPORAL_SERVER_ENV_FILE:?provide a 0600 Temporal server env file}"]
+    environment:
+      DB: postgres12
+      DB_PORT: "5432"
+      POSTGRES_SEEDS: temporal-postgres
+      POSTGRES_USER: temporal
+      DYNAMIC_CONFIG_FILE_PATH: config/dynamicconfig/development-sql.yaml
+    depends_on:
+      temporal-postgres: {condition: service_healthy}
+    networks: [v7-temporal-service, v7-temporal-database]
+    restart: unless-stopped
+
+  temporal-ui:
+    image: ${V7_TEMPORAL_UI_IMAGE:?provide an immutable Temporal UI image}
+    environment:
+      TEMPORAL_ADDRESS: temporal:7233
+    depends_on:
+      temporal: {condition: service_started}
+    ports: ["${V7_TEMPORAL_UI_BIND:-127.0.0.1}:${V7_TEMPORAL_UI_PORT:-18088}:8080"]
+    networks: [v7-temporal-service]
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    restart: unless-stopped
+
+  v7-temporal-worker:
+    <<: *worker
+    depends_on:
+      temporal: {condition: service_started}
+    command: [v7-temporal-worker]
+    environment:
+      V7_TEMPORAL_ADDRESS: temporal:7233
+      V7_TEMPORAL_NAMESPACE: ${V7_TEMPORAL_NAMESPACE:-default}
+      V7_TEMPORAL_TASK_QUEUE: ${V7_TEMPORAL_TASK_QUEUE:-v7-general-workflows}
+      V7_TEMPORAL_PLUGIN_MANIFESTS: /opt/v7/temporal/manifests/plugins.json
+      V7_TEMPORAL_GOVERNANCE_TOKEN_FILE: /run/secrets/v7-temporal/governance-token
+      PYTHONDONTWRITEBYTECODE: "1"
+    healthcheck:
+      test: [CMD-SHELL, "v7-temporal-worker --validate-config"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+networks:
+  v7-temporal-service: {internal: true}
+  v7-temporal-database: {internal: true}
+  # Created by the V7 Platform deployment and shared only with its private
+  # listener. It must itself be an internal Docker network.
+  v7-platform-internal:
+    external: true
+    name: ${V7_PLATFORM_INTERNAL_NETWORK:?provide the existing V7 private network}

@@ -2,7 +2,6 @@ import os
 import subprocess
 import sys
 from copy import deepcopy
-from pathlib import Path
 
 import pytest
 import sqlalchemy as sa
@@ -12,11 +11,12 @@ from platform_core.application.authoring import (
     AuthoringValidationProcessor,
     semantic_environment,
 )
-from platform_core.application.catalog import build_catalog
+from platform_core.application.catalog import build_catalog, write_catalog
 from platform_core.application.control import ControlService
 from platform_core.domain.control import RuleViolation
 from platform_infrastructure import tables
 
+from scripts.lib.runtime_layout import P4_RUNTIME_ROOT
 from tests.authoring.a2.helpers import profile_source
 
 
@@ -131,6 +131,7 @@ def test_validation_is_idempotent_compiles_and_fences_old_generation(database, o
         service.descriptor,
         validate_operator_parameters,
         environment,
+        operator_catalog=build_catalog(),
         owner="worker-new",
     )
     assert processor.process_one()
@@ -171,6 +172,7 @@ def test_frozen_environment_change_fails_without_calling_validator(database, own
         service.descriptor,
         validate_operator_parameters,
         changed,
+        operator_catalog=build_catalog(),
         owner="worker",
     )
     assert processor.process_one()
@@ -201,6 +203,7 @@ def test_validator_unavailable_is_error_and_can_be_retried_with_new_request(data
         service.descriptor,
         validate_operator_parameters,
         environment,
+        operator_catalog=build_catalog(),
         owner="failed-worker",
     ).process_one()
     failed = service.validation(actor, project, receipt["validation_id"])
@@ -250,9 +253,11 @@ def test_expired_lease_is_taken_over_and_old_generation_cannot_finish(database, 
         )
 
 
-def test_dedicated_worker_process_uses_fixed_cwl_container(database, owner):
+def test_dedicated_worker_process_uses_fixed_cwl_container(database, owner, tmp_path):
     actor, project, definition_id, revision, service, _ = setup(database, owner)
-    image = Path(".p4-runtime/cwl-image.txt").read_text(encoding="utf-8").strip()
+    image = (P4_RUNTIME_ROOT / "cwl-image.txt").read_text(encoding="utf-8").strip()
+    catalog_path = tmp_path / "operator-catalog.json"
+    write_catalog(catalog_path)
     environment = semantic_environment(service.descriptor, image, None)
     service.environment = environment
     receipt = service.request_validation(
@@ -272,6 +277,7 @@ def test_dedicated_worker_process_uses_fixed_cwl_container(database, owner):
         | {
             "V7_DATABASE_URL": database.engine.url.render_as_string(hide_password=False),
             "V7_CWL_IMAGE": image,
+            "V7_OPERATOR_CATALOG": str(catalog_path),
         },
         capture_output=True,
         text=True,
@@ -279,4 +285,5 @@ def test_dedicated_worker_process_uses_fixed_cwl_container(database, owner):
         check=False,
     )
     assert result.returncode == 0, result.stderr
-    assert service.validation(actor, project, receipt["validation_id"])["status"] == "PASSED"
+    validation = service.validation(actor, project, receipt["validation_id"])
+    assert validation["status"] == "PASSED", validation["issues"]

@@ -5,7 +5,8 @@ export default defineConfig({
   base: "/",
   plugins: [react()],
   build: {
-    outDir: "../platform-api/src/platform_api/studio_static",
+    // Generated bundles are deployment artifacts, never Python source files.
+    outDir: "../../../runtime/work/capability-studio",
     emptyOutDir: true,
     sourcemap: false,
   },

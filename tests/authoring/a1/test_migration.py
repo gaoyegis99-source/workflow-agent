@@ -10,7 +10,7 @@ from platform_infrastructure.database import SCHEMA_VERSION
 
 
 def test_authoring_schema_is_current_and_repeatable(database):
-    assert SCHEMA_VERSION == "0023_workflow_release_lifecycle"
+    assert SCHEMA_VERSION == "0026_worker_lane_leases"
     database.migrate()
     database.check_schema()
     with database.engine.connect() as connection:

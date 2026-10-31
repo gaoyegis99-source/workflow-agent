@@ -1,12 +1,14 @@
 """Trusted one-attempt Docker runtime. Never accept client commands or image names."""
 
 import json
+import logging
 import os
 import re
 import subprocess
 from pathlib import Path
 
 from platform_contracts.engine_runtime import validate as validate_runtime_profile
+from platform_contracts.runtime_context import ContainerIdentity
 
 from platform_execution.implementations import implementation
 
@@ -20,6 +22,8 @@ class Docker:
         spatial_native_image=None,
         gdal_checker_image=None,
         tabular_image=None,
+        *,
+        container_identity: ContainerIdentity | None = None,
     ):
         self.images = {
             "OPERATOR": operator_image,
@@ -34,6 +38,7 @@ class Docker:
             for value in self.images.values()
         ):
             raise ValueError("Runtime requires locally verified immutable image IDs")
+        self.container_identity = container_identity or ContainerIdentity()
 
     def profile(self, row):
         identity, spec = implementation(row["payload"])
@@ -49,13 +54,7 @@ class Docker:
             ):
                 raise ValueError("Checker runtime differs from its frozen capability")
         frozen = row["payload"].get("_operator_snapshot")
-        # Production and explicitly catalogued development deployments must run
-        # the exact frozen image. Legacy development tests deliberately swap a
-        # source-catalogue image to inject deterministic bad scientific output.
-        enforce_catalog_image = os.environ.get(
-            "V7_DEPLOYMENT_MODE", "development"
-        ) == "production" or bool(os.environ.get("V7_OPERATOR_CATALOG"))
-        if frozen is not None and enforce_catalog_image:
+        if frozen is not None:
             executable = frozen.get("implementation") or {}
             if executable.get("image_digest") != image:
                 raise ValueError("Operator Catalog image differs from the installed runtime")
@@ -88,16 +87,28 @@ class Docker:
         return prefix + row["execution_id"]
 
     @staticmethod
-    def command(*args, timeout=5):
-        result = subprocess.run(
-            ["docker", *args], capture_output=True, timeout=timeout, check=False
-        )
+    def command(*args, timeout=30):
+        try:
+            result = subprocess.run(
+                ["docker", *args], capture_output=True, timeout=timeout, check=False
+            )
+        except subprocess.TimeoutExpired:
+            logging.warning(
+                "Container runtime command timed out operation=%s timeout=%s",
+                args[0] if args else "unknown",
+                timeout,
+            )
+            raise
         if result.returncode:
             raise OSError("Container runtime operation failed")
         return result.stdout.decode().strip()
 
     def inspect(self, name):
-        result = subprocess.run(["docker", "inspect", name], capture_output=True, timeout=5)
+        try:
+            result = subprocess.run(["docker", "inspect", name], capture_output=True, timeout=30)
+        except subprocess.TimeoutExpired:
+            logging.warning("Container runtime command timed out operation=inspect timeout=30")
+            raise
         if result.returncode:
             # Differentiate a functioning daemon's confirmed absence from daemon failure.
             self.command("info", "--format", "{{.ServerVersion}}")
@@ -116,13 +127,7 @@ class Docker:
         profile = row["runtime"].get("implementation_profile")
         if profile is not None:
             expected["v7.implementation"] = profile["implementation_id"]
-        if os.environ.get("V7_TEST_RUN_ID"):
-            expected["v7.test-run"] = os.environ["V7_TEST_RUN_ID"]
-        p82 = {
-            "v7.execution": row["execution_id"],
-            "v7.deployment": os.environ.get("V7_DEPLOYMENT_ID"),
-            "v7.release": os.environ.get("V7_RELEASE_DIGEST"),
-        }
+        p82 = {"v7.execution": row["execution_id"]} | self.container_identity.labels()
         # N-1 containers have none of the P8.2 labels.  A partial set is never
         # accepted; new containers must carry the complete release identity.
         if any(labels.get(key) is not None for key in p82):
@@ -191,34 +196,41 @@ class Docker:
             ("implementation", profile["implementation_id"]),
         ]:
             args += ["--label", f"v7.{key}={value}"]
-        for key, variable in (
-            ("deployment", "V7_DEPLOYMENT_ID"),
-            ("release", "V7_RELEASE_DIGEST"),
-            ("test-run", "V7_TEST_RUN_ID"),
-        ):
-            if os.environ.get(variable):
-                args += ["--label", f"v7.{key}={os.environ[variable]}"]
+        for key, value in self.container_identity.labels().items():
+            args += ["--label", f"{key}={value}"]
         args += [row["runtime"]["image_id"]]
-        self.command(*args)
+        self.command(*args, timeout=30)
         return self.inspect(name)
 
     def start(self, container):
-        self.command("start", container)
+        self.command("start", container, timeout=30)
 
     def stop(self, container, *, never_started=False):
         if never_started:
-            self.command("rm", container)
+            self.command("rm", container, timeout=30)
         else:
-            self.command("kill", container)
+            self.command("kill", container, timeout=30)
 
 
 class CwlDocker:
     """Trusted Toil engine container; it receives no database or Docker socket."""
 
-    def __init__(self, image):
+    def __init__(
+        self,
+        image,
+        *,
+        container_identity: ContainerIdentity | None = None,
+        workload_network: str | None = None,
+    ):
         if not re.fullmatch(r"sha256:[0-9a-f]{64}", image or ""):
             raise ValueError("Workflow runtime requires an immutable image ID")
         self.image = image
+        self.container_identity = container_identity or ContainerIdentity()
+        self.workload_network = workload_network or "v7-workload"
+        if not re.fullmatch(
+            r"[A-Za-z0-9][A-Za-z0-9_.-]{0,127}", self.workload_network
+        ) or self.workload_network in {"host", "none"}:
+            raise ValueError("Workflow workload network is invalid")
 
     command = staticmethod(Docker.command)
 
@@ -237,13 +249,7 @@ class CwlDocker:
             "v7.attempt": row["attempt_id"],
             "v7.epoch": str(epoch),
         }
-        p82 = {
-            "v7.execution": row["execution_id"],
-            "v7.deployment": os.environ.get("V7_DEPLOYMENT_ID"),
-            "v7.release": os.environ.get("V7_RELEASE_DIGEST"),
-        }
-        if os.environ.get("V7_TEST_RUN_ID"):
-            expected["v7.test-run"] = os.environ["V7_TEST_RUN_ID"]
+        p82 = {"v7.execution": row["execution_id"]} | self.container_identity.labels()
         if any(labels.get(key) is not None for key in p82):
             expected |= {key: value for key, value in p82.items() if value is not None}
         engine = row.get("payload", {}).get("engine_package")
@@ -253,8 +259,7 @@ class CwlDocker:
                 "v7.engine.digest": engine["package_digest"],
             }
         runtime_profile = row.get("runtime", {}).get("_engine_runtime_profile")
-        legacy_unlabeled = row.get("runtime", {}).get("_engine_profile_legacy_unlabeled", False)
-        if runtime_profile is not None and not legacy_unlabeled:
+        if runtime_profile is not None:
             runtime_profile = validate_runtime_profile(runtime_profile)
             expected |= {
                 "v7.engine.profile": runtime_profile["profile_id"],
@@ -282,7 +287,7 @@ class CwlDocker:
             "--user",
             f"{os.getuid() or 65532}:{os.getgid() or 65532}",
             "--network",
-            "host",
+            self.workload_network,
             "--read-only",
             "--cap-drop",
             "ALL",
@@ -311,13 +316,8 @@ class CwlDocker:
             ("epoch", str(epoch)),
         ]:
             args += ["--label", f"v7.{key}={value}"]
-        for key, variable in (
-            ("deployment", "V7_DEPLOYMENT_ID"),
-            ("release", "V7_RELEASE_DIGEST"),
-            ("test-run", "V7_TEST_RUN_ID"),
-        ):
-            if os.environ.get(variable):
-                args += ["--label", f"v7.{key}={os.environ[variable]}"]
+        for key, value in self.container_identity.labels().items():
+            args += ["--label", f"{key}={value}"]
         engine = row.get("payload", {}).get("engine_package")
         if engine is not None:
             args += ["--label", f"v7.engine.strategy={engine['strategy']}"]
@@ -328,11 +328,11 @@ class CwlDocker:
             args += ["--label", f"v7.engine.profile={runtime_profile['profile_id']}"]
             args += ["--label", f"v7.engine.profile-digest={runtime_profile['profile_digest']}"]
         args.append(self.image)
-        self.command(*args)
+        self.command(*args, timeout=30)
         return self.inspect(row["execution_id"], epoch)
 
     def start(self, container):
-        self.command("start", container)
+        self.command("start", container, timeout=30)
 
     def inspect_container(self, container):
         return Docker.inspect(self, container)
@@ -347,7 +347,7 @@ class CwlDocker:
             pass
         info = self.inspect_container(container)
         if info is not None and info["State"]["Running"]:
-            self.command("kill", container)
+            self.command("kill", container, timeout=30)
             info = self.inspect_container(container)
         if info is not None and info["State"]["Running"]:
             raise OSError("Workflow engine did not stop")

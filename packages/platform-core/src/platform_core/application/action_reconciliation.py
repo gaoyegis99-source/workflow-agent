@@ -41,7 +41,7 @@ class AgentActionReconciler:
             }
         if link["operation"] == "REGISTER_DELIVERABLE":
             candidate = uow.science.candidate(
-                uow.agents.run_by_id(link["agent_run_id"])["project_id"],
+                uow.agent_runs.run_by_id(link["agent_run_id"])["project_id"],
                 link["business_id"],
             )
             return {
@@ -58,7 +58,7 @@ class AgentActionReconciler:
                 "status": "RECORDED",
             }
         acceptance = uow.science.check(
-            uow.agents.run_by_id(link["agent_run_id"])["project_id"],
+            uow.agent_runs.run_by_id(link["agent_run_id"])["project_id"],
             link["business_id"],
         )
         task = uow.tasks.get(acceptance["project_id"], acceptance["task_id"])
@@ -74,15 +74,15 @@ class AgentActionReconciler:
         with self.store.transaction() as uow:
             runs = [
                 value
-                for value in uow.agents.runs_with_action_links()
+                for value in uow.agent_tools.runs_with_action_links()
                 if value["status"] not in {"STOPPED", "BLOCKED"}
             ]
         changed = False
         for run in runs:
             for link in run["links"]:
                 with self.store.transaction() as uow:
-                    locked = uow.agents.action_link(link["tool_request_id"], lock=True)
-                    current_run = uow.agents.run_by_id(locked["agent_run_id"], lock=True)
+                    locked = uow.agent_tools.action_link(link["tool_request_id"], lock=True)
+                    current_run = uow.agent_runs.run_by_id(locked["agent_run_id"], lock=True)
                     if current_run["status"] in {"STOPPED", "BLOCKED"}:
                         continue
                     payload = self._payload(uow, locked)
@@ -107,7 +107,7 @@ class AgentActionReconciler:
                         "kind": payload["kind"],
                         "payload": payload,
                     }
-                    if not uow.agents.register_event(
+                    if not uow.agent_conversations.register_event(
                         event
                         | {
                             "agent_run_id": current_run["agent_run_id"],
@@ -116,7 +116,7 @@ class AgentActionReconciler:
                         }
                     ):
                         continue
-                    uow.agents.update_watermark(
+                    uow.agent_recovery.update_watermark(
                         {
                             "agent_run_id": current_run["agent_run_id"],
                             "source": "ACTION",
@@ -126,12 +126,12 @@ class AgentActionReconciler:
                             "updated_at": uow.now(),
                         }
                     )
-                    uow.agents.update_action_link(
+                    uow.agent_tools.update_action_link(
                         locked["tool_request_id"],
                         observation_revision=revision,
                         last_observation_digest=state_digest,
                     )
-                    dependencies = uow.agents.wait_dependencies(
+                    dependencies = uow.agent_recovery.wait_dependencies(
                         current_run["agent_run_id"], active_only=True, lock=True
                     )
                     had_dependencies = bool(dependencies)
@@ -142,14 +142,14 @@ class AgentActionReconciler:
                             if fact["satisfied"]
                             else ("UNKNOWN" if fact["unknown"] else "WAITING")
                         )
-                        uow.agents.update_wait_dependency(
+                        uow.agent_recovery.update_wait_dependency(
                             dependency["dependency_id"],
                             observed_revision=fact["revision"],
                             state=next_state,
                             state_digest=canonical_digest(fact),
                             updated_at=uow.now(),
                         )
-                    remaining = uow.agents.wait_dependencies(
+                    remaining = uow.agent_recovery.wait_dependencies(
                         current_run["agent_run_id"], active_only=True
                     )
                     # Intermediate QUEUED/RUNNING observations remain visible
@@ -167,7 +167,7 @@ class AgentActionReconciler:
                         current_run["task_spec_revision"] != task.spec_revision
                         or current_run["control_version"] != task.control_version
                     ):
-                        uow.agents.update_run(
+                        uow.agent_runs.update_run(
                             current_run["agent_run_id"],
                             task_spec_revision=task.spec_revision,
                             control_version=task.control_version,

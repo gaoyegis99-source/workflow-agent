@@ -15,6 +15,12 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from scripts.lib.runtime_layout import P1_RUNTIME_ROOT  # noqa: E402
+from scripts.maintenance.project_environment import docker_executable  # noqa: E402
+
 PINS = json.loads((HERE / "pins.json").read_text())
 
 
@@ -31,9 +37,10 @@ class WeaverProbe:
     def compose(self, *args: str, check: bool = True) -> str:
         env = os.environ.copy()
         env["V7_P1_ROOT"] = str(ROOT)
+        env["V7_P1_RUNTIME_ROOT"] = str(P1_RUNTIME_ROOT)
         result = subprocess.run(
             [
-                "docker",
+                docker_executable(),
                 "compose",
                 "-p",
                 self.project,
@@ -83,8 +90,8 @@ class WeaverProbe:
 
     def start(self) -> None:
         for name in ["outputs", "tmp"]:
-            (ROOT / ".p1-runtime/weaver" / name).mkdir(parents=True, exist_ok=True)
-        (ROOT / ".p1-runtime/weaver/weaver.ini").write_text(
+            (P1_RUNTIME_ROOT / "weaver" / name).mkdir(parents=True, exist_ok=True)
+        (P1_RUNTIME_ROOT / "weaver/weaver.ini").write_text(
             (HERE / "weaver.ini").read_text().replace("__V7_P1_ROOT__", str(ROOT))
         )
         self.compose("up", "-d")
@@ -174,13 +181,20 @@ class WeaverProbe:
 
     def tool_containers(self) -> set[str]:
         ids = subprocess.check_output(
-            ["docker", "ps", "-q", "--filter", "ancestor=" + PINS["python"]], text=True
+            [
+                docker_executable(),
+                "ps",
+                "-q",
+                "--filter",
+                "ancestor=" + PINS["python"],
+            ],
+            text=True,
         ).split()
         owned = set()
-        prefix = str(ROOT / ".p1-runtime/weaver/tmp") + "/"
+        prefix = str(P1_RUNTIME_ROOT / "weaver/tmp") + "/"
         for container_id in ids:
             data = json.loads(
-                subprocess.check_output(["docker", "inspect", container_id], text=True)
+                subprocess.check_output([docker_executable(), "inspect", container_id], text=True)
             )[0]
             if any(mount.get("Source", "").startswith(prefix) for mount in data["Mounts"]):
                 owned.add(container_id)
@@ -191,7 +205,11 @@ class WeaverProbe:
         (self.directory / "service.log").write_text(self.compose("logs", "--no-color", check=False))
         self.tool_containers()
         for container_id in self.containers:
-            subprocess.run(["docker", "rm", "-f", container_id], capture_output=True, timeout=20)
+            subprocess.run(
+                [docker_executable(), "rm", "-f", container_id],
+                capture_output=True,
+                timeout=20,
+            )
         self.compose("down", "-v", "--remove-orphans", check=False)
         (self.directory / "http-trace.json").write_text(json.dumps(self.trace, indent=2))
 

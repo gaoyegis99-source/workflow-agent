@@ -3,7 +3,7 @@ name = "groundwater-platform-core"
 version = "0.15.5"
 description = "Framework-independent core for Groundwater Platform V7"
 requires-python = ">=3.12,<3.13"
-dependencies = []
+dependencies = ["groundwater-platform-contracts==0.15.5"]
 
 [build-system]
 requires = ["hatchling==1.27.0"]

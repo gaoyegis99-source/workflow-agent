@@ -31,7 +31,7 @@ export function OverviewPage() {
       <Card title="任务状态" description="完整状态计数，不根据客户端权限推断。"><StateBars values={value.tasks} /></Card>
       <Card title="运行状态" description="包括记录、派发、执行、协调与终止事实。"><StateBars values={value.executions} /></Card>
       <Card title="快捷入口" className="quick-card"><button onClick={() => navigate(`/projects/${projectId}/assets`)}><Upload /><span><strong>导入数据</strong><small>上传并检查科研数据</small></span></button><button onClick={() => navigate(`/projects/${projectId}/tasks`)}><Plus /><span><strong>创建任务</strong><small>冻结范围与预算</small></span></button><button onClick={() => navigate(`/projects/${projectId}/workflows`)}><Workflow /><span><strong>编排工作流</strong><small>节点画布与权威校验</small></span></button></Card>
-      <Card title="发布身份" description="当前实例与 Release Lock 的一致性标识。"><dl className="definition-list"><div><dt>Phase</dt><dd><Badge>{value.phase}</Badge></dd></div><div><dt>Release digest</dt><dd><code>{value.release_digest ?? "未报告"}</code></dd></div><div><dt>项目角色</dt><dd><Badge>{value.role}</Badge></dd></div></dl></Card>
+      <Card title="部署身份" description="当前实例的部署修订与项目角色。"><dl className="definition-list"><div><dt>Phase</dt><dd><Badge>{value.phase}</Badge></dd></div><div><dt>部署修订</dt><dd><code>{value.release_digest ?? "未报告"}</code></dd></div><div><dt>项目角色</dt><dd><Badge>{value.role}</Badge></dd></div></dl></Card>
     </div>
   </div>;
 }

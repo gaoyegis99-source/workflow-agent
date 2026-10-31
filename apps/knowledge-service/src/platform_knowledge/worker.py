@@ -2,7 +2,6 @@
 
 import hashlib
 import logging
-import os
 import threading
 import time
 from uuid import uuid4
@@ -12,6 +11,7 @@ from platform_contracts.service import ServiceFault, ensure
 from sqlalchemy.exc import SQLAlchemyError
 
 from platform_knowledge.blobs import Blobs
+from platform_knowledge.composition import KnowledgeComposition
 from platform_knowledge.data_client import DataClient
 from platform_knowledge.database import Database
 from platform_knowledge.domain import normalize, segment
@@ -130,11 +130,16 @@ class Worker:
 
 
 def main():
-    database = Database(os.environ["V7_KNOWLEDGE_DATABASE_URL"])
+    composition = KnowledgeComposition.from_environment()
+    database = Database(composition.database_url)
     database.check_schema()
-    touch_worker_heartbeat()
-    data = DataClient(os.environ["V7_DATA_URL"], os.environ["V7_KNOWLEDGE_DATA_TOKEN"])
-    worker = Worker(database, Blobs(os.environ["V7_KNOWLEDGE_STORAGE"]), data)
+    touch_worker_heartbeat(composition.heartbeat_file)
+    data = DataClient(
+        composition.data.url,
+        composition.data.token,
+        deployment=composition.deployment,
+    )
+    worker = Worker(database, Blobs(composition.storage_root), data)
     try:
         while True:
             try:
@@ -142,7 +147,7 @@ def main():
             except (SQLAlchemyError, OSError) as exc:
                 logging.warning("Knowledge worker dependency unavailable: %s", type(exc).__name__)
                 active = False
-            touch_worker_heartbeat()
+            touch_worker_heartbeat(composition.heartbeat_file)
             if not active:
                 time.sleep(0.5)
     finally:

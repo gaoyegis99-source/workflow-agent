@@ -1,0 +1,414 @@
+# Direct-Compose V7 deployment.  The only Compose control input is the
+# non-secret compose.env written by configure_p8.py; each process receives its
+# own 0600 env file.  No service inherits a workspace-wide p8.env.
+name: ${V7_P8_PROJECT_NAME:?run bin/configure-p8 first}
+
+x-app: &app
+  image: ${V7_P8_APP_IMAGE:?pass --app-image to bin/configure-p8}
+  volumes:
+    - ${V7_P8_ARTIFACT_DIR:?}:${V7_P8_ARTIFACT_DIR:?}:ro
+  restart: unless-stopped
+  stop_grace_period: 35s
+  read_only: true
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+  tmpfs:
+    - /tmp:rw,noexec,nosuid,size=64m
+
+x-api-dependencies: &api_dependencies
+  postgres: {condition: service_healthy}
+  migrate: {condition: service_completed_successfully}
+
+x-worker-healthcheck: &worker_healthcheck
+  test:
+    - CMD
+    - python
+    - -c
+    - >-
+      import os, time;
+      p = os.environ["V7_WORKER_HEARTBEAT_FILE"];
+      s = os.stat(p);
+      raise SystemExit(0 if time.time() - s.st_mtime <= 300 else 1)
+  interval: 10s
+  timeout: 3s
+  retries: 3
+
+services:
+  postgres:
+    image: postgres@sha256:3645570cccdfa447589da9f57dd740faa29b30938e861289a5574b6ca6b03826
+    env_file: ["${V7_P8_POSTGRES_ENV_FILE:?}"]
+    environment:
+      POSTGRES_USER: v7_p8_admin
+      POSTGRES_DB: postgres
+    volumes:
+      - ${V7_P8_POSTGRES_DIR:?}:/var/lib/postgresql/data
+      - ./init-db.sh:/docker-entrypoint-initdb.d/10-v7-services.sh:ro
+    networks: [v7-database]
+    healthcheck:
+      test: [CMD-SHELL, pg_isready -h 127.0.0.1 -U v7_p8_admin -d postgres]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+    restart: unless-stopped
+    labels:
+      io.platform.role: postgres
+      io.platform.hardening-exception: database
+
+  volume-init:
+    <<: *app
+    user: "0:0"
+    read_only: false
+    restart: "no"
+    network_mode: none
+    environment:
+      V7_DATA_STORAGE: ${V7_P8_DATA_DIR:?}
+      V7_KNOWLEDGE_STORAGE: ${V7_P8_KNOWLEDGE_DIR:?}
+      V7_EXECUTION_WORKDIR: ${V7_P8_EXECUTION_DIR:?}
+      V7_DATA_SPATIAL_WORK_ROOT: ${V7_P8_SPATIAL_DIR:?}
+      V7_MAINTENANCE_FILE: ${V7_P8_CONTROL_DIR:?}/maintenance
+    command:
+      - /bin/sh
+      - -ec
+      - |
+        mkdir -p "$$V7_DATA_STORAGE" "$$V7_KNOWLEDGE_STORAGE" "$$V7_EXECUTION_WORKDIR" "$$V7_EXECUTION_WORKDIR/platform-tmp" "$$V7_DATA_SPATIAL_WORK_ROOT" "$$(dirname "$$V7_MAINTENANCE_FILE")"
+        chmod 0777 "$$V7_DATA_STORAGE" "$$V7_KNOWLEDGE_STORAGE" "$$V7_EXECUTION_WORKDIR" "$$V7_DATA_SPATIAL_WORK_ROOT" "$$(dirname "$$V7_MAINTENANCE_FILE")"
+        chmod 1777 "$$V7_EXECUTION_WORKDIR/platform-tmp"
+    volumes:
+      - ${V7_P8_ARTIFACT_DIR:?}:${V7_P8_ARTIFACT_DIR:?}:ro
+      - ${V7_P8_DATA_DIR:?}:${V7_P8_DATA_DIR:?}
+      - ${V7_P8_KNOWLEDGE_DIR:?}:${V7_P8_KNOWLEDGE_DIR:?}
+      - ${V7_P8_EXECUTION_DIR:?}:${V7_P8_EXECUTION_DIR:?}
+      - ${V7_P8_SPATIAL_DIR:?}:${V7_P8_SPATIAL_DIR:?}
+      - ${V7_P8_CONTROL_DIR:?}:${V7_P8_CONTROL_DIR:?}
+    labels:
+      io.platform.role: volume-init
+      io.platform.hardening-exception: volume-ownership
+
+  migrate:
+    <<: *app
+    env_file: ["${V7_P8_MIGRATE_ENV_FILE:?}"]
+    restart: "no"
+    depends_on:
+      postgres: {condition: service_healthy}
+      volume-init: {condition: service_completed_successfully}
+    networks: [v7-database]
+    command:
+      - /bin/sh
+      - -ec
+      - |
+        platform-admin migrate
+        agent-checkpoint-admin migrate
+        data-admin migrate
+        execution-admin migrate
+        knowledge-admin migrate
+    labels:
+      io.platform.role: migrate
+      io.platform.hardening-exception: migration
+
+  platform-api:
+    <<: *app
+    env_file: ["${V7_P8_PLATFORM_API_ENV_FILE:?}"]
+    depends_on: *api_dependencies
+    command: ["platform-api", "--host", "0.0.0.0", "--port", "8007"]
+    networks: [v7-service, v7-database]
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8007/api/v1/ready', timeout=2)"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+    labels: {io.platform.role: platform-api}
+
+  data-api:
+    <<: *app
+    env_file: ["${V7_P8_DATA_API_ENV_FILE:?}"]
+    depends_on: *api_dependencies
+    command: ["data-service"]
+    volumes:
+      - ${V7_P8_ARTIFACT_DIR:?}:${V7_P8_ARTIFACT_DIR:?}:ro
+      - ${V7_P8_DATA_DIR:?}:${V7_P8_DATA_DIR:?}
+    networks: [v7-service, v7-database]
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8011/readyz', timeout=2)"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+    labels: {io.platform.role: data-api}
+
+  execution-api:
+    <<: *app
+    env_file: ["${V7_P8_EXECUTION_API_ENV_FILE:?}"]
+    depends_on: *api_dependencies
+    command: ["execution-service"]
+    volumes:
+      - ${V7_P8_ARTIFACT_DIR:?}:${V7_P8_ARTIFACT_DIR:?}:ro
+      - ${V7_P8_EXECUTION_DIR:?}:${V7_P8_EXECUTION_DIR:?}
+    networks: [v7-service, v7-database, v7-workload]
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8012/readyz', timeout=2)"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+    labels: {io.platform.role: execution-api}
+
+  knowledge-api:
+    <<: *app
+    env_file: ["${V7_P8_KNOWLEDGE_API_ENV_FILE:?}"]
+    depends_on: *api_dependencies
+    command: ["knowledge-service"]
+    volumes:
+      - ${V7_P8_ARTIFACT_DIR:?}:${V7_P8_ARTIFACT_DIR:?}:ro
+      - ${V7_P8_KNOWLEDGE_DIR:?}:${V7_P8_KNOWLEDGE_DIR:?}
+    networks: [v7-service, v7-database, v7-egress]
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8013/readyz', timeout=2)"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+    labels: {io.platform.role: knowledge-api}
+
+  gateway:
+    <<: *app
+    env_file: ["${V7_P8_GATEWAY_ENV_FILE:?}"]
+    depends_on:
+      platform-api: {condition: service_healthy}
+    command: ["platform-gateway", "--host", "0.0.0.0", "--port", "8080"]
+    ports: ["${V7_P8_GATEWAY_BIND:-127.0.0.1}:${V7_P8_GATEWAY_PORT:-18080}:8080"]
+    volumes:
+      - ${V7_P8_ARTIFACT_DIR:?}:${V7_P8_ARTIFACT_DIR:?}:ro
+      - ${V7_P8_CONTROL_DIR:?}:${V7_P8_CONTROL_DIR:?}
+    networks: [v7-service, v7-ingress]
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/gateway/health', timeout=2)"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+    labels: {io.platform.role: gateway}
+
+  platform-worker-package:
+    <<: *app
+    env_file: ["${V7_P8_PLATFORM_WORKER_PACKAGE_ENV_FILE:?}"]
+    group_add: ["${V7_DOCKER_GID:?}"]
+    environment: {V7_WORKER_HEARTBEAT_FILE: /tmp/v7-worker.heartbeat}
+    depends_on: *api_dependencies
+    command: ["platform-worker", "--lane", "package"]
+    volumes:
+      - ${V7_P8_ARTIFACT_DIR:?}:${V7_P8_ARTIFACT_DIR:?}:ro
+      - ${V7_DOCKER_SOCKET:?}:/var/run/docker.sock
+    networks: [v7-service, v7-database]
+    healthcheck: *worker_healthcheck
+    labels: {io.platform.role: platform-worker-package, io.platform.docker-socket: allowed}
+
+  platform-worker-action:
+    <<: *app
+    env_file: ["${V7_P8_PLATFORM_WORKER_ACTION_ENV_FILE:?}"]
+    environment: {V7_WORKER_HEARTBEAT_FILE: /tmp/v7-worker.heartbeat}
+    depends_on: *api_dependencies
+    command: ["platform-worker", "--lane", "action"]
+    networks: [v7-service, v7-database]
+    healthcheck: *worker_healthcheck
+    labels: {io.platform.role: platform-worker-action}
+
+  platform-worker-acceptance:
+    <<: *app
+    env_file: ["${V7_P8_PLATFORM_WORKER_ACCEPTANCE_ENV_FILE:?}"]
+    environment: {V7_WORKER_HEARTBEAT_FILE: /tmp/v7-worker.heartbeat}
+    depends_on: *api_dependencies
+    command: ["platform-worker", "--lane", "acceptance"]
+    networks: [v7-service, v7-database]
+    healthcheck: *worker_healthcheck
+    labels: {io.platform.role: platform-worker-acceptance}
+
+  platform-worker-knowledge:
+    <<: *app
+    env_file: ["${V7_P8_PLATFORM_WORKER_KNOWLEDGE_ENV_FILE:?}"]
+    environment: {V7_WORKER_HEARTBEAT_FILE: /tmp/v7-worker.heartbeat}
+    depends_on: *api_dependencies
+    command: ["platform-worker", "--lane", "knowledge"]
+    networks: [v7-service, v7-database]
+    healthcheck: *worker_healthcheck
+    labels: {io.platform.role: platform-worker-knowledge}
+
+  authoring-worker:
+    <<: *app
+    env_file: ["${V7_P8_AUTHORING_WORKER_ENV_FILE:?}"]
+    group_add: ["${V7_DOCKER_GID:?}"]
+    environment: {V7_WORKER_HEARTBEAT_FILE: /tmp/v7-worker.heartbeat}
+    depends_on: *api_dependencies
+    command: ["platform-authoring-worker"]
+    volumes:
+      - ${V7_P8_ARTIFACT_DIR:?}:${V7_P8_ARTIFACT_DIR:?}:ro
+      - ${V7_P8_EXECUTION_DIR:?}:${V7_P8_EXECUTION_DIR:?}
+      - ${V7_DOCKER_SOCKET:?}:/var/run/docker.sock
+    networks: [v7-service, v7-database]
+    healthcheck: *worker_healthcheck
+    labels: {io.platform.role: authoring-worker, io.platform.docker-socket: allowed}
+
+  data-worker:
+    <<: *app
+    env_file: ["${V7_P8_DATA_WORKER_ENV_FILE:?}"]
+    environment: {V7_WORKER_HEARTBEAT_FILE: /tmp/v7-worker.heartbeat}
+    depends_on: *api_dependencies
+    command: ["data-worker"]
+    volumes:
+      - ${V7_P8_ARTIFACT_DIR:?}:${V7_P8_ARTIFACT_DIR:?}:ro
+      - ${V7_P8_DATA_DIR:?}:${V7_P8_DATA_DIR:?}
+    networks: [v7-service, v7-database]
+    healthcheck: *worker_healthcheck
+    labels: {io.platform.role: data-worker}
+
+  data-document-worker:
+    <<: *app
+    env_file: ["${V7_P8_DATA_DOCUMENT_WORKER_ENV_FILE:?}"]
+    environment: {V7_WORKER_HEARTBEAT_FILE: /tmp/v7-worker.heartbeat}
+    depends_on: *api_dependencies
+    command: ["data-document-worker"]
+    volumes:
+      - ${V7_P8_ARTIFACT_DIR:?}:${V7_P8_ARTIFACT_DIR:?}:ro
+      - ${V7_P8_DATA_DIR:?}:${V7_P8_DATA_DIR:?}
+    networks: [v7-service, v7-database]
+    healthcheck: *worker_healthcheck
+    labels: {io.platform.role: data-document-worker}
+
+  data-spatial-worker:
+    <<: *app
+    env_file: ["${V7_P8_DATA_SPATIAL_WORKER_ENV_FILE:?}"]
+    group_add: ["${V7_DOCKER_GID:?}"]
+    environment: {V7_WORKER_HEARTBEAT_FILE: /tmp/v7-worker.heartbeat}
+    depends_on: *api_dependencies
+    command: ["data-spatial-worker"]
+    volumes:
+      - ${V7_P8_ARTIFACT_DIR:?}:${V7_P8_ARTIFACT_DIR:?}:ro
+      - ${V7_P8_DATA_DIR:?}:${V7_P8_DATA_DIR:?}
+      - ${V7_P8_SPATIAL_DIR:?}:${V7_P8_SPATIAL_DIR:?}
+      - ${V7_DOCKER_SOCKET:?}:/var/run/docker.sock
+    networks: [v7-service, v7-database]
+    healthcheck: *worker_healthcheck
+    labels: {io.platform.role: data-spatial-worker, io.platform.docker-socket: allowed}
+
+  execution-supervisor:
+    <<: *app
+    env_file: ["${V7_P8_EXECUTION_SUPERVISOR_ENV_FILE:?}"]
+    group_add: ["${V7_DOCKER_GID:?}"]
+    environment: {V7_WORKER_HEARTBEAT_FILE: /tmp/v7-worker.heartbeat}
+    depends_on: *api_dependencies
+    command: ["execution-worker", "--role", "supervisor"]
+    volumes:
+      - ${V7_P8_ARTIFACT_DIR:?}:${V7_P8_ARTIFACT_DIR:?}:ro
+      - ${V7_P8_EXECUTION_DIR:?}:${V7_P8_EXECUTION_DIR:?}
+      - ${V7_DOCKER_SOCKET:?}:/var/run/docker.sock
+    networks: [v7-service, v7-database, v7-workload]
+    healthcheck: *worker_healthcheck
+    labels: {io.platform.role: execution-supervisor, io.platform.docker-socket: allowed}
+
+  execution-node-1:
+    <<: *app
+    env_file: ["${V7_P8_EXECUTION_NODE_1_ENV_FILE:?}"]
+    group_add: ["${V7_DOCKER_GID:?}"]
+    environment: {V7_WORKER_HEARTBEAT_FILE: /tmp/v7-worker.heartbeat}
+    depends_on: *api_dependencies
+    command: ["execution-worker", "--role", "node"]
+    volumes:
+      - ${V7_P8_ARTIFACT_DIR:?}:${V7_P8_ARTIFACT_DIR:?}:ro
+      - ${V7_P8_EXECUTION_DIR:?}:${V7_P8_EXECUTION_DIR:?}
+      - ${V7_DOCKER_SOCKET:?}:/var/run/docker.sock
+    networks: [v7-service, v7-database, v7-workload]
+    healthcheck: *worker_healthcheck
+    labels: {io.platform.role: execution-node-1, io.platform.docker-socket: allowed}
+
+  execution-node-2:
+    <<: *app
+    env_file: ["${V7_P8_EXECUTION_NODE_2_ENV_FILE:?}"]
+    group_add: ["${V7_DOCKER_GID:?}"]
+    environment: {V7_WORKER_HEARTBEAT_FILE: /tmp/v7-worker.heartbeat}
+    depends_on: *api_dependencies
+    command: ["execution-worker", "--role", "node"]
+    volumes:
+      - ${V7_P8_ARTIFACT_DIR:?}:${V7_P8_ARTIFACT_DIR:?}:ro
+      - ${V7_P8_EXECUTION_DIR:?}:${V7_P8_EXECUTION_DIR:?}
+      - ${V7_DOCKER_SOCKET:?}:/var/run/docker.sock
+    networks: [v7-service, v7-database, v7-workload]
+    healthcheck: *worker_healthcheck
+    labels: {io.platform.role: execution-node-2, io.platform.docker-socket: allowed}
+
+  execution-publication:
+    <<: *app
+    env_file: ["${V7_P8_EXECUTION_PUBLICATION_ENV_FILE:?}"]
+    group_add: ["${V7_DOCKER_GID:?}"]
+    environment: {V7_WORKER_HEARTBEAT_FILE: /tmp/v7-worker.heartbeat}
+    depends_on: *api_dependencies
+    command: ["execution-worker", "--role", "publication"]
+    volumes:
+      - ${V7_P8_ARTIFACT_DIR:?}:${V7_P8_ARTIFACT_DIR:?}:ro
+      - ${V7_P8_EXECUTION_DIR:?}:${V7_P8_EXECUTION_DIR:?}
+      - ${V7_DOCKER_SOCKET:?}:/var/run/docker.sock
+    networks: [v7-service, v7-database, v7-workload]
+    healthcheck: *worker_healthcheck
+    labels: {io.platform.role: execution-publication, io.platform.docker-socket: allowed}
+
+  knowledge-worker:
+    <<: *app
+    env_file: ["${V7_P8_KNOWLEDGE_WORKER_ENV_FILE:?}"]
+    environment: {V7_WORKER_HEARTBEAT_FILE: /tmp/v7-worker.heartbeat}
+    depends_on: *api_dependencies
+    command: ["knowledge-worker"]
+    volumes:
+      - ${V7_P8_ARTIFACT_DIR:?}:${V7_P8_ARTIFACT_DIR:?}:ro
+      - ${V7_P8_KNOWLEDGE_DIR:?}:${V7_P8_KNOWLEDGE_DIR:?}
+    networks: [v7-service, v7-database, v7-egress]
+    healthcheck: *worker_healthcheck
+    labels: {io.platform.role: knowledge-worker}
+
+  agent-worker:
+    <<: *app
+    env_file: ["${V7_P8_AGENT_WORKER_ENV_FILE:?}"]
+    environment: {V7_WORKER_HEARTBEAT_FILE: /tmp/v7-worker.heartbeat}
+    depends_on: *api_dependencies
+    command: ["agent-worker"]
+    networks: [v7-service, v7-database, v7-egress]
+    healthcheck: *worker_healthcheck
+    labels: {io.platform.role: agent-worker}
+
+  backup:
+    <<: *app
+    env_file: ["${V7_P8_BACKUP_ENV_FILE:?}"]
+    profiles: [ops]
+    user: "0:0"
+    read_only: false
+    restart: "no"
+    group_add: ["${V7_DOCKER_GID:?}"]
+    depends_on:
+      postgres: {condition: service_healthy}
+      migrate: {condition: service_completed_successfully}
+    command: ["platform-cold-backup", "status"]
+    volumes:
+      - ${V7_P8_ARTIFACT_DIR:?}:${V7_P8_ARTIFACT_DIR:?}:ro
+      - ${V7_P8_DATA_DIR:?}:${V7_P8_DATA_DIR:?}
+      - ${V7_P8_KNOWLEDGE_DIR:?}:${V7_P8_KNOWLEDGE_DIR:?}
+      - ${V7_P8_EXECUTION_DIR:?}:${V7_P8_EXECUTION_DIR:?}
+      - ${V7_P8_SPATIAL_DIR:?}:${V7_P8_SPATIAL_DIR:?}
+      - ${V7_P8_CONTROL_DIR:?}:${V7_P8_CONTROL_DIR:?}
+      - ${V7_P8_BACKUP_DIR:?}:${V7_P8_BACKUP_DIR:?}
+      - ${V7_DOCKER_SOCKET:?}:/var/run/docker.sock
+    networks: [v7-database]
+    labels: {io.platform.role: backup, io.platform.docker-socket: allowed, io.platform.hardening-exception: backup}
+
+networks:
+  # Docker does not activate published ports for containers attached only to
+  # internal networks.  This dedicated edge network makes the Gateway's host
+  # binding effective while disabled masquerading keeps it from becoming an
+  # outbound-egress path.
+  v7-ingress:
+    name: ${V7_P8_PROJECT_NAME:?}-v7-ingress
+    driver_opts:
+      com.docker.network.bridge.enable_ip_masquerade: "false"
+  v7-service:
+    name: ${V7_P8_PROJECT_NAME:?}-v7-service
+    internal: true
+  v7-database:
+    name: ${V7_P8_PROJECT_NAME:?}-v7-database
+    internal: true
+  v7-workload:
+    name: ${V7_P8_PROJECT_NAME:?}-v7-workload
+    internal: true
+  v7-egress:
+    name: ${V7_P8_PROJECT_NAME:?}-v7-egress

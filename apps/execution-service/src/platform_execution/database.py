@@ -1,12 +1,13 @@
 """Service-owned PostgreSQL connection and explicit migrations."""
 
 import argparse
-import os
 from pathlib import Path
 
 import sqlalchemy as sa
 from alembic import command
 from alembic.config import Config
+
+from platform_execution.composition import ExecutionAdminComposition
 
 SCHEMA_VERSION = "0006_remote_reliability"
 
@@ -42,7 +43,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("command", choices=["migrate", "check-schema"])
     args = parser.parse_args()
-    database = Database(os.environ["V7_EXECUTION_DATABASE_URL"])
+    composition = ExecutionAdminComposition.from_environment()
+    database = Database(composition.database_url)
     try:
         database.migrate() if args.command == "migrate" else database.check_schema()
     finally:

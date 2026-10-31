@@ -3,7 +3,7 @@ name = "groundwater-platform-v7"
 version = "0.15.5"
 description = "V7 P8.2 unified enterprise workspace and recoverable release engineering"
 requires-python = ">=3.12,<3.13"
-dependencies = ["groundwater-platform-api==0.15.5", "groundwater-data-service==0.15.5", "groundwater-execution-service==0.15.5", "groundwater-knowledge-service==0.15.5", "groundwater-agent-runtime==0.15.5", "groundwater-operator-pack==0.15.5", "groundwater-checker-pack==0.15.5", "groundwater-tabular-operator-pack==0.15.5"]
+dependencies = ["groundwater-platform-api==0.15.5", "groundwater-data-service==0.15.5", "groundwater-execution-service==0.15.5", "groundwater-knowledge-service==0.15.5", "groundwater-agent-runtime==0.15.5", "groundwater-operator-pack==0.15.5", "groundwater-checker-pack==0.15.5", "groundwater-tabular-operator-pack==0.15.5", "groundwater-temporal-workflow-runtime==0.15.5"]
 
 [dependency-groups]
 dev = [
@@ -21,7 +21,7 @@ package = false
 required-version = ">=0.8.14"
 
 [tool.uv.workspace]
-members = ["apps/platform-api", "apps/agent-worker", "packages/platform-core", "packages/contracts", "packages/platform-infrastructure", "apps/data-service", "apps/execution-service", "apps/knowledge-service", "packages/operator-pack", "packages/checker-pack", "packages/tabular-operator-pack"]
+members = ["apps/platform-api", "apps/agent-worker", "packages/platform-core", "packages/contracts", "packages/platform-infrastructure", "apps/data-service", "apps/execution-service", "apps/knowledge-service", "packages/operator-pack", "packages/checker-pack", "packages/tabular-operator-pack", "packages/temporal-workflow-runtime"]
 
 [tool.uv.sources]
 groundwater-platform-api = { workspace = true }
@@ -36,6 +36,7 @@ groundwater-operator-pack = { workspace = true }
 groundwater-checker-pack = { workspace = true }
 groundwater-agent-runtime = { workspace = true }
 groundwater-tabular-operator-pack = { workspace = true }
+groundwater-temporal-workflow-runtime = { workspace = true }
 
 [[tool.uv.index]]
 name = "pypi"
@@ -43,7 +44,7 @@ url = "https://pypi.org/simple"
 default = true
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+testpaths = ["tests", "packages/temporal-workflow-runtime/tests"]
 addopts = "-ra --import-mode=importlib"
 
 [tool.ruff]

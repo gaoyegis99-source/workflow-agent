@@ -160,9 +160,6 @@ for identity, image_key in {
         "outputs": {"check": "check.json"},
     }
 
-# Compatibility for old imports only. Runtime resolution never uses this merged map.
-SPECS = COMPUTE_IMPLEMENTATIONS | CHECKER_IMPLEMENTATIONS
-
 REMOTE_SPATIAL_SUMMARY_CONTRACT = (
     "sha256:8a49ec81ca22f0ab595ea30cc8f1f9641433ee9820e9a76e095d26889b0754ee"
 )

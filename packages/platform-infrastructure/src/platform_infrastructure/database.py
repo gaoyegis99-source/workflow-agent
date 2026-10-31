@@ -1,5 +1,5 @@
 import hashlib
-import os
+import re
 import secrets
 from datetime import timedelta
 from pathlib import Path
@@ -16,7 +16,11 @@ from platform_infrastructure import tables as t
 from platform_infrastructure.repositories import (
     AccessRepository,
     ActionRepository,
-    AgentRepository,
+    AgentBudgetRepository,
+    AgentConversationRepository,
+    AgentRecoveryRepository,
+    AgentRunLeaseRepository,
+    AgentToolRepository,
     AuthoringRepository,
     BudgetRepository,
     DeliveryRepository,
@@ -28,8 +32,10 @@ from platform_infrastructure.repositories import (
     one,
 )
 
-SCHEMA_VERSION = "0023_workflow_release_lifecycle"
+SCHEMA_VERSION = "0026_worker_lane_leases"
 StorageError = SQLAlchemyError
+_EXTERNAL_SUBJECT = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.:@/-]{0,127}")
+_AUDIT_REVIEWER = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.:@/-]{0,127}")
 
 
 class UnitOfWork:
@@ -49,7 +55,11 @@ class UnitOfWork:
         self.workflows = WorkflowRepository(self.connection)
         self.authoring = AuthoringRepository(self.connection)
         self.service_bindings = ServiceBindingRepository(self.connection)
-        self.agents = AgentRepository(self.connection)
+        self.agent_runs = AgentRunLeaseRepository(self.connection)
+        self.agent_conversations = AgentConversationRepository(self.connection)
+        self.agent_tools = AgentToolRepository(self.connection)
+        self.agent_budgets = AgentBudgetRepository(self.connection)
+        self.agent_recovery = AgentRecoveryRepository(self.connection)
         return self
 
     def __exit__(self, kind, value, traceback):
@@ -81,13 +91,6 @@ class Database:
             connect_args={"connect_timeout": 3},
             hide_parameters=True,
         )
-
-    @classmethod
-    def from_environment(cls):
-        url = os.environ.get("V7_DATABASE_URL")
-        if not url:
-            raise RuntimeError("V7_DATABASE_URL is required")
-        return cls(url)
 
     def transaction(self):
         return UnitOfWork(self.engine)
@@ -125,14 +128,144 @@ class Database:
             uow.access.authorize(actor, None)
         return actor
 
+    @staticmethod
+    def _external_subject(value: str) -> str:
+        require(
+            isinstance(value, str) and _EXTERNAL_SUBJECT.fullmatch(value) is not None,
+            "MALFORMED_REQUEST",
+            "External subject is invalid",
+            400,
+        )
+        return value
+
+    @staticmethod
+    def _binding_audit(reviewer: str, reason: str) -> tuple[str, str]:
+        reviewer = reviewer.strip() if isinstance(reviewer, str) else ""
+        reason = reason.strip() if isinstance(reason, str) else ""
+        require(
+            _AUDIT_REVIEWER.fullmatch(reviewer) is not None,
+            "MALFORMED_REQUEST",
+            "Binding reviewer is invalid",
+            400,
+        )
+        require(
+            0 < len(reason) <= 512
+            and all(ord(character) >= 32 and ord(character) != 127 for character in reason),
+            "MALFORMED_REQUEST",
+            "Binding reason is invalid",
+            400,
+        )
+        return reviewer, reason
+
+    def authenticate_subject(self, subject: str):
+        """Authenticate a subject previously bound by local administration.
+
+        This is only called after the HTTP adapter has verified the trusted
+        proxy proof.  It intentionally yields no Bearer token id, so callers
+        cannot replay a proxy identity as a user credential.
+        """
+        subject = self._external_subject(subject)
+        with self.engine.connect() as connection:
+            row = one(
+                connection,
+                sa.select(t.principals).where(t.principals.c.external_subject == subject),
+                required=False,
+            )
+        require(row is not None, "AUTHENTICATION_REQUIRED", "Valid authentication is required", 401)
+        return Identity(row["principal_id"], None, "trusted-proxy")
+
+    def principal(self, principal_id: str):
+        with self.engine.connect() as connection:
+            return one(
+                connection,
+                sa.select(t.principals).where(t.principals.c.principal_id == principal_id),
+            )
+
+    def identity_view(self, actor: Identity) -> dict:
+        principal = self.principal(actor.principal_id)
+        with self.engine.connect() as connection:
+            projects = [
+                dict(row)
+                for row in connection.execute(
+                    sa.select(t.projects.c.project_id, t.members.c.role)
+                    .join(t.members)
+                    .where(t.members.c.principal_id == actor.principal_id)
+                    .order_by(t.projects.c.project_id)
+                ).mappings()
+            ]
+        return {
+            "principal_id": principal["principal_id"],
+            "principal_name": principal["name"],
+            "external_subject": principal["external_subject"],
+            "projects": projects,
+        }
+
     def create_principal(self, name: str):
         require(
             0 < len(name) <= 200, "MALFORMED_REQUEST", "Name must contain 1 to 200 characters", 400
         )
         principal_id = uuid4().hex
         with self.engine.begin() as connection:
-            connection.execute(t.principals.insert().values(principal_id=principal_id, name=name))
+            connection.execute(
+                t.principals.insert().values(
+                    principal_id=principal_id,
+                    name=name,
+                )
+            )
         return principal_id
+
+    def bind_subject(self, principal_id: str, subject: str, *, reviewer: str, reason: str):
+        subject = self._external_subject(subject)
+        reviewer, reason = self._binding_audit(reviewer, reason)
+        with self.engine.begin() as connection:
+            # Serialize both first-time binds and rebinding attempts for one
+            # external subject.  A unique constraint remains the invariant;
+            # the advisory lock turns a concurrent collision into the same
+            # reviewable 409 response rather than an unclassified DB error.
+            connection.execute(
+                sa.text("SELECT pg_advisory_xact_lock(hashtext(:subject))"),
+                {"subject": subject},
+            )
+            principal = one(
+                connection,
+                sa.select(t.principals)
+                .where(t.principals.c.principal_id == principal_id)
+                .with_for_update(),
+            )
+            existing = one(
+                connection,
+                sa.select(t.principals.c.principal_id).where(
+                    t.principals.c.external_subject == subject
+                ),
+                required=False,
+            )
+            require(
+                existing is None or existing["principal_id"] == principal_id,
+                "PRECONDITION_UNRESOLVED",
+                "External subject is already bound",
+                409,
+            )
+            connection.execute(
+                t.principals.update()
+                .where(t.principals.c.principal_id == principal_id)
+                .values(external_subject=subject)
+            )
+            event_id = uuid4().hex
+            connection.execute(
+                t.principal_identity_events.insert().values(
+                    event_id=event_id,
+                    principal_id=principal_id,
+                    previous_subject=principal["external_subject"],
+                    bound_subject=subject,
+                    reviewer=reviewer,
+                    reason=reason,
+                )
+            )
+        return {
+            "event_id": event_id,
+            "principal_id": principal_id,
+            "external_subject": subject,
+        }
 
     def issue_token(self, principal_id: str, ttl_seconds: int = 2592000):
         require(1 <= ttl_seconds <= 31536000, "MALFORMED_REQUEST", "Invalid token lifetime", 400)
@@ -140,7 +273,9 @@ class Database:
         with self.engine.begin() as connection:
             one(
                 connection,
-                sa.select(t.principals).where(t.principals.c.principal_id == principal_id),
+                sa.select(t.principals.c.principal_id).where(
+                    t.principals.c.principal_id == principal_id
+                ),
             )
             now = connection.scalar(sa.select(sa.func.clock_timestamp()))
             connection.execute(

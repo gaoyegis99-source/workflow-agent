@@ -2,12 +2,11 @@
 
 from __future__ import annotations
 
-import hashlib
-import json
 from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Any
 
+from platform_core.domain.canonical import digest_uri
 from platform_core.domain.control import require, valid_identifier
 
 PROPOSAL_KINDS = frozenset(
@@ -28,14 +27,7 @@ PROPOSAL_KINDS = frozenset(
 
 def canonical_digest(value: Mapping[str, Any]) -> str:
     """Return the stable digest used at the runtime boundary."""
-    encoded = json.dumps(
-        value,
-        ensure_ascii=False,
-        sort_keys=True,
-        separators=(",", ":"),
-        allow_nan=False,
-    ).encode("utf-8")
-    return "sha256:" + hashlib.sha256(encoded).hexdigest()
+    return digest_uri(value)
 
 
 @dataclass(frozen=True, slots=True)

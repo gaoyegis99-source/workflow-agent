@@ -1,0 +1,24 @@
+{
+  "schema_version": 2,
+  "project": "groundwater-v7",
+  "source": "source",
+  "runtime": {
+    "root": "runtime",
+    "work": "runtime/work",
+    "active": "runtime/active",
+    "archive": "runtime/archive",
+    "toolchain": "runtime/toolchain",
+    "docker": "runtime/docker",
+    "p1": "runtime/work/p1",
+    "p2": "runtime/work/p2",
+    "p3": "runtime/work/p3",
+    "p4": "runtime/work/p4",
+    "p5": "runtime/work/p5",
+    "p6": "runtime/work/p6",
+    "p7": "runtime/work/p7",
+    "p8": "runtime/p8",
+    "docker_socket": "/run/user/__UID__/groundwater-v7-docker/docker.sock"
+  },
+  "shared_runtime_paths": [],
+  "shared_docker_resources": []
+}

@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -euo pipefail
+project_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+if ! resolved="$(python3 -B "$project_root/source/scripts/maintenance/project_environment.py" shell)"; then
+  exit 75
+fi
+eval "$resolved"
+unset resolved
+exec bash "$project_root/source/scripts/operations/p8.sh" "$@"

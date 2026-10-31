@@ -1,1 +1,1 @@
-from tests.p2.conftest import database, owner, postgres  # noqa: F401
+from tests.platform.database.conftest import database, owner, postgres  # noqa: F401

@@ -19,6 +19,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 import sqlalchemy as sa  # noqa: E402
+from platform_core.application.catalog import build_catalog  # noqa: E402
 from platform_core.application.workflow_compiler import compile_package  # noqa: E402
 from platform_infrastructure.database import Database  # noqa: E402
 
@@ -37,8 +38,9 @@ from benchmarks.p4.workflow_benchmark import (  # noqa: E402
     scatter_package,
     service_databases,
 )
-from scripts.p2_environment import PostgreSQL  # noqa: E402
-from tests.p3.harness import Cluster  # noqa: E402
+from scripts.configure.p2_environment import PostgreSQL  # noqa: E402
+from scripts.lib.runtime_layout import P4_RUNTIME_ROOT  # noqa: E402
+from tests.platform.services.harness import Cluster  # noqa: E402
 
 PROFILES = {
     "quick": {"rows": 20_000, "groups": 200, "nodes": 4, "concurrency": 4, "repeats": 1},
@@ -58,7 +60,7 @@ SOURCES = (
     "apps/execution-service/src/platform_execution/application/runner.py",
     "apps/execution-service/src/platform_execution/adapters/repository.py",
     "benchmarks/p4/scheduler_r44.py",
-    "scripts/check_p4_scheduler_r44.sh",
+    "scripts/checks/check_p4_scheduler_r44.sh",
 )
 
 
@@ -175,9 +177,9 @@ def launch_role_workers(cluster, roles):
 def run_pair(postgres, platform_database, admin, directory, config, profile, repeat):
     services = service_databases(postgres.url, admin)
     cluster = Cluster(directory, platform_database, tuple(value for _, value in services))
-    cluster.env["V7_CWL_IMAGE"] = (ROOT / ".p4-runtime/cwl-image.txt").read_text().strip()
+    cluster.env["V7_CWL_IMAGE"] = (P4_RUNTIME_ROOT / "cwl-image.txt").read_text().strip()
     cluster.env["V7_OPERATOR_IMAGE"] = (
-        (ROOT / ".p4-runtime/performance-operator-image.txt").read_text().strip()
+        (P4_RUNTIME_ROOT / "performance-operator-image.txt").read_text().strip()
     )
     cluster.env["V7_EXECUTION_CALLBACK_URL"] = cluster.env["V7_EXECUTION_URL"]
     executions = []
@@ -188,13 +190,13 @@ def run_pair(postgres, platform_database, admin, directory, config, profile, rep
         )
         token = platform_database.issue_token(principal, ttl_seconds=7200)["token"]
         cluster.start_services()
-        cluster.launch("platform-worker")
+        cluster.launch_platform_worker_lanes()
         if config.get("roles"):
             launch_role_workers(cluster, config["roles"])
         else:
             launch_workers(cluster, config["workers"], True)
         definition = scatter_package()
-        compiled = compile_package(definition)
+        compiled = compile_package(definition, catalog=build_catalog())
         contexts = []
         packages = []
         datasets = []
@@ -445,8 +447,8 @@ def environment():
         "docker": subprocess.check_output(
             ["docker", "version", "--format", "{{.Server.Version}}"], text=True
         ).strip(),
-        "cwl_image": (ROOT / ".p4-runtime/cwl-image.txt").read_text().strip(),
-        "performance_operator_image": (ROOT / ".p4-runtime/performance-operator-image.txt")
+        "cwl_image": (P4_RUNTIME_ROOT / "cwl-image.txt").read_text().strip(),
+        "performance_operator_image": (P4_RUNTIME_ROOT / "performance-operator-image.txt")
         .read_text()
         .strip(),
     }
@@ -460,9 +462,11 @@ def main():
     args = parser.parse_args()
     suffix = "-quick" if args.profile == "quick" else ""
     args.output = (
-        args.output or ROOT / f"docs/verification/p4-r44-worker-queue{suffix}-evidence.json"
+        args.output or P4_RUNTIME_ROOT / f"verification/p4-r44-worker-queue{suffix}-evidence.json"
     )
-    args.report = args.report or ROOT / f"docs/verification/p4-r44-worker-queue{suffix}-report.md"
+    args.report = (
+        args.report or P4_RUNTIME_ROOT / f"verification/p4-r44-worker-queue{suffix}-report.md"
+    )
     profile = PROFILES[args.profile]
     runs = []
     started = time.perf_counter()

@@ -17,7 +17,8 @@ import sqlalchemy as sa  # noqa: E402
 from platform_infrastructure.database import Database  # noqa: E402
 
 from benchmarks.p4.scheduler_diagnostics import distribution, run_once  # noqa: E402
-from scripts.p2_environment import PostgreSQL  # noqa: E402
+from scripts.configure.p2_environment import PostgreSQL  # noqa: E402
+from scripts.lib.runtime_layout import P4_RUNTIME_ROOT  # noqa: E402
 
 PROFILES = {
     "quick": {"rows": 20_000, "groups": 200, "nodes": 4, "concurrency": 4, "repeats": 1},
@@ -33,7 +34,7 @@ PROFILES = {
 
 def old_image():
     evidence = json.loads(
-        (ROOT / "docs/verification/p4-workflow-scheduler-diagnostics.json").read_text()
+        (P4_RUNTIME_ROOT / "verification/p4-workflow-scheduler-diagnostics.json").read_text()
     )
     image = evidence["environment"]["images"]["cwl"]
     inspected = subprocess.run(
@@ -60,7 +61,7 @@ def configurations():
             "workers": 2,
             "init": False,
             "baseline_resources": False,
-            "cwl_image": (ROOT / ".p4-runtime/cwl-image.txt").read_text().strip(),
+            "cwl_image": (P4_RUNTIME_ROOT / "cwl-image.txt").read_text().strip(),
         },
     )
 
@@ -239,12 +240,12 @@ def main():
     parser.add_argument(
         "--output",
         type=Path,
-        default=ROOT / "docs/verification/p4-r2-scheduler-evidence.json",
+        default=P4_RUNTIME_ROOT / "verification/p4-r2-scheduler-evidence.json",
     )
     parser.add_argument(
         "--report",
         type=Path,
-        default=ROOT / "docs/verification/p4-r2-scheduler-report.md",
+        default=P4_RUNTIME_ROOT / "verification/p4-r2-scheduler-report.md",
     )
     parser.add_argument("--only", choices=("both", "optimized"), default="both")
     args = parser.parse_args()

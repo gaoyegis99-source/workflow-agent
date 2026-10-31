@@ -46,10 +46,6 @@ def check_literal(value):
         )
 
 
-def ports(target):
-    return catalog_ports(target)
-
-
 def short_type(value):
     if isinstance(value, dict) and "type" in value:
         kind = value["type"]
@@ -128,7 +124,26 @@ def signature(document, key):
     return values
 
 
-def compile_package(request, *, resolver=ports, bridge_command=None):
+def compile_package(request, *, catalog=None, resolver=None, bridge_command=None):
+    """Compile one package against an explicitly selected operator catalogue.
+
+    Tests for the compiler's graph mechanics may inject a narrow ``resolver``.
+    Every real catalogue-backed caller must instead pass ``catalog``; the core
+    never reads deployment configuration or chooses a catalogue implicitly.
+    """
+
+    require(
+        (catalog is None) != (resolver is None),
+        "INVALID_BINDING",
+        "Provide exactly one operator catalog or resolver",
+        422,
+    )
+    if resolver is None:
+
+        def resolve_from_catalog(target):
+            return catalog_ports(target, catalog)
+
+        resolver = resolve_from_catalog
     require(
         request.get("profile", PROFILE) == PROFILE,
         "UNSUPPORTED_TARGET",

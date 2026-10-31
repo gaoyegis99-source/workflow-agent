@@ -5,11 +5,10 @@ from platform_core.application.control import ControlService
 from tests.authoring.a4.helpers import catalog_and_materials
 
 
-def test_public_http_only_exposes_project_material_workflow(database, owner, monkeypatch):
+def test_public_http_only_exposes_project_material_workflow(database, owner):
     actor, token = owner
     project = ControlService(database).create_project(actor, "a4-http", "A4 HTTP")
     catalog, materials, release = catalog_and_materials()
-    monkeypatch.setattr("platform_core.application.catalog.configured_catalog", lambda: catalog)
     prefix = f"/api/v1/projects/{project['project_id']}"
     headers = {"Authorization": "Bearer " + token}
     with TestClient(create_app(database, release_lock=release)) as client:
@@ -37,14 +36,13 @@ def test_public_http_only_exposes_project_material_workflow(database, owner, mon
         assert not any("approve" in path or "deploy" in path for path in paths)
 
 
-def test_viewer_cannot_create_and_owner_has_no_review_route(database, owner, monkeypatch):
+def test_viewer_cannot_create_and_owner_has_no_review_route(database, owner):
     actor, token = owner
     project = ControlService(database).create_project(actor, "a4-permissions", "A4 Permissions")
     viewer_id = database.create_principal("viewer")
     database.set_member(project["project_id"], viewer_id, "VIEWER", actor=actor)
     viewer_token = database.issue_token(viewer_id)["token"]
     catalog, materials, release = catalog_and_materials()
-    monkeypatch.setattr("platform_core.application.catalog.configured_catalog", lambda: catalog)
     prefix = f"/api/v1/projects/{project['project_id']}"
     with TestClient(create_app(database, release_lock=release)) as client:
         denied = client.post(

@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -euo pipefail
+project_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+if ! resolved="$(python3 -B "$project_root/source/scripts/maintenance/project_environment.py" shell)"; then
+  exit 75
+fi
+eval "$resolved"
+unset resolved
+python_bin="$V7_PYTHON"
+if [[ ! -x "$python_bin" ]]; then
+  printf 'V7 toolchain is missing: %s; rebuild it with UV_PROJECT_ENVIRONMENT=%q uv sync --locked from source/\n' \
+    "$python_bin" "$project_root/runtime/toolchain/v7" >&2
+  exit 1
+fi
+exec "$python_bin" \
+  "$project_root/source/scripts/configure/configure_p8.py" "$@"

@@ -6,11 +6,15 @@ from fastapi import APIRouter, Query, Request
 from platform_contracts.knowledge import (
     EvidenceRead,
     KnowledgeDocumentList,
+    KnowledgeFusionSearch,
+    KnowledgeFusionSearchResult,
     KnowledgeImportCreate,
     KnowledgeImportReceipt,
     KnowledgeImportView,
     KnowledgeSearch,
     KnowledgeSearchResult,
+    KnowledgeSemanticSearch,
+    KnowledgeSemanticSearchResult,
     KnowledgeVersionView,
     KnowledgeWithdraw,
 )
@@ -36,7 +40,11 @@ def call(
     params=None,
 ):
     Science(
-        request.app.state.database, request.app.state.data, request.app.state.execution
+        request.app.state.database,
+        request.app.state.data,
+        request.app.state.execution,
+        operator_catalog=request.app.state.operator_catalog,
+        checker_catalog=request.app.state.checker_catalog,
     ).authorize(actor, project, role)
     remote = request.app.state.knowledge
     if remote is None:
@@ -120,6 +128,34 @@ def search(project_id: PathId, body: KnowledgeSearch, actor: Actor, request: Req
         project_id,
         "POST",
         "/search",
+        body=body.model_dump(mode="json"),
+    )
+
+
+@router.post(P + "/semantic-search", response_model=KnowledgeSemanticSearchResult)
+def semantic_search(
+    project_id: PathId, body: KnowledgeSemanticSearch, actor: Actor, request: Request
+):
+    """Candidate discovery only; exact evidence remains a separate read route."""
+
+    return call(
+        request,
+        actor,
+        project_id,
+        "POST",
+        "/semantic-search",
+        body=body.model_dump(mode="json"),
+    )
+
+
+@router.post(P + "/fusion-search", response_model=KnowledgeFusionSearchResult)
+def fusion_search(project_id: PathId, body: KnowledgeFusionSearch, actor: Actor, request: Request):
+    return call(
+        request,
+        actor,
+        project_id,
+        "POST",
+        "/fusion-search",
         body=body.model_dump(mode="json"),
     )
 

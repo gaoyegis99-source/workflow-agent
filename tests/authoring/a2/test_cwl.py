@@ -1,9 +1,11 @@
-from pathlib import Path
 from types import SimpleNamespace
 
+from platform_core.application.catalog import build_catalog
 from platform_core.application.workflow_compiler import compile_package
 from platform_infrastructure.cwl import CwlValidator
 
+from scripts.lib.runtime_layout import P4_RUNTIME_ROOT
+from scripts.maintenance.project_environment import docker_executable
 from tests.authoring.a2.helpers import profile_source
 
 
@@ -15,9 +17,11 @@ def test_cwltool_container_has_fixed_resources_and_process_isolation(monkeypatch
         return SimpleNamespace(returncode=0)
 
     monkeypatch.setattr("platform_infrastructure.cwl.subprocess.run", run)
-    CwlValidator("sha256:" + "a" * 64).validate(compile_package(profile_source()))
+    CwlValidator("sha256:" + "a" * 64).validate(
+        compile_package(profile_source(), catalog=build_catalog())
+    )
 
-    assert command[0:2] == ["docker", "run"]
+    assert command[0:2] == [docker_executable(), "run"]
     for option, value in {
         "--network": "none",
         "--cpus": "1",
@@ -33,6 +37,8 @@ def test_cwltool_container_has_fixed_resources_and_process_isolation(monkeypatch
 
 
 def test_fixed_cwltool_container_accepts_a2_generated_package():
-    image = Path(".p4-runtime/cwl-image.txt").read_text(encoding="utf-8").strip()
+    image = (P4_RUNTIME_ROOT / "cwl-image.txt").read_text(encoding="utf-8").strip()
     assert image.startswith("sha256:")
-    CwlValidator(image, timeout=90).validate(compile_package(profile_source()))
+    CwlValidator(image, timeout=90).validate(
+        compile_package(profile_source(), catalog=build_catalog())
+    )

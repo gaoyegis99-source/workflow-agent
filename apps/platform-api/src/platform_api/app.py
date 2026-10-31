@@ -1,9 +1,7 @@
 """Composition root. Assemble only capabilities implemented in this phase."""
 
-import os
 from contextlib import asynccontextmanager
 from importlib.metadata import version
-from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
@@ -11,12 +9,11 @@ from platform_contracts.authoring import (
     build_authoring_descriptor,
     validate_operator_parameters,
 )
-from platform_contracts.release import file_digest, production_mode, production_release
-from platform_contracts.service import ReleaseIdentityMiddleware
+from platform_contracts.service import DeploymentIdentityMiddleware
 from platform_core.application.authoring import semantic_environment
 from platform_core.application.errors import RuleViolation
 from platform_infrastructure.database import Database, StorageError
-from platform_infrastructure.services import from_environment, knowledge_from_environment
+from platform_infrastructure.services import data_client, execution_client, knowledge_client
 from starlette.exceptions import HTTPException
 from starlette.responses import FileResponse
 from starlette.staticfiles import StaticFiles
@@ -32,6 +29,8 @@ from platform_api.adapters.http.errors import (
     validation_error,
 )
 from platform_api.adapters.http.health import router
+from platform_api.adapters.http.identity import IdentityResolver
+from platform_api.adapters.http.internal_authorization import InternalExecutionPolicy
 from platform_api.adapters.http.knowledge import router as knowledge_router
 from platform_api.adapters.http.remote import router as remote_router
 from platform_api.adapters.http.research import router as research_router
@@ -39,6 +38,7 @@ from platform_api.adapters.http.science import internal
 from platform_api.adapters.http.science import router as science_router
 from platform_api.adapters.http.workflows import internal as workflow_internal
 from platform_api.adapters.http.workflows import router as workflow_router
+from platform_api.composition import PlatformComposition
 
 
 def create_app(
@@ -47,40 +47,42 @@ def create_app(
     agent_runtime_profile: dict | None = None,
     agent_model_catalog: dict | None = None,
     agent_tool_catalog: dict | None = None,
+    deployment_evidence: dict | None = None,
+    # Historical test fixtures used this private constructor argument. It is
+    # never read from a file or environment in a direct deployment.
     release_lock: dict | None = None,
+    composition: PlatformComposition | None = None,
 ) -> FastAPI:
-    owned = database is None and bool(os.environ.get("V7_DATABASE_URL"))
+    composition = composition or (
+        PlatformComposition.from_environment()
+        if database is None
+        else PlatformComposition.for_test()
+    )
+    owned = database is None and composition.database_url is not None
     if owned:
-        database = Database.from_environment()
-    runtime_path = os.environ.get("V7_AGENT_RUNTIME_PROFILE")
+        database = Database(composition.database_url)
+    runtime_path = composition.agent_runtime_profile_path
     if agent_runtime_profile is None and runtime_path:
         from platform_core.application.runtime_config import load_runtime_profile
 
         agent_runtime_profile = load_runtime_profile(runtime_path)
-    catalog_path = os.environ.get("V7_MODEL_CATALOG")
+    catalog_path = composition.model_catalog_path
     if agent_model_catalog is None and catalog_path:
         from platform_core.application.model_catalog import load_catalog
 
         agent_model_catalog = load_catalog(catalog_path)
-    tool_path = os.environ.get("V7_AGENT_TOOL_CATALOG")
+    tool_path = composition.agent_tool_catalog_path
     if agent_tool_catalog is None and tool_path:
         from platform_core.application.tool_catalog import load_tool_catalog
 
         agent_tool_catalog = load_tool_catalog(tool_path)
-    from platform_core.application.catalog import configured_catalog
-
-    operator_catalog = configured_catalog()
+    operator_catalog = composition.operator_catalog
     authoring_descriptor = build_authoring_descriptor(operator_catalog)
-    checker_path = os.environ.get("V7_CHECKER_CATALOG")
-    cwl_image = os.environ.get("V7_CWL_IMAGE")
-    checker_catalog = None
-    if checker_path:
-        from platform_core.application.checker_catalog import load_catalog as load_checker_catalog
-
-        checker_catalog = load_checker_catalog(checker_path)
-    release = release_lock
-    if production_mode():
-        operator_path = os.environ.get("V7_OPERATOR_CATALOG")
+    checker_path = composition.catalog.checker_catalog_path
+    cwl_image = composition.cwl_image
+    checker_catalog = composition.checker_catalog
+    if composition.deployment.is_direct:
+        operator_path = composition.catalog.operator_catalog_path
         if (
             not operator_path
             or not tool_path
@@ -89,36 +91,19 @@ def create_app(
             or checker_catalog is None
             or not cwl_image
         ):
-            raise ValueError(
-                "Production Platform requires operator, checker, tool and CWL validation inputs"
-            )
+            raise ValueError("Direct Platform requires operator, checker, tool and CWL inputs")
         if agent_tool_catalog.get("catalog_id") not in {
             "p7-action-tools-v2",
             "p7-science-tools-v2",
         }:
-            raise ValueError("Production cannot create Agent runs with a legacy tool catalogue")
-        release = production_release(
-            operator_path=operator_path,
-            operator_catalog=operator_catalog,
-            tool_path=tool_path,
-            tool_catalog=agent_tool_catalog,
-            catalogs={"checker_catalog": (checker_path, checker_catalog)},
-            images={"cwl": cwl_image},
-            version=version("groundwater-platform-api"),
-        )
-        studio_root = Path(__file__).parent / "studio_static"
-        installed_assets = {
-            path.relative_to(studio_root).as_posix(): file_digest(path)
-            for path in sorted(studio_root.rglob("*"))
-            if path.is_file()
-        }
-        if release.get("web_assets") != installed_assets:
-            raise ValueError("Installed Capability Studio bundle differs from the release lock")
+            raise ValueError(
+                "Direct Platform cannot create Agent runs with a legacy tool catalogue"
+            )
     authoring_environment = (
         semantic_environment(
             authoring_descriptor,
             cwl_image,
-            release["release_digest"] if release else None,
+            composition.deployment.deployment_revision,
         )
         if cwl_image
         else None
@@ -139,8 +124,8 @@ def create_app(
         title="Groundwater Platform V7",
         version=version("groundwater-platform-api"),
         description=(
-            "P8.2 / A7: immutable workflow releases, lifecycle governance, "
-            "maintenance-window upgrades, and recoverable deployment."
+            "P8 / A7: immutable workflow releases, lifecycle governance, "
+            "direct-Compose maintenance, and recoverable deployment."
         ),
         openapi_url="/api/v1/openapi.json",
         docs_url=None,
@@ -149,12 +134,37 @@ def create_app(
         lifespan=lifespan,
     )
     app.state.database = database
+    app.state.identity_resolver = IdentityResolver(
+        database,
+        mode=composition.identity_mode,
+        proxy_token=composition.trusted_proxy_token,
+    )
     app.state.agent_runtime_profile = agent_runtime_profile
     app.state.agent_model_catalog = agent_model_catalog
     app.state.agent_tool_catalog = agent_tool_catalog
     app.state.checker_catalog = checker_catalog
-    app.state.release_digest = release["release_digest"] if release else None
-    app.state.release_lock = release
+    # ``release_digest`` remains in existing read models for wire
+    # compatibility.  It is now only the optional deployment revision and is
+    # never obtained from, or validated against, a Release Lock.
+    app.state.release_digest = composition.deployment.deployment_revision
+    if deployment_evidence is not None and release_lock is not None:
+        raise ValueError("Provide deployment_evidence once")
+    app.state.deployment_evidence = (
+        deployment_evidence
+        or release_lock
+        or {
+            "deployment_id": composition.deployment.deployment_id,
+            # Database/read-model fields keep ``release_digest`` for historical
+            # wire compatibility; the value is direct deployment metadata only.
+            "release_digest": composition.deployment.deployment_revision,
+        }
+    )
+    app.state.deployment_context = composition.deployment
+    app.state.catalog_context = composition.catalog
+    app.state.internal_execution_policy = InternalExecutionPolicy(
+        composition.internal_execution.token,
+        composition.internal_execution.maintenance_file,
+    )
     # create_app fixtures do not enter lifespan; keep an independently validated
     # source catalogue available for synchronous TestClient-free use as well.
     app.state.operator_catalog = operator_catalog
@@ -164,9 +174,10 @@ def create_app(
     app.state.agent_configuration_complete = (agent_runtime_profile is None) == (
         agent_model_catalog is None
     )
-    app.state.data, app.state.execution = from_environment()
-    app.state.knowledge = knowledge_from_environment()
-    app.add_middleware(ReleaseIdentityMiddleware)
+    app.state.data = data_client(composition.data, deployment=composition.deployment)
+    app.state.execution = execution_client(composition.execution, deployment=composition.deployment)
+    app.state.knowledge = knowledge_client(composition.knowledge, deployment=composition.deployment)
+    app.add_middleware(DeploymentIdentityMiddleware, deployment=composition.deployment)
     app.add_middleware(RequestIdMiddleware)
     app.add_exception_handler(HTTPException, http_error)
     app.add_exception_handler(RequestValidationError, validation_error)
@@ -183,7 +194,11 @@ def create_app(
     app.include_router(research_router, prefix="/api/v1")
     app.include_router(workflow_internal)
     app.include_router(internal)
-    studio = Path(__file__).parent / "studio_static"
+    studio = composition.studio_root
+    if composition.deployment.is_direct and not (
+        (studio / "index.html").is_file() and (studio / "assets").is_dir()
+    ):
+        raise ValueError("Direct Platform requires a packaged Capability Studio bundle")
     app.mount(
         "/assets",
         StaticFiles(directory=studio / "assets", check_dir=False),

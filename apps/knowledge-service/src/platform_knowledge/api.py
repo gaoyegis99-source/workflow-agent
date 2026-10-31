@@ -1,7 +1,6 @@
 """Authenticated internal Knowledge HTTP API."""
 
 import logging
-import os
 import re
 from contextlib import asynccontextmanager
 from importlib.metadata import version as package_version
@@ -12,16 +11,25 @@ from fastapi import Depends, FastAPI, Header, Path, Query, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from platform_contracts.knowledge import (
+    KnowledgeFusionSearch,
     KnowledgeImportCreate,
     KnowledgeScopedSearch,
+    KnowledgeScopedSemanticSearch,
     KnowledgeSearch,
+    KnowledgeSemanticSearch,
     KnowledgeWithdraw,
+    SemanticIndexProfile,
 )
-from platform_contracts.service import ReleaseIdentityMiddleware, ServiceFault, authenticate
+from platform_contracts.service import (
+    DeploymentIdentityMiddleware,
+    ServiceFault,
+    authenticate,
+)
 from sqlalchemy.exc import SQLAlchemyError
 
 from platform_knowledge.application import Knowledge
 from platform_knowledge.blobs import Blobs
+from platform_knowledge.composition import KnowledgeComposition
 from platform_knowledge.database import Database
 from platform_knowledge.repository import Repository
 
@@ -32,12 +40,19 @@ Actor = Annotated[str, Header(alias="X-Actor-ID", pattern=PATTERN)]
 ReadReceipt = Annotated[str | None, Header(alias="X-Read-Receipt-ID", pattern=PATTERN)]
 
 
-def create_app(database=None, blobs=None, credentials=None):
+def create_app(
+    database=None, blobs=None, credentials=None, *, composition=None, semantic_encoder=None
+):
+    composition = composition or (
+        KnowledgeComposition.from_environment()
+        if database is None
+        else KnowledgeComposition.for_test()
+    )
     owned = database is None
-    database = database or Database(os.environ["V7_KNOWLEDGE_DATABASE_URL"])
-    blobs = blobs or Blobs(os.environ["V7_KNOWLEDGE_STORAGE"])
-    credentials = credentials or {"platform": os.environ.get("V7_PLATFORM_KNOWLEDGE_TOKEN")}
-    service = Knowledge(Repository(database), blobs)
+    database = database or Database(composition.database_url)
+    blobs = blobs or Blobs(composition.storage_root)
+    credentials = credentials or {"platform": composition.platform_token}
+    service = Knowledge(Repository(database), blobs, semantic_encoder=semantic_encoder)
 
     @asynccontextmanager
     async def lifespan(app):
@@ -54,7 +69,7 @@ def create_app(database=None, blobs=None, credentials=None):
         version=package_version("groundwater-knowledge-service"),
         lifespan=lifespan,
     )
-    app.add_middleware(ReleaseIdentityMiddleware)
+    app.add_middleware(DeploymentIdentityMiddleware, deployment=composition.deployment)
 
     @app.exception_handler(ServiceFault)
     async def fault(request, exc):
@@ -113,6 +128,27 @@ def create_app(database=None, blobs=None, credentials=None):
     def search_scoped(project: Id, body: KnowledgeScopedSearch):
         return service.search(project, body.model_dump(mode="json"))
 
+    @app.post(p + "/semantic-search", dependencies=[Depends(platform)])
+    def semantic_search(project: Id, body: KnowledgeSemanticSearch):
+        return service.semantic_search(project, body.model_dump(mode="json"))
+
+    @app.post(p + "/semantic-search-scoped", dependencies=[Depends(platform)])
+    def semantic_search_scoped(project: Id, body: KnowledgeScopedSemanticSearch):
+        return service.semantic_search(project, body.model_dump(mode="json"))
+
+    @app.post(
+        p + "/semantic-indexes/{index_id}/rebuild",
+        dependencies=[Depends(platform)],
+    )
+    def rebuild_semantic_index(project: Id, index_id: Id, body: SemanticIndexProfile):
+        """Internal, explicit lifecycle operation; public reads cannot trigger it."""
+
+        return service.rebuild_semantic_index(project, index_id, body)
+
+    @app.post(p + "/fusion-search", dependencies=[Depends(platform)])
+    def fusion_search(project: Id, body: KnowledgeFusionSearch):
+        return service.fusion_search(project, body.model_dump(mode="json"))
+
     @app.get(
         p + "/documents/{document}/versions/{version}/units/{unit}",
         dependencies=[Depends(platform)],
@@ -167,14 +203,30 @@ def create_app(database=None, blobs=None, credentials=None):
             raise ServiceFault("MALFORMED_REQUEST", "Invalid lifecycle acknowledgement", 422)
         return service.repo.ack_lifecycle(event_id, owner, generation)
 
+    @app.post("/internal/lifecycle-events/{event_id}/renew", dependencies=[Depends(platform)])
+    def renew_lifecycle(event_id: Id, body: dict):
+        owner, generation = body.get("owner"), body.get("generation")
+        seconds = body.get("lease_seconds", 30)
+        if (
+            not isinstance(owner, str)
+            or not PATTERN.fullmatch(owner)
+            or type(generation) is not int
+            or generation < 1
+            or type(seconds) is not int
+            or not 1 <= seconds <= 300
+        ):
+            raise ServiceFault("MALFORMED_REQUEST", "Invalid lifecycle renewal", 422)
+        return service.repo.renew_lifecycle(event_id, owner, generation, seconds)
+
     app.state.service = service
     return app
 
 
 def main():
+    composition = KnowledgeComposition.from_environment()
     uvicorn.run(
-        create_app(),
-        host=os.environ.get("V7_KNOWLEDGE_HOST", "127.0.0.1"),
-        port=int(os.environ.get("V7_KNOWLEDGE_PORT", "8013")),
+        create_app(composition=composition),
+        host=composition.host,
+        port=composition.port,
         access_log=False,
     )

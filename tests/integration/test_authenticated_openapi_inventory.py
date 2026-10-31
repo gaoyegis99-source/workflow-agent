@@ -21,7 +21,7 @@ from fastapi.testclient import TestClient
 from platform_api.app import create_app
 from platform_core.application.control import ControlService
 
-from tests.p2.conftest import database, owner, postgres  # noqa: F401, F811
+from tests.platform.database.conftest import database, owner, postgres  # noqa: F401, F811
 
 METHODS = {"get", "post", "put", "patch", "delete", "head", "options"}
 UUID = "00000000-0000-4000-8000-000000000000"
@@ -125,5 +125,5 @@ def test_authenticated_openapi_inventory(database, owner):  # noqa: F811
         "results": results,
     }
     _write_evidence(os.environ.get("V7_AUTH_OPENAPI_EVIDENCE"), value)
-    assert len(results) == 90
+    assert len(results) == 93
     assert not invalid, invalid

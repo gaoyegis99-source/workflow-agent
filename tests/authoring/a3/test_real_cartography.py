@@ -10,9 +10,9 @@ from tests.authoring.a3.test_real_workflow import (
     publish_release_in_studio,
     submit_trial_in_studio,
 )
-from tests.p2.processes import eventually
-from tests.p42.conftest import spatial_images  # noqa: F401
-from tests.p42.test_spatial_workflow_e2e import FIXTURE, p42_cluster  # noqa: F401
+from tests.platform.database.processes import eventually
+from tests.spatial.native.conftest import spatial_images  # noqa: F401
+from tests.spatial.native.test_spatial_workflow_e2e import FIXTURE, p42_cluster  # noqa: F401
 
 
 def test_real_buffer_summary_map_trial_releases_atomically(p42_cluster, owner):  # noqa: F811
@@ -126,7 +126,7 @@ def test_real_buffer_summary_map_trial_releases_atomically(p42_cluster, owner): 
         },
         key="a3-map-candidate",
     )
-    cluster.launch("platform-worker")
+    cluster.launch_platform_worker_lanes()
     candidate_view = eventually(
         lambda: (
             value

@@ -1,12 +1,14 @@
+from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 
 import pytest
 import sqlalchemy as sa
 from fastapi.testclient import TestClient
 from platform_api.app import create_app
+from platform_api.composition import PlatformComposition
 from platform_contracts.authoring import WorkflowReleaseExecutionCreate
-from platform_core.application.authoring_release import TrialVerdictProcessor
 from platform_core.application.control import ControlService
+from platform_core.application.trial_verdict import TrialVerdictProcessor
 from platform_core.domain.control import RuleViolation
 from platform_infrastructure import tables
 
@@ -235,12 +237,12 @@ def test_release_execution_without_grant_leaves_no_action_or_reservation(databas
         assert budget.in_flight == 0
 
 
-def test_release_library_and_execution_http_routes(database, owner, monkeypatch):
+def test_release_library_and_execution_http_routes(database, owner):
     actor, project, definition, service, release = published_release(database, owner)
     _, token = owner
     task, selection, body = execution_request(database, actor, project, release)
-    monkeypatch.setenv("V7_CWL_IMAGE", Validator.image_id)
-    with TestClient(create_app(database)) as client:
+    composition = replace(PlatformComposition.for_test(), cwl_image=Validator.image_id)
+    with TestClient(create_app(database, composition=composition)) as client:
         client.app.state.data = Data(selection)
         headers = {
             "Authorization": "Bearer " + token,

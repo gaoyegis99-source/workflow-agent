@@ -1,12 +1,13 @@
 """Service-owned PostgreSQL connection and explicit migrations."""
 
 import argparse
-import os
 from pathlib import Path
 
 import sqlalchemy as sa
 from alembic import command
 from alembic.config import Config
+
+from platform_data.composition import DataComposition
 
 SCHEMA_VERSION = "0004_document_assets"
 
@@ -42,7 +43,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("command", choices=["migrate", "check-schema"])
     args = parser.parse_args()
-    database = Database(os.environ["V7_DATA_DATABASE_URL"])
+    composition = DataComposition.from_environment(role="database")
+    database = Database(composition.database_url)
     try:
         database.migrate() if args.command == "migrate" else database.check_schema()
     finally:

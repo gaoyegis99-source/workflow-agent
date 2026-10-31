@@ -1,7 +1,12 @@
 import { Database, GitBranch, Layers3, Plus, ShieldCheck } from "lucide-react";
-import { useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { mutate, request } from "../shared/api";
+import {
+  type CurrentIdentity,
+  TRUSTED_PROXY_SESSION,
+  mutate,
+  request,
+} from "../shared/api";
 import { Banner, Button, EmptyState, Field, Select } from "../shared/ui";
 import { errorText } from "../core/support";
 import { useSession } from "../core/session";
@@ -24,6 +29,26 @@ export function ConnectionPage({ returnTo }: { returnTo?: string }) {
   const [selected, setSelected] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const proxyAttempted = useRef(false);
+  const proxySession = session.token === TRUSTED_PROXY_SESSION;
+
+  useEffect(() => {
+    if (session.token || proxyAttempted.current) return;
+    proxyAttempted.current = true;
+    let current = true;
+    void (async () => {
+      try {
+        const identity = await request<CurrentIdentity>(TRUSTED_PROXY_SESSION, "/me");
+        if (identity.authentication_mode !== "trusted-proxy") return;
+        const projects = await request<Page<Project>>(TRUSTED_PROXY_SESSION, "/projects");
+        if (current) session.setSession(TRUSTED_PROXY_SESSION, projects.items);
+      } catch {
+        // Token mode and a missing proxy session both intentionally fall back
+        // to the explicit in-memory Bearer Token form below.
+      }
+    })();
+    return () => { current = false; };
+  }, [session]);
 
   async function connect(event: FormEvent) {
     event.preventDefault();
@@ -57,7 +82,7 @@ export function ConnectionPage({ returnTo }: { returnTo?: string }) {
     </section>
     <section className="connection-form-wrap">
       <div className="connection-card">
-        <header><p className="eyebrow">Secure access</p><h2>{session.token ? "选择项目" : "连接工作区"}</h2><p>{session.token ? "选择一个有权访问的项目继续。" : "令牌只保存在当前页面内存中，刷新后需要重新输入。"}</p></header>
+        <header><p className="eyebrow">Secure access</p><h2>{session.token ? "选择项目" : "连接工作区"}</h2><p>{session.token ? (proxySession ? "当前会话由受信代理验证；项目权限仍由平台服务端确认。" : "选择一个有权访问的项目继续。") : "令牌只保存在当前页面内存中，刷新后需要重新输入。"}</p></header>
         {!session.token ? <form onSubmit={connect}>
           <Field label="临时 Bearer Token" hint="不会写入 URL、Cookie 或浏览器存储。"><input autoFocus type="password" autoComplete="off" value={tokenInput} onChange={(event) => setTokenInput(event.target.value)} placeholder="粘贴临时访问令牌" /></Field>
           {error ? <Banner tone="danger">{error}</Banner> : null}
@@ -69,7 +94,7 @@ export function ConnectionPage({ returnTo }: { returnTo?: string }) {
           <Field label="项目名称"><input value={name} onChange={(event) => setName(event.target.value)} placeholder="例如：华北地下水调查" /></Field>
           <Button variant="secondary" busy={busy} disabled={!name.trim()} onClick={createProject}><Plus size={16} />创建项目</Button>
           {error ? <Banner tone="danger">{error}</Banner> : null}
-          <button className="text-button" onClick={session.clear}>使用其他令牌</button>
+          <button className="text-button" onClick={session.clear}>{proxySession ? "退出当前代理会话" : "使用其他令牌"}</button>
         </div>}
       </div>
       <p className="connection-footnote">P8.2 · Release Lock · 仅限授权科研环境</p>

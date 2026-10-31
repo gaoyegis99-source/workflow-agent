@@ -1,0 +1,5 @@
+# Generated or retired material must not enter source retrieval context.
+archive/
+docs/verification/
+evidence/
+apps/platform-api/src/platform_api/studio_static/

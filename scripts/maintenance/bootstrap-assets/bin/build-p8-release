@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+printf '%s\n' 'RETIRED_RELEASE_LOCK_WORKFLOW: use bin/configure-p8 with an explicit artifact directory and images' >&2
+exit 64
